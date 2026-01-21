@@ -34,10 +34,10 @@ export default function Home() {
   const handleToggleTone = async () => {
     if (!lastRequest) return;
 
-    const newTone = currentTone === "standard" ? "roast" : "standard";
+    const newTone: "standard" | "roast" = currentTone === "standard" ? "roast" : "standard";
     setCurrentTone(newTone);
 
-    const updatedRequest = {
+    const updatedRequest: ReviewRequest = {
       ...lastRequest,
       tone: newTone,
     };
