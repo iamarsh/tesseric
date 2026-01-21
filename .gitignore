@@ -7,8 +7,10 @@
 *.crt
 secrets/
 
-# Memory Bank (local only)
+# Memory Bank & AI Working Contract (local only)
 memory-bank/
+Claude.md
+CLAUDE.md
 
 # Python
 __pycache__/

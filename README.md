@@ -119,9 +119,10 @@ tesseric/
 ├── memory-bank/          # Project brain (git-ignored, local only)
 │   ├── project-goals.md
 │   ├── architecture.md
+│   ├── architecture-explained.md
 │   ├── decisions.log.md
 │   └── progress.md
-├── Claude.md             # AI assistant working contract
+├── Claude.md             # AI assistant working contract (git-ignored, local only)
 ├── .gitignore            # Secrets excluded
 ├── .env.example          # Environment variable template
 └── README.md             # This file
@@ -145,8 +146,8 @@ If you accidentally commit a secret:
 - **Backend API**: [backend/README.md](backend/README.md)
 - **Frontend**: [frontend/README.md](frontend/README.md)
 - **Infrastructure**: [infra/](infra/)
-- **Project Goals & Decisions**: `memory-bank/` (local only, not in repo)
-- **Working Contract**: [Claude.md](Claude.md) (for AI assistant sessions)
+- **Project Goals & Decisions**: `memory-bank/` (local only, git-ignored)
+- **Working Contract**: `Claude.md` (local only, git-ignored; for AI assistant sessions)
 
 ## 🗺️ Roadmap
 
