@@ -65,10 +65,10 @@ export function ReviewForm({ onSubmit, loading }: ReviewFormProps) {
         <button
           type="button"
           onClick={() => setInputMode("text")}
-          className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+          className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-medium transition-all border ${
             inputMode === "text"
-              ? "bg-primary text-primary-foreground shadow-lg"
-              : "bg-card border border-border hover:bg-accent"
+              ? "bg-primary text-primary-foreground border-primary"
+              : "bg-card border-border hover:bg-muted"
           }`}
         >
           <FileText className="h-4 w-4" />
@@ -77,10 +77,10 @@ export function ReviewForm({ onSubmit, loading }: ReviewFormProps) {
         <button
           type="button"
           onClick={() => setInputMode("image")}
-          className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+          className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-medium transition-all border ${
             inputMode === "image"
-              ? "bg-primary text-primary-foreground shadow-lg"
-              : "bg-card border border-border hover:bg-accent"
+              ? "bg-primary text-primary-foreground border-primary"
+              : "bg-card border-border hover:bg-muted"
           }`}
         >
           <Upload className="h-4 w-4" />
@@ -150,32 +150,31 @@ export function ReviewForm({ onSubmit, loading }: ReviewFormProps) {
           <button
             type="button"
             onClick={() => setTone("standard")}
-            className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all ${
+            className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all border ${
               tone === "standard"
-                ? "bg-primary text-primary-foreground shadow-lg"
-                : "bg-card border border-border hover:bg-accent"
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-card border-border hover:bg-muted"
             }`}
           >
             <div className="flex items-center justify-center gap-2">
               <Sparkles className="h-4 w-4" />
               <span>Professional</span>
             </div>
-            <p className="text-xs mt-1 opacity-80">Clear, actionable feedback</p>
+            <p className="text-xs mt-1 opacity-70">Clear, actionable feedback</p>
           </button>
           <button
             type="button"
             onClick={() => setTone("roast")}
-            className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all ${
+            className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all border ${
               tone === "roast"
-                ? "bg-destructive text-destructive-foreground shadow-lg"
-                : "bg-card border border-border hover:bg-accent"
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-card border-border hover:bg-muted"
             }`}
           >
             <div className="flex items-center justify-center gap-2">
-              <span className="text-lg">🔥</span>
               <span>Roast Mode</span>
             </div>
-            <p className="text-xs mt-1 opacity-80">Direct, no-nonsense critique</p>
+            <p className="text-xs mt-1 opacity-70">Direct, no-nonsense critique</p>
           </button>
         </div>
       </div>
@@ -184,11 +183,10 @@ export function ReviewForm({ onSubmit, loading }: ReviewFormProps) {
       <button
         type="submit"
         disabled={loading || (inputMode === "text" && designText.length < 50)}
-        className="w-full px-8 py-4 bg-primary text-primary-foreground rounded-lg font-semibold text-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
+        className="w-full px-8 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
       >
         {loading ? (
           <span className="flex items-center justify-center gap-2">
-            <span className="animate-spin">⚙️</span>
             Analyzing Architecture...
           </span>
         ) : (

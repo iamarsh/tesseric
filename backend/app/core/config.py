@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
 
     # CORS Origins (comma-separated for production)
-    cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
+    cors_origins: str = "http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000,http://127.0.0.1:3001"
 
     # Application Metadata
     app_name: str = "Tesseric Backend"

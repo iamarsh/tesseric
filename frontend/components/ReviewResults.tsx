@@ -25,10 +25,10 @@ interface ReviewResultsProps {
 }
 
 const severityConfig = {
-  CRITICAL: { color: "text-red-600 dark:text-red-400", bg: "bg-red-50 dark:bg-red-900/20", icon: XCircle },
-  HIGH: { color: "text-orange-600 dark:text-orange-400", bg: "bg-orange-50 dark:bg-orange-900/20", icon: AlertCircle },
-  MEDIUM: { color: "text-yellow-600 dark:text-yellow-400", bg: "bg-yellow-50 dark:bg-yellow-900/20", icon: AlertTriangle },
-  LOW: { color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-900/20", icon: Info },
+  CRITICAL: { color: "text-critical", bg: "bg-critical/10", icon: XCircle },
+  HIGH: { color: "text-warning", bg: "bg-warning/10", icon: AlertCircle },
+  MEDIUM: { color: "text-warning", bg: "bg-warning/5", icon: AlertTriangle },
+  LOW: { color: "text-muted-foreground", bg: "bg-muted", icon: Info },
 };
 
 const pillarIcons = {
@@ -41,20 +41,20 @@ const pillarIcons = {
 };
 
 const pillarColors = {
-  operational_excellence: "text-purple-600 dark:text-purple-400",
-  security: "text-red-600 dark:text-red-400",
-  reliability: "text-green-600 dark:text-green-400",
-  performance_efficiency: "text-blue-600 dark:text-blue-400",
-  cost_optimization: "text-yellow-600 dark:text-yellow-400",
-  sustainability: "text-emerald-600 dark:text-emerald-400",
+  operational_excellence: "text-muted-foreground",
+  security: "text-muted-foreground",
+  reliability: "text-muted-foreground",
+  performance_efficiency: "text-muted-foreground",
+  cost_optimization: "text-muted-foreground",
+  sustainability: "text-muted-foreground",
 };
 
 function ScoreGauge({ score }: { score: number }) {
   const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-green-600 dark:text-green-400";
-    if (score >= 60) return "text-yellow-600 dark:text-yellow-400";
-    if (score >= 40) return "text-orange-600 dark:text-orange-400";
-    return "text-red-600 dark:text-red-400";
+    if (score >= 80) return "text-success";
+    if (score >= 60) return "text-warning";
+    if (score >= 40) return "text-warning";
+    return "text-critical";
   };
 
   const getScoreLabel = (score: number) => {
@@ -193,22 +193,12 @@ export function ReviewResults({ review, onToggleTone, currentTone, loading }: Re
         <button
           onClick={onToggleTone}
           disabled={loading}
-          className={`px-6 py-3 rounded-lg font-medium transition-all shadow-lg hover:shadow-xl ${
-            currentTone === "roast"
-              ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              : "bg-primary text-primary-foreground hover:bg-primary/90"
-          }`}
+          className="px-6 py-2.5 rounded-lg font-medium transition-all border border-border bg-card text-foreground hover:bg-muted disabled:opacity-50"
         >
           {loading ? (
-            <span className="flex items-center gap-2">
-              <span className="animate-spin">⚙️</span>
-              Switching to {currentTone === "standard" ? "Roast" : "Professional"}...
-            </span>
+            <span>Switching to {currentTone === "standard" ? "Roast" : "Professional"}...</span>
           ) : (
-            <span className="flex items-center gap-2">
-              {currentTone === "standard" ? "🔥" : "✨"}
-              Switch to {currentTone === "standard" ? "Roast" : "Professional"} Mode
-            </span>
+            <span>Switch to {currentTone === "standard" ? "Roast" : "Professional"} Mode</span>
           )}
         </button>
       </div>
@@ -222,11 +212,7 @@ export function ReviewResults({ review, onToggleTone, currentTone, loading }: Re
           <h3 className="text-lg font-semibold text-foreground mb-3">Summary</h3>
           <p className="text-muted-foreground leading-relaxed">{review.summary}</p>
           <div className="mt-4 flex items-center gap-2">
-            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-              currentTone === "roast"
-                ? "bg-destructive/20 text-destructive"
-                : "bg-primary/20 text-primary"
-            }`}>
+            <span className="px-3 py-1 rounded-full text-sm font-medium bg-muted text-muted-foreground">
               {currentTone === "standard" ? "Professional Tone" : "Roast Mode"}
             </span>
           </div>
