@@ -121,6 +121,13 @@ export default function Home() {
               View on GitHub
             </a>
             {" · "}
+            <a
+              href="/roadmap"
+              className="text-primary hover:underline"
+            >
+              Roadmap
+            </a>
+            {" · "}
             <span>v0.1.0-alpha</span>
           </p>
         </div>

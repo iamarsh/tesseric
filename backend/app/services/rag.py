@@ -1,14 +1,30 @@
 """
 RAG (Retrieval-Augmented Generation) service for architecture analysis.
 
-v0.1: Stubbed implementation with pattern detection
-Phase 1: Will integrate real Bedrock KB retrieval + Claude 3 generation
+Phase 1: Real Bedrock integration with fallback to pattern matching
 """
 
+import json
 import uuid
+import logging
+import asyncio
 from datetime import datetime, timezone
+
 from app.models.request import ReviewRequest
 from app.models.response import ReviewResponse, RiskItem
+from app.services.bedrock import bedrock_client
+from app.services.prompts import build_analysis_prompt
+from app.utils.token_counter import (
+    estimate_request_cost,
+    log_token_usage,
+    calculate_actual_cost,
+)
+from app.utils.exceptions import (
+    BedrockThrottlingException,
+    BedrockException,
+)
+
+logger = logging.getLogger(__name__)
 
 
 def calculate_score(risks: list[RiskItem]) -> int:
@@ -40,16 +56,117 @@ def calculate_score(risks: list[RiskItem]) -> int:
 
 async def analyze_design(request: ReviewRequest) -> ReviewResponse:
     """
-    Analyze architecture design and return structured feedback.
+    Main entry point: Try Bedrock first, fall back to pattern matching on error.
 
-    v0.1: Stubbed implementation with simple pattern detection
-    Phase 1: Will call Bedrock KB for retrieval → Claude 3 for generation → parse JSON
+    Args:
+        request: ReviewRequest with design_text, format, tone, provider
+
+    Returns:
+        ReviewResponse with risks, score, summary, metadata
+    """
+    try:
+        return await analyze_with_bedrock(request)
+    except Exception as e:
+        logger.exception(
+            f"Bedrock analysis failed, using fallback pattern matching: {e}",
+            extra={"error_type": type(e).__name__}
+        )
+        return await analyze_design_stub(request)
+
+
+async def analyze_with_bedrock(request: ReviewRequest) -> ReviewResponse:
+    """
+    Real Bedrock-based AWS architecture analysis.
+
+    Args:
+        request: ReviewRequest with design_text, format, tone, provider
+
+    Returns:
+        ReviewResponse with AI-generated risks and metadata
+
+    Raises:
+        Various exceptions that trigger fallback to pattern matching
+    """
+    # 1. Estimate cost (pre-request)
+    cost_estimate = estimate_request_cost(request.design_text)
+    logger.info(
+        f"Estimated cost: ${cost_estimate['total_cost_estimate']:.4f}",
+        extra=cost_estimate
+    )
+
+    # 2. Build prompt (AWS-focused)
+    system_prompt, user_message = build_analysis_prompt(
+        design_text=request.design_text,
+        tone=request.tone,
+    )
+
+    # 3. Call Bedrock (with retry for throttling)
+    max_retries = 1
+    retry_delay = 2  # seconds
+
+    for attempt in range(max_retries + 1):
+        try:
+            response = await bedrock_client.generate(
+                system_prompt=system_prompt,
+                user_message=user_message,
+                max_tokens=4096,
+                temperature=0.3,
+            )
+            break  # Success, exit retry loop
+        except BedrockThrottlingException as e:
+            if attempt < max_retries:
+                logger.warning(f"Throttled, retrying in {retry_delay}s (attempt {attempt + 1}/{max_retries + 1})")
+                await asyncio.sleep(retry_delay)
+            else:
+                logger.error("Throttled and max retries exceeded, falling back")
+                raise
+
+    # 4. Parse JSON response
+    try:
+        analysis_json = json.loads(response["content"])
+    except json.JSONDecodeError as e:
+        logger.error(
+            "Invalid JSON from Bedrock",
+            extra={"raw_content": response["content"][:500], "error": str(e)}
+        )
+        raise
+
+    # 5. Log actual token usage
+    review_id = analysis_json.get("review_id", f"review-{uuid.uuid4()}")
+    log_token_usage(response["usage"], review_id)
+
+    # 6. Convert to ReviewResponse model
+    review_response = ReviewResponse(**analysis_json)
+
+    # 7. Add metadata
+    review_response.metadata = {
+        "analysis_method": "bedrock_claude_3_5_haiku",
+        "provider": "aws",
+        "token_usage": response["usage"],
+        "cost_usd": calculate_actual_cost(response["usage"]),
+    }
+
+    logger.info(
+        "Bedrock analysis completed successfully",
+        extra={
+            "review_id": review_id,
+            "num_risks": len(review_response.risks),
+            "score": review_response.architecture_score,
+        }
+    )
+
+    return review_response
+
+
+async def analyze_design_stub(request: ReviewRequest) -> ReviewResponse:
+    """
+    Fallback: v0.1 AWS pattern matching (existing code).
 
     Args:
         request: ReviewRequest with design_text, format, tone
 
     Returns:
-        ReviewResponse with risks, score, summary
+        ReviewResponse with pattern-matched risks and fallback metadata
     """
     design_lower = request.design_text.lower()
     risks: list[RiskItem] = []
@@ -242,7 +359,7 @@ async def analyze_design(request: ReviewRequest) -> ReviewResponse:
     # Generate review ID
     review_id = f"review-{uuid.uuid4()}"
 
-    return ReviewResponse(
+    response = ReviewResponse(
         review_id=review_id,
         architecture_score=score,
         risks=risks,
@@ -250,3 +367,12 @@ async def analyze_design(request: ReviewRequest) -> ReviewResponse:
         tone=request.tone,
         created_at=datetime.now(timezone.utc),
     )
+
+    # Add metadata indicating fallback was used
+    response.metadata = {
+        "analysis_method": "pattern_matching_fallback",
+        "provider": "aws",
+        "note": "AI analysis unavailable, using rule-based detection",
+    }
+
+    return response

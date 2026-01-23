@@ -1,88 +1,150 @@
 """
 Amazon Bedrock client wrapper.
 
-v0.1: Stubbed for local testing (no real AWS calls)
-Phase 1: Will implement real Bedrock Knowledge Base retrieval + Claude 3 generation
+Phase 1: Real Bedrock integration with Claude 3.5 Haiku via boto3
 """
 
+import json
+import logging
+import boto3
+from botocore.exceptions import ClientError
+
 from app.core.config import settings
+from app.utils.exceptions import (
+    BedrockThrottlingException,
+    BedrockAccessDeniedException,
+    BedrockModelNotFoundException,
+    BedrockValidationException,
+    BedrockServiceException,
+)
+
+logger = logging.getLogger(__name__)
 
 
 class BedrockClient:
     """
     Wrapper for Amazon Bedrock API calls.
 
-    TODO(Phase 1): Implement real Bedrock integration
-    - retrieve() for Knowledge Base queries
-    - generate() for Claude 3 model calls
-    - Error handling and retries
+    Implements real boto3 integration with Claude 3.5 Haiku.
     """
 
     def __init__(self):
         self.region = settings.aws_region
-        self.kb_id = settings.bedrock_kb_id
         self.model_id = settings.bedrock_model_id
 
-        # TODO(Phase 1): Initialize boto3 bedrock-runtime client
-        # import boto3
-        # self.client = boto3.client('bedrock-runtime', region_name=self.region)
-        # self.kb_client = boto3.client('bedrock-agent-runtime', region_name=self.region)
+        # Initialize boto3 bedrock-runtime client
+        logger.info(f"Initializing Bedrock client in region {self.region} with model {self.model_id}")
 
-    async def retrieve(self, query: str, max_results: int = 10) -> list[dict]:
+        try:
+            self.client = boto3.client(
+                "bedrock-runtime",
+                region_name=self.region,
+                aws_access_key_id=settings.aws_access_key_id,
+                aws_secret_access_key=settings.aws_secret_access_key,
+            )
+        except Exception as e:
+            logger.error(f"Failed to initialize Bedrock client: {e}")
+            raise
+
+    async def generate(
+        self,
+        system_prompt: str,
+        user_message: str,
+        max_tokens: int = 4096,
+        temperature: float = 0.3,
+    ) -> dict:
         """
-        Retrieve relevant documents from Bedrock Knowledge Base.
+        Call Bedrock InvokeModel with Claude 3.5 Haiku.
 
         Args:
-            query: User's architecture description
-            max_results: Number of doc chunks to retrieve
+            system_prompt: System instructions with AWS Well-Architected context
+            user_message: User's architecture description and analysis request
+            max_tokens: Maximum tokens in response (default: 4096)
+            temperature: Randomness (0.0-1.0, default: 0.3 for deterministic)
 
         Returns:
-            List of retrieved document chunks with metadata
+            dict with keys:
+                - content (str): Generated text (JSON string)
+                - usage (dict): {input_tokens: int, output_tokens: int}
+                - metadata (dict): {model_id: str, stop_reason: str}
 
-        TODO(Phase 1): Implement real retrieval
-        Currently returns empty list (stub)
+        Raises:
+            BedrockThrottlingException: Rate limit hit
+            BedrockAccessDeniedException: IAM permissions insufficient
+            BedrockModelNotFoundException: Model ID invalid or not available in region
+            BedrockValidationException: Request validation failed
+            BedrockServiceException: Other Bedrock service errors
         """
-        # TODO(Phase 1): Call Bedrock Knowledge Base
-        # response = self.kb_client.retrieve(
-        #     knowledgeBaseId=self.kb_id,
-        #     retrievalQuery={'text': query},
-        #     retrievalConfiguration={
-        #         'vectorSearchConfiguration': {'numberOfResults': max_results}
-        #     }
-        # )
-        # return response['retrievalResults']
+        # Construct request body (Anthropic Messages API format)
+        body = json.dumps({
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": max_tokens,
+            "temperature": temperature,
+            "system": system_prompt,
+            "messages": [{"role": "user", "content": user_message}],
+        })
 
-        return []  # Stub for v0.1
+        try:
+            logger.info(f"Calling Bedrock InvokeModel with model {self.model_id}")
 
-    async def generate(self, prompt: str, max_tokens: int = 4096) -> str:
-        """
-        Generate response using Claude 3 via Bedrock.
+            # Call Bedrock InvokeModel
+            response = self.client.invoke_model(
+                modelId=self.model_id,
+                body=body,
+                contentType="application/json",
+                accept="application/json",
+            )
 
-        Args:
-            prompt: Full prompt (system + context + user query + output format)
-            max_tokens: Maximum tokens in response
+            # Parse response
+            response_body = json.loads(response["body"].read())
 
-        Returns:
-            Generated text (JSON string for structured output)
+            logger.info(
+                "Bedrock call successful",
+                extra={
+                    "model_id": self.model_id,
+                    "stop_reason": response_body.get("stop_reason"),
+                    "input_tokens": response_body.get("usage", {}).get("input_tokens", 0),
+                    "output_tokens": response_body.get("usage", {}).get("output_tokens", 0),
+                },
+            )
 
-        TODO(Phase 1): Implement real generation
-        Currently returns empty string (stub)
-        """
-        # TODO(Phase 1): Call Bedrock InvokeModel
-        # body = json.dumps({
-        #     "anthropic_version": "bedrock-2023-05-31",
-        #     "max_tokens": max_tokens,
-        #     "messages": [{"role": "user", "content": prompt}],
-        #     "temperature": 0.7,
-        # })
-        # response = self.client.invoke_model(
-        #     modelId=self.model_id,
-        #     body=body
-        # )
-        # response_body = json.loads(response['body'].read())
-        # return response_body['content'][0]['text']
+            return {
+                "content": response_body["content"][0]["text"],
+                "usage": response_body.get("usage", {}),
+                "metadata": {
+                    "model_id": self.model_id,
+                    "stop_reason": response_body.get("stop_reason"),
+                },
+            }
 
-        return ""  # Stub for v0.1
+        except ClientError as e:
+            error_code = e.response["Error"]["Code"]
+            error_message = e.response["Error"]["Message"]
+
+            logger.error(
+                f"Bedrock API error: {error_code} - {error_message}",
+                extra={"error_code": error_code, "model_id": self.model_id},
+            )
+
+            # Map AWS error codes to custom exceptions
+            if error_code == "ThrottlingException":
+                raise BedrockThrottlingException(f"Rate limit hit: {error_message}")
+            elif error_code == "AccessDeniedException":
+                raise BedrockAccessDeniedException(f"IAM permissions insufficient: {error_message}")
+            elif error_code == "ResourceNotFoundException":
+                raise BedrockModelNotFoundException(f"Model not found: {error_message}")
+            elif error_code == "ValidationException":
+                raise BedrockValidationException(f"Request validation failed: {error_message}")
+            else:
+                raise BedrockServiceException(f"Bedrock service error: {error_message}")
+
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse Bedrock response body: {e}")
+            raise BedrockServiceException(f"Invalid JSON in Bedrock response: {e}")
+
+        except Exception as e:
+            logger.error(f"Unexpected error calling Bedrock: {e}")
+            raise BedrockServiceException(f"Unexpected error: {e}")
 
 
 # Singleton instance

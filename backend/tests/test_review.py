@@ -55,7 +55,7 @@ def test_review_response_structure():
 def test_review_detects_single_az():
     """Test that single AZ pattern is detected."""
     payload = {
-        "design_text": "Single AZ deployment with EC2 instances.",
+        "design_text": "Single AZ deployment with EC2 instances behind an ALB.",
         "format": "text",
         "tone": "standard",
     }

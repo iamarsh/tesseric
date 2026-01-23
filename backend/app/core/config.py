@@ -11,12 +11,19 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
     # AWS Configuration
-    aws_region: str = "us-east-1"
+    aws_region: str = "us-east-2"
     aws_profile: str | None = None  # For local dev only
+
+    # AWS Credentials (for Bedrock API calls)
+    aws_access_key_id: str | None = None
+    aws_secret_access_key: str | None = None
 
     # Bedrock Configuration (Phase 1+)
     bedrock_kb_id: str | None = None  # Knowledge Base ID
-    bedrock_model_id: str = "anthropic.claude-3-sonnet-20240229-v1:0"
+    bedrock_model_id: str = "anthropic.claude-3-5-haiku-20241022-v1:0"
+
+    # Cost Tracking
+    enable_cost_logging: bool = True
 
     # Backend Configuration
     backend_port: int = 8000

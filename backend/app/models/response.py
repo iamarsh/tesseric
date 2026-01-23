@@ -5,7 +5,7 @@ Pydantic models for structured architecture review responses.
 """
 
 from pydantic import BaseModel, Field
-from typing import List, Optional, Literal
+from typing import List, Optional, Literal, Any
 from datetime import datetime
 
 
@@ -120,6 +120,11 @@ class ReviewResponse(BaseModel):
     created_at: datetime = Field(
         ...,
         description="Review creation timestamp (ISO 8601)",
+    )
+
+    metadata: Optional[dict[str, Any]] = Field(
+        default=None,
+        description="Analysis metadata (method, provider, cost, token usage)",
     )
 
     class Config:
