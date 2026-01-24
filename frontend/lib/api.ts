@@ -34,20 +34,29 @@ export interface ReviewResponse {
 export async function submitReview(request: ReviewRequest): Promise<ReviewResponse> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-  const response = await fetch(`${apiUrl}/review`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(request),
-  });
+  try {
+    const response = await fetch(`${apiUrl}/review`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(request),
+    });
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ detail: "Unknown error" }));
-    throw new Error(error.detail || `API error: ${response.statusText}`);
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ detail: "Unknown error" }));
+      throw new Error(error.detail || `API error: ${response.statusText}`);
+    }
+
+    return response.json();
+  } catch (error) {
+    // Backend unavailable - use client-side fallback
+    console.warn("Backend unavailable, using client-side fallback analyzer:", error);
+
+    // Dynamically import fallback to reduce initial bundle size
+    const { analyzeFallback } = await import("./fallback-analyzer");
+    return analyzeFallback(request);
   }
-
-  return response.json();
 }
 
 export async function checkHealth(): Promise<{ status: string; version: string; service: string }> {
