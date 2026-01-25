@@ -19,13 +19,12 @@ app = FastAPI(
 )
 
 # CORS middleware (allow frontend to call backend)
-# DEV MODE: Allow all origins for local development (change for production!)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for local dev
-    allow_credentials=False,  # Must be False when using wildcard origins
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=settings.cors_origins_list,  # Use configured origins from settings
+    allow_credentials=True,  # Allow credentials (cookies, auth headers)
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
 )
 
 # Include routers
