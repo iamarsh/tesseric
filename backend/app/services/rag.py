@@ -104,13 +104,16 @@ async def analyze_with_bedrock(request: ReviewRequest) -> ReviewResponse:
     max_retries = 1
     retry_delay = 2  # seconds
 
+    # Use higher temperature for roast mode to allow more creative/brutal language
+    temperature = 0.7 if request.tone == "roast" else 0.3
+
     for attempt in range(max_retries + 1):
         try:
             response = await bedrock_client.generate(
                 system_prompt=system_prompt,
                 user_message=user_message,
                 max_tokens=4096,
-                temperature=0.3,
+                temperature=temperature,
             )
             break  # Success, exit retry loop
         except BedrockThrottlingException as e:
