@@ -8,7 +8,7 @@
 secrets/
 
 # Memory Bank & AI Working Contract (local only)
-memory-bank/
+# memory-bank/  # TEMPORARILY DISABLED for Perplexity access - 2026-01-25
 Claude.md
 CLAUDE.md
 
