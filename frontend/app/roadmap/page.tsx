@@ -1,6 +1,7 @@
 "use client";
 
 import { CheckCircle2, Circle, Clock, Sparkles } from "lucide-react";
+import { SiteLayout } from "@/components/layout/SiteLayout";
 
 interface Phase {
   version: string;
@@ -169,21 +170,22 @@ const phases: Phase[] = [
 
 export default function RoadmapPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950">
-      {/* Header */}
-      <div className="border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-6 py-6">
-          <div className="flex items-center gap-3 mb-2">
-            <Sparkles className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Roadmap
-            </h1>
+    <SiteLayout>
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+        {/* Header */}
+        <div className="border-b border-border bg-background/80 backdrop-blur-sm">
+          <div className="max-w-5xl mx-auto px-6 py-6">
+            <div className="flex items-center gap-3 mb-2">
+              <Sparkles className="w-6 h-6 text-primary" />
+              <h1 className="text-3xl font-bold text-foreground">
+                Roadmap
+              </h1>
+            </div>
+            <p className="text-muted-foreground">
+              From AWS-first architecture review to multi-cloud SaaS platform
+            </p>
           </div>
-          <p className="text-gray-600 dark:text-gray-400">
-            From AWS-first architecture review to multi-cloud SaaS platform
-          </p>
         </div>
-      </div>
 
       {/* Timeline */}
       <div className="max-w-5xl mx-auto px-6 py-12">
@@ -320,6 +322,7 @@ export default function RoadmapPage() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </SiteLayout>
   );
 }

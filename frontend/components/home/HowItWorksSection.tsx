@@ -1,0 +1,72 @@
+import { FileText, Sparkles, CheckCircle2 } from "lucide-react";
+
+const steps = [
+  {
+    icon: FileText,
+    title: "Describe Your Architecture",
+    description:
+      "Paste your AWS architecture description (EC2, RDS, S3, etc.) or upload a diagram (coming soon).",
+  },
+  {
+    icon: Sparkles,
+    title: "AI Analysis via Bedrock",
+    description:
+      "Claude 3.5 Haiku analyzes your design against the Well-Architected Framework with 6K tokens of context.",
+  },
+  {
+    icon: CheckCircle2,
+    title: "Get Actionable Feedback",
+    description:
+      "Receive structured risks, remediation steps, and AWS documentation references in seconds.",
+  },
+];
+
+export function HowItWorksSection() {
+  return (
+    <section id="how-it-works" className="container mx-auto px-4 py-16 md:py-24">
+      <div className="text-center mb-12 max-w-3xl mx-auto">
+        <h2 className="text-4xl font-bold text-foreground mb-4">
+          How It Works
+        </h2>
+        <p className="text-lg text-muted-foreground">
+          Three simple steps to Well-Architected feedback
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        {steps.map((step, idx) => {
+          const StepIcon = step.icon;
+          return (
+            <div key={idx} className="relative">
+              {/* Connector Line (desktop only) */}
+              {idx < steps.length - 1 && (
+                <div className="hidden md:block absolute top-12 left-full w-full h-0.5 bg-border -translate-x-1/2 z-0" />
+              )}
+
+              {/* Card */}
+              <div className="relative bg-card border border-border rounded-2xl p-8 hover:shadow-xl transition-shadow z-10">
+                {/* Step Number */}
+                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                  <span className="text-xl font-bold text-primary">{idx + 1}</span>
+                </div>
+
+                {/* Title with Icon */}
+                <div className="flex items-center gap-3 mb-2">
+                  <StepIcon className="h-6 w-6 text-primary flex-shrink-0" />
+                  <h3 className="text-xl font-semibold text-foreground">
+                    {step.title}
+                  </h3>
+                </div>
+
+                {/* Content */}
+                <p className="text-sm text-muted-foreground">
+                  {step.description}
+                </p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}

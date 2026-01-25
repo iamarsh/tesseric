@@ -110,7 +110,7 @@ function RiskCard({ risk }: { risk: RiskItem }) {
   const pillarColor = pillarColors[risk.pillar];
 
   return (
-    <div className="bg-card border border-border rounded-lg p-6 hover:shadow-lg transition-shadow animate-fade-in">
+    <div className="bg-card border border-border rounded-xl p-6 hover:shadow-2xl transition-all duration-300 animate-fade-in">
       {/* Header */}
       <div className="flex items-start justify-between gap-4 mb-4">
         <div className="flex-1">
@@ -222,7 +222,7 @@ export function ReviewResults({ review, onToggleTone, currentTone, loading }: Re
       {/* Risks */}
       <div>
         <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-          <AlertTriangle className="h-5 w-5 text-orange-600" />
+          <AlertTriangle className="h-5 w-5 text-primary" />
           Identified Risks ({review.risks.length})
         </h3>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

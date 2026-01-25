@@ -4,19 +4,19 @@
 
 @layer base {
   :root {
-    /* Light Mode - Premium Palette */
-    --background: 220 17% 97%;        /* #F8FAFC - Off-white */
-    --foreground: 222 84% 5%;         /* #0F172A - Deep graphite */
+    /* Light Mode - Navy + Orange Brand Palette */
+    --background: 210 40% 98%;        /* #F8FAFC - Very light blue-gray */
+    --foreground: 210 40% 8%;         /* #0A1628 - Deep navy (logo color) */
     --card: 0 0% 100%;                /* #FFFFFF - Pure white cards */
-    --card-foreground: 222 84% 5%;    /* #0F172A */
+    --card-foreground: 210 40% 8%;    /* #0A1628 - Deep navy */
 
-    /* Single Accent: Indigo */
-    --primary: 239 84% 58%;           /* #4F46E5 - Indigo accent */
-    --primary-foreground: 0 0% 100%;  /* White text on indigo */
+    /* Primary: Bright Orange (logo accent) */
+    --primary: 14 100% 60%;           /* #FF6B35 - Bright orange */
+    --primary-foreground: 0 0% 100%;  /* White text on orange */
 
     /* Muted/Secondary */
-    --muted: 220 14% 96%;             /* Very light gray */
-    --muted-foreground: 215 19% 35%;  /* #475569 - Muted text */
+    --muted: 210 40% 96%;             /* Light blue-gray muted */
+    --muted-foreground: 215 19% 35%;  /* #475569 - Slate text */
 
     /* Semantic Colors (Meaning Only) */
     --success: 142 71% 45%;           /* #16A34A - Green */
@@ -24,51 +24,51 @@
     --critical: 0 72% 51%;            /* #DC2626 - Red */
 
     /* UI Elements */
-    --border: 220 13% 91%;            /* Subtle border */
-    --input: 220 13% 91%;             /* Input border */
-    --ring: 239 84% 58%;              /* Focus ring = primary */
+    --border: 210 30% 91%;            /* Subtle border with blue tint */
+    --input: 210 30% 91%;             /* Input border */
+    --ring: 14 100% 60%;              /* Focus ring = orange */
 
     /* Deprecated/Unused (kept for compatibility) */
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 222 84% 5%;
-    --accent: 220 14% 96%;
-    --accent-foreground: 222 84% 5%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 210 40% 8%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 210 40% 8%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
   }
 
   .dark {
-    /* Dark Mode - Premium Palette */
-    --background: 222 84% 5%;         /* #0F172A - Deep graphite */
-    --foreground: 220 9% 90%;         /* #E5E7EB - Light text */
-    --card: 217 33% 11%;              /* #111827 - Dark cards */
-    --card-foreground: 220 9% 90%;    /* #E5E7EB */
+    /* Dark Mode - Navy + Orange Brand Palette */
+    --background: 210 40% 8%;         /* #0A1628 - Deep navy (logo color) */
+    --foreground: 210 20% 92%;        /* #E8EDF2 - Light text */
+    --card: 210 35% 12%;              /* #141D2E - Dark navy cards */
+    --card-foreground: 210 20% 92%;   /* #E8EDF2 - Light text */
 
-    /* Single Accent: Indigo (same hue, adjusted for dark) */
-    --primary: 239 84% 58%;           /* #4F46E5 - Same indigo */
-    --primary-foreground: 0 0% 100%;  /* White text */
+    /* Primary: Same Orange (consistent across modes) */
+    --primary: 14 100% 60%;           /* #FF6B35 - Bright orange */
+    --primary-foreground: 210 40% 8%; /* Navy text on orange for better contrast */
 
     /* Muted/Secondary */
-    --muted: 217 19% 27%;             /* Dark muted bg */
-    --muted-foreground: 218 11% 65%;  /* #9CA3AF - Muted text */
+    --muted: 210 30% 18%;             /* Dark muted bg with navy tint */
+    --muted-foreground: 210 15% 65%;  /* Lighter muted text */
 
-    /* Semantic Colors (Meaning Only) */
-    --success: 142 71% 45%;           /* #16A34A - Same green */
-    --warning: 38 92% 50%;            /* #F59E0B - Same amber */
-    --critical: 0 72% 51%;            /* #DC2626 - Same red */
+    /* Semantic Colors (Same as light mode) */
+    --success: 142 71% 45%;           /* #16A34A - Green */
+    --warning: 38 92% 50%;            /* #F59E0B - Amber */
+    --critical: 0 72% 51%;            /* #DC2626 - Red */
 
     /* UI Elements */
-    --border: 217 19% 20%;            /* Subtle dark border */
-    --input: 217 19% 20%;             /* Input border */
-    --ring: 239 84% 58%;              /* Focus ring = primary */
+    --border: 210 30% 20%;            /* Subtle dark border with navy tint */
+    --input: 210 30% 20%;             /* Input border */
+    --ring: 14 100% 60%;              /* Focus ring = orange */
 
     /* Deprecated/Unused (kept for compatibility) */
-    --secondary: 217 19% 27%;
-    --secondary-foreground: 220 9% 90%;
-    --accent: 217 19% 27%;
-    --accent-foreground: 220 9% 90%;
+    --secondary: 210 30% 18%;
+    --secondary-foreground: 210 20% 92%;
+    --accent: 210 30% 18%;
+    --accent-foreground: 210 20% 92%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
   }
@@ -86,21 +86,30 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Typography Hierarchy */
+  /* Enhanced Typography Hierarchy */
   h1, h2, h3, h4, h5, h6 {
     @apply font-semibold tracking-tight;
   }
 
   h1 {
-    @apply text-2xl;
+    @apply text-4xl md:text-5xl lg:text-6xl;
   }
 
   h2 {
-    @apply text-xl;
+    @apply text-3xl md:text-4xl;
   }
 
   h3 {
-    @apply text-lg;
+    @apply text-2xl md:text-3xl;
+  }
+
+  h4 {
+    @apply text-xl md:text-2xl;
+  }
+
+  /* Text Balance Utility */
+  .text-balance {
+    text-wrap: balance;
   }
 }
 
