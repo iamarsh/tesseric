@@ -32,7 +32,7 @@ const phases: Phase[] = [
   {
     version: "Phase 1",
     title: "AI-Powered AWS Analysis",
-    status: "current",
+    status: "completed",
     date: "January 2026",
     description:
       "Real AI-powered AWS architecture review using Claude 3.5 Haiku via Amazon Bedrock with inline context.",
@@ -48,17 +48,51 @@ const phases: Phase[] = [
   },
   {
     version: "Phase 2",
+    title: "Production Deployment",
+    status: "completed",
+    date: "January 2026",
+    description:
+      "Production API deployed to Railway with Bedrock AI integration and nuclear-level roast mode.",
+    features: [
+      "Railway production deployment (tesseric-production.up.railway.app)",
+      "Docker containerization with multi-stage builds",
+      "Environment variable management for production",
+      "Production CORS configuration",
+      "Nuclear-level roast mode (devastating and memorable)",
+      "Bedrock AI verified working in production",
+      "Cost: ~$0.011/review + Railway $5-10/month",
+    ],
+  },
+  {
+    version: "Phase 2.1",
+    title: "AWS Diagram Parsing",
+    status: "current",
+    date: "January 2026",
+    description:
+      "Accept AWS architecture diagrams and drawings as input using Bedrock vision capabilities.",
+    features: [
+      "Image upload support (PNG, JPG, PDF up to 5MB)",
+      "Bedrock vision API integration (Claude with vision)",
+      "Architecture component extraction from diagrams",
+      "Visual element to text conversion",
+      "Feed extracted text to existing RAG pipeline",
+      "Maintain quality and cost efficiency (~$0.023/diagram)",
+    ],
+  },
+  {
+    version: "Phase 2.5",
     title: "Frontend Polish & Features",
     status: "planned",
     date: "Q1 2026",
     description:
-      "Enhance user experience with review history, improved UI/UX, and fully activated roast mode.",
+      "Enhance user experience with review history, improved UI/UX, and additional features.",
     features: [
+      "Deploy frontend to Vercel",
+      "Custom domain setup (tesseric.ca, api.tesseric.ca)",
       "Review history storage (DynamoDB)",
       "/reviews endpoint for past reviews",
       "Comparison view (before/after iterations)",
       "Loading spinners and error toasts",
-      "Enhanced roast mode with more AWS humor",
       "Export to PDF functionality",
       "AWS architecture examples in UI",
     ],
@@ -82,18 +116,18 @@ const phases: Phase[] = [
   },
   {
     version: "Phase 4",
-    title: "IaC & Diagram Analysis",
+    title: "IaC Analysis",
     status: "planned",
     date: "Q2-Q3 2026",
     description:
-      "Advanced input formats: CloudFormation, Terraform, and architecture diagram parsing.",
+      "Infrastructure as Code analysis: CloudFormation and Terraform template review.",
     features: [
       "AWS CloudFormation template analysis",
       "Terraform HCL parsing and review",
-      "Architecture diagram image parsing (Bedrock vision)",
       "IaC-specific security checks",
       "Resource relationship mapping",
       "Cost estimation from infrastructure code",
+      "Drift detection and compliance checking",
     ],
   },
   {
