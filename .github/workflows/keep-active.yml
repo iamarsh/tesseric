@@ -38,8 +38,6 @@ jobs:
             echo "No changes to commit"
           else
             git add .github/LAST_ACTIVITY.txt
-            git commit -m "chore: Update activity timestamp [skip ci]
-
-Automated monthly maintenance commit to show repository is actively maintained."
+            git commit -m "chore: Update activity timestamp [skip ci]" -m "Automated monthly maintenance commit to show repository is actively maintained."
             git push
           fi
