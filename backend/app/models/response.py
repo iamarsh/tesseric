@@ -118,7 +118,7 @@ class ReviewResponse(BaseModel):
     )
 
     created_at: datetime = Field(
-        ...,
+        default_factory=datetime.utcnow,
         description="Review creation timestamp (ISO 8601)",
     )
 
