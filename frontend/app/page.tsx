@@ -55,9 +55,54 @@ export default function Home() {
     setError(null);
   };
 
+  // Structured data for SEO
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Tesseric",
+    "applicationCategory": "DeveloperApplication",
+    "offers": {
+      "@type": "Offer",
+      "price": "0.01",
+      "priceCurrency": "USD",
+      "description": "Pay per review, no subscription required"
+    },
+    "description": "AI-powered AWS architecture review service that analyzes your designs and returns structured, Well-Architected-aligned feedback",
+    "operatingSystem": "Web",
+    "url": "https://tesseric.ca",
+    "author": {
+      "@type": "Person",
+      "name": "Arsh Singh",
+      "url": "https://iamarsh.com"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "5",
+      "ratingCount": "1",
+      "bestRating": "5",
+      "worstRating": "1"
+    },
+    "featureList": [
+      "AWS Well-Architected Framework alignment",
+      "Powered by Amazon Bedrock and Claude 3.5 Haiku",
+      "Structured risk identification with severity levels",
+      "Remediation recommendations",
+      "Professional and Roast tone modes",
+      "No signup required",
+      "Cost: ~$0.01 per review"
+    ]
+  };
+
   return (
-    <SiteLayout>
-      <HeroSection />
+    <>
+      {/* Structured Data for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+
+      <SiteLayout>
+        <HeroSection />
 
       <LiveReviewSection
         review={review}
@@ -80,6 +125,7 @@ export default function Home() {
       )}
 
       <FinalCTA />
-    </SiteLayout>
+      </SiteLayout>
+    </>
   );
 }

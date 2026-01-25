@@ -1,0 +1,27 @@
+# robots.txt for Tesseric - AWS Architecture Review Service
+
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://tesseric.ca/sitemap.xml
+
+# Google
+User-agent: Googlebot
+Allow: /
+
+# Bing
+User-agent: Bingbot
+Allow: /
+
+# Disallow admin/api routes (if they exist in future)
+Disallow: /api/
+Disallow: /_next/
+
+# Allow images
+User-agent: Googlebot-Image
+Allow: /
+
+# Performance: Crawl-delay for aggressive bots
+User-agent: *
+Crawl-delay: 1

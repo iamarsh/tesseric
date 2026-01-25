@@ -6,15 +6,48 @@ import { ThemeProvider } from '@/components/ThemeProvider'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Tesseric - Architecture, piece by piece',
-  description: 'AI-powered AWS architecture review service. Get instant, Well-Architected-aligned feedback on your cloud designs in seconds.',
-  keywords: ['AWS', 'architecture', 'review', 'well-architected', 'cloud', 'AI', 'Bedrock'],
-  authors: [{ name: 'Arsh Singh' }],
+  title: {
+    default: 'Tesseric - AI-Powered AWS Architecture Review',
+    template: '%s | Tesseric'
+  },
+  description: 'AI-powered AWS architecture review service. Get instant, Well-Architected-aligned feedback on your cloud designs in seconds. Powered by Amazon Bedrock and Claude 3.5 Haiku. ~$0.01 per review, no signup required.',
+  keywords: [
+    'AWS architecture review',
+    'Well-Architected Framework',
+    'AWS best practices',
+    'cloud architecture review',
+    'AWS Bedrock',
+    'Claude AI',
+    'AWS solutions architect',
+    'infrastructure review',
+    'AWS security audit',
+    'cloud cost optimization',
+    'AWS reliability',
+    'architecture assessment'
+  ],
+  authors: [{ name: 'Arsh Singh', url: 'https://iamarsh.com' }],
+  creator: 'Arsh Singh',
+  publisher: 'Tesseric',
   metadataBase: new URL('https://tesseric.ca'),
+  alternates: {
+    canonical: 'https://tesseric.ca'
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   openGraph: {
     title: 'Tesseric - AI-Powered AWS Architecture Review',
-    description: 'Get instant, expert feedback on your AWS architectures aligned with the Well-Architected Framework',
+    description: 'Get instant, expert feedback on your AWS architectures aligned with the Well-Architected Framework. Powered by Amazon Bedrock. ~$0.01 per review, no signup required.',
     type: 'website',
+    locale: 'en_US',
     url: 'https://tesseric.ca',
     siteName: 'Tesseric',
     images: [
@@ -23,14 +56,17 @@ export const metadata: Metadata = {
         width: 1200,
         height: 630,
         alt: 'Tesseric - Architecture, piece by piece',
+        type: 'image/png',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Tesseric - AI-Powered AWS Architecture Review',
-    description: 'Get instant, expert feedback on your AWS architectures',
+    description: 'Get instant, expert feedback on your AWS architectures aligned with the Well-Architected Framework',
     images: ['/og-image.png'],
+    creator: '@iamarsh',
+    site: '@tesseric'
   },
   icons: {
     icon: [
@@ -44,6 +80,8 @@ export const metadata: Metadata = {
       { rel: 'icon', url: '/favicon.ico' },
     ],
   },
+  manifest: '/site.webmanifest',
+  category: 'technology',
 }
 
 export default function RootLayout({
