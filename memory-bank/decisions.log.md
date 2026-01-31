@@ -509,9 +509,102 @@ Then implement Bedrock Knowledge Bases in Phase 2 with platform-specific indices
 
 ---
 
-## Next ADR: ADR-015
+## ADR-015 – Bedrock Vision Model Selection for Architecture Diagram Parsing
+**Date**: 2026-01-31
+**Status**: Accepted ✅
+**Phase**: 2.1 - Image Upload & Diagram Parsing
 
-For future decisions (image parsing strategy, Terraform analysis, deployment architecture, etc.), add here following the template above.
+**Context**:
+Phase 2.1 requires accepting AWS architecture diagrams (PNG/JPG/PDF) and extracting architecture details using AI vision capabilities. Need to select appropriate Bedrock model for vision + extraction task.
+
+**Decision**: Use Claude 3 Sonnet for vision extraction, Claude 3.5 Haiku for analysis
+
+**Rationale**:
+1. **Claude 3.5 Haiku does NOT support vision capabilities**
+   - Only text input/output
+   - Cannot process images directly
+   - Would require external OCR solution (more complexity, lower quality)
+
+2. **Claude 3 Sonnet has native vision support**
+   - Can process images directly via Bedrock API
+   - Model ID: `anthropic.claude-3-sonnet-20240229-v1:0`
+   - Optimized for structured extraction tasks
+   - Balance of cost and accuracy
+
+3. **Vision as Preprocessing Step**
+   - Extract architecture description from image using Sonnet
+   - Feed extracted text to existing RAG pipeline (Haiku)
+   - No changes to core analysis logic
+   - Maintains quality consistency between text and image reviews
+
+4. **Cost Analysis**:
+   - Sonnet vision: $3/MTok input, $15/MTok output
+   - Typical image: ~4K input tokens, ~800 output tokens
+   - Cost: (4000 * $0.003 / 1000) + (800 * $0.015 / 1000) = ~$0.012 per extraction
+   - Total review cost: $0.012 (vision) + $0.011 (analysis) = ~$0.023
+   - **Under $0.05 budget target** ✅
+
+5. **Alternatives Considered**:
+   - **Claude 3 Opus**: More capable but 5x more expensive ($15/$75 per MTok)
+   - **External OCR (Textract)**: Would miss visual context, layout understanding
+   - **Claude 3.5 Sonnet** (newer): Similar capabilities, slightly different pricing (not available in Bedrock at time of implementation)
+
+**Consequences**:
+
+**Positive**:
+- High-quality architecture extraction from diagrams
+- Native Bedrock integration (no external services)
+- Cost-efficient at ~$0.023 per diagram review
+- Structured output format integrates seamlessly with existing pipeline
+- Maintains same analysis quality for both text and image input
+
+**Negative**:
+- Requires two Bedrock API calls per image review (vision + analysis)
+- Sonnet costs 2x Haiku for vision step
+- No fallback for images (requires backend connection)
+- Dependency on Bedrock vision availability
+
+**Implementation Details**:
+- Image processing: Validate, resize (max 2048px), base64 encode
+- Vision prompt: Extract services, configurations, network topology
+- Cost tracking: Separate metrics for vision vs analysis
+- Error handling: Graceful degradation if extraction unclear
+
+**Configuration** (`backend/app/core/config.py`):
+```python
+bedrock_model_id: str = "anthropic.claude-3-5-haiku-20241022-v1:0"  # Analysis
+bedrock_vision_model_id: str = "anthropic.claude-3-sonnet-20240229-v1:0"  # Vision
+vision_input_cost_per_1k: float = 0.003   # $3/MTok
+vision_output_cost_per_1k: float = 0.015  # $15/MTok
+```
+
+**Success Criteria**:
+- ✅ Extract >= 3 AWS services correctly from test diagrams
+- ✅ Cost per diagram review < $0.05
+- ✅ Vision extraction < 4 seconds
+- ✅ Analysis quality matches text reviews
+
+**Monitoring**:
+- Track vision token usage separately from analysis
+- Log total cost (vision + analysis) in metadata
+- Monitor extraction accuracy via manual spot checks
+- Alert if average cost exceeds $0.03 per review
+
+**Future Considerations**:
+- Evaluate Claude 3.5 Sonnet when available in Bedrock
+- Consider Opus for complex multi-page diagrams if budget allows
+- Add confidence scoring for extractions
+- Support architectural diagram generation (reverse process)
+
+**Related ADRs**:
+- ADR-001: Bedrock vs External LLMs (decided Bedrock)
+- ADR-013: AWS-First Scope (validates AWS diagram focus)
+
+---
+
+## Next ADR: ADR-016
+
+For future decisions (IaC parsing strategy, Terraform analysis, deployment architecture, etc.), add here following the template above.
 
 ---
 

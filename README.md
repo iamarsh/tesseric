@@ -239,6 +239,64 @@ curl -X POST https://tesseric-production.up.railway.app/review \
 }
 ```
 
+### Upload Architecture Diagram (Phase 2.1+)
+
+You can now upload AWS architecture diagrams (PNG, JPG, PDF) for analysis:
+
+```bash
+curl -X POST https://tesseric-production.up.railway.app/review \
+  -F "file=@/path/to/architecture-diagram.png" \
+  -F "tone=standard" \
+  -F "provider=aws"
+```
+
+**With Roast Mode**:
+
+```bash
+curl -X POST https://tesseric-production.up.railway.app/review \
+  -F "file=@/path/to/terrible-architecture.jpg" \
+  -F "tone=roast" \
+  -F "provider=aws"
+```
+
+**Image Requirements**:
+- Formats: PNG, JPG, PDF
+- Max size: 5 MB
+- Max dimensions: 2048x2048px (auto-resized if larger)
+- Content: AWS architecture diagrams with service labels
+
+**How it Works**:
+1. Backend validates and processes image
+2. Bedrock vision API (Claude 3 Sonnet) extracts architecture details
+3. Extracted text feeds into existing analysis pipeline (Claude 3.5 Haiku)
+4. Returns same structured response as text reviews
+5. Cost: ~$0.023 per diagram review (vision $0.012 + analysis $0.011)
+
+**Example Response (Image Upload)**:
+
+```json
+{
+  "review_id": "review-img456",
+  "architecture_score": 52,
+  "risks": [ ... ],
+  "summary": "Analyzed architecture from uploaded diagram...",
+  "tone": "standard",
+  "created_at": "2026-01-31T12:00:00Z",
+  "metadata": {
+    "input_method": "image",
+    "image_filename": "architecture-diagram.png",
+    "image_format": "png",
+    "image_size_kb": 127,
+    "image_dimensions": [800, 600],
+    "extraction_model": "anthropic.claude-3-sonnet-20240229-v1:0",
+    "analysis_method": "bedrock_claude_3_5_haiku",
+    "vision_cost_usd": 0.0118,
+    "cost_usd": 0.0112,
+    "total_cost_usd": 0.0230
+  }
+}
+```
+
 ---
 
 ## 📁 Project Structure

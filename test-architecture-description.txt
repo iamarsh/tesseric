@@ -1,0 +1,62 @@
+AWS Architecture Diagram - Simple 3-Tier Web Application
+
+┌─────────────────────────────────────────────────────────┐
+│                     AWS Cloud (us-east-1)                │
+│                                                           │
+│  ┌─────────────────────────────────────────────────┐   │
+│  │                VPC (10.0.0.0/16)                 │   │
+│  │                                                   │   │
+│  │  ┌──────────────────────────────────────────┐   │   │
+│  │  │  Public Subnet (10.0.1.0/24) - AZ-1      │   │   │
+│  │  │                                            │   │   │
+│  │  │  ┌──────────────┐                         │   │   │
+│  │  │  │ Application  │                         │   │   │
+│  │  │  │ Load Balancer│                         │   │   │
+│  │  │  │  (ALB)       │                         │   │   │
+│  │  │  └──────────────┘                         │   │   │
+│  │  │         │                                  │   │   │
+│  │  └─────────┼──────────────────────────────────┘   │   │
+│  │            │                                       │   │
+│  │  ┌─────────┼───────────────────────────────────┐  │   │
+│  │  │  Private Subnet (10.0.2.0/24) - AZ-1       │  │   │
+│  │  │         │                                    │  │   │
+│  │  │    ┌────▼─────┐     ┌──────────┐           │  │   │
+│  │  │    │   EC2    │     │   EC2    │           │  │   │
+│  │  │    │ Instance │     │ Instance │           │  │   │
+│  │  │    │  (t3.medium)   │  (t3.medium)        │  │   │
+│  │  │    └────┬─────┘     └──────────┘           │  │   │
+│  │  │         │                                    │  │   │
+│  │  └─────────┼────────────────────────────────────┘  │   │
+│  │            │                                       │   │
+│  │  ┌─────────┼───────────────────────────────────┐  │   │
+│  │  │  Private Subnet (10.0.3.0/24) - AZ-1       │  │   │
+│  │  │         │                                    │  │   │
+│  │  │    ┌────▼─────┐                             │  │   │
+│  │  │    │   RDS    │                             │  │   │
+│  │  │    │  MySQL   │                             │  │   │
+│  │  │    │ (Single  │                             │  │   │
+│  │  │    │   AZ)    │                             │  │   │
+│  │  │    └──────────┘                             │  │   │
+│  │  │                                              │  │   │
+│  │  └──────────────────────────────────────────────┘  │   │
+│  └──────────────────────────────────────────────────────┘   │
+│                                                           │
+│  ┌──────────────┐                                        │
+│  │      S3      │                                        │
+│  │    Bucket    │  (Public access enabled)              │
+│  │  (no encrypt)│                                        │
+│  └──────────────┘                                        │
+└─────────────────────────────────────────────────────────┘
+
+Key Architecture Details:
+- Region: us-east-1
+- VPC with single availability zone
+- ALB in public subnet (internet-facing)
+- EC2 instances in private subnet (no auto-scaling)
+- RDS MySQL in private subnet (SINGLE AZ - no Multi-AZ)
+- S3 bucket with public access enabled
+- NO encryption at rest configured
+- NO CloudWatch monitoring
+- NO backup strategy visible
+
+This is intentionally a poor architecture for testing purposes!

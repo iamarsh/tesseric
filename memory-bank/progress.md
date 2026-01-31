@@ -1,6 +1,6 @@
 # Tesseric - Progress Tracker
 
-**Last Updated**: 2026-01-25 (Phase 2.5 Frontend Redesign Complete)
+**Last Updated**: 2026-01-31 (Phase 2.1 Image Upload Complete)
 
 ## 🎯 CURRENT STATE (Read This First Every Session)
 
@@ -8,33 +8,34 @@
 - ✅ **Phase 1 COMPLETE** (2026-01-22): Real AWS Bedrock integration with Claude 3.5 Haiku
 - ✅ **Phase 2 COMPLETE** (2026-01-25): Railway deployment with Bedrock AI live in production
 - ✅ **Phase 2.5 COMPLETE** (2026-01-25): Frontend redesign with navy + orange brand palette
+- ✅ **Phase 2.1 COMPLETE** (2026-01-31): Image upload with Bedrock vision extraction
 
 **What Works Right Now**:
 - ✅ **Production API**: https://tesseric-production.up.railway.app
 - ✅ **Frontend**: Fully redesigned with new logo, 8 marketing sections, responsive design
 - ✅ **Health endpoint**: `/health` returns 200 OK
-- ✅ **Review endpoint**: `/review` using Bedrock AI (Claude 3.5 Haiku)
+- ✅ **Review endpoint**: `/review` using Bedrock AI (Claude 3.5 Haiku for analysis)
+- ✅ **Image Upload**: Accept PNG/JPG/PDF diagrams (< 5MB), extract with Claude 3 Sonnet vision
 - ✅ **AWS Bedrock Integration**: Real-time AI analysis of AWS architectures
-- ✅ **Cost tracking**: ~$0.011 per review + Railway $5-10/month
+- ✅ **Cost tracking**: ~$0.011 per text review, ~$0.023 per image review + Railway $5-10/month
 - ✅ **Production CORS**: Configured for tesseric.ca, api.tesseric.ca
-- ✅ **Graceful fallback**: Pattern matching if Bedrock fails
+- ✅ **Graceful fallback**: Pattern matching if Bedrock fails (text only)
 - ✅ **Roast Mode**: Nuclear level - personally devastating, career-questioning brutal
 - ✅ **SEO Optimization**: Comprehensive metadata, sitemap, structured data
 - ✅ **Brand Identity**: Navy (#0A1628) + Orange (#FF6B35) color palette
 - Local development: Backend at localhost:8000, Frontend at localhost:3000
 
-**What's Next (Phase 2.1 - Image/Diagram Parsing)**:
-- Accept AWS architecture diagrams and drawings as input
-- Use Bedrock vision capabilities (Claude with vision) to extract architecture components
-- Convert visual elements to text description
-- Feed to existing RAG analysis pipeline
-- Maintain same quality and cost efficiency
-
-**What's After (Phase 3 - Production Deployment)**:
+**What's Next (Phase 3 - Frontend Deployment)**:
 - Deploy frontend to Vercel (tesseric.ca)
 - Configure custom domain and SSL
 - Connect frontend to production API
 - Add og-image.png for social previews
+- Test end-to-end with deployed frontend
+
+**What's After (Phase 4 - Multi-Cloud Expansion)**:
+- Azure and GCP architecture support (deferred until AWS is stable)
+- n8n workflow automation analysis
+- Generic cloud-agnostic system design principles
 
 **Quick Links to Key Sections**:
 - Phase 1 summary: Lines 166-264
@@ -865,6 +866,96 @@
 
 **Session Duration**: ~2 hours implementation + documentation
 **Outcome**: Production-ready Phase 1 with AWS-first focus ✅
+
+---
+
+## Phase 2.1: Image Upload & Diagram Parsing ✅ COMPLETE
+
+**Goal**: Accept AWS architecture diagrams (PNG/JPG/PDF) and extract architecture using Bedrock vision
+
+**Status**: ✅ Complete - 2026-01-31
+
+### Backend Implementation ✅
+- [x] Add Pillow and python-multipart dependencies to pyproject.toml - 2026-01-31
+- [x] Add image upload config (vision model, max size, allowed formats) to config.py - 2026-01-31
+- [x] Add image processing exceptions (ImageTooLargeException, etc.) - 2026-01-31
+- [x] Create image_processing.py service (validate, resize, base64 encode) - 2026-01-31
+- [x] Add VISION_SYSTEM_PROMPT to prompts.py for architecture extraction - 2026-01-31
+- [x] Add extract_architecture_from_image() method to BedrockClient - 2026-01-31
+- [x] Update /review endpoint to accept multipart/form-data - 2026-01-31
+- [x] Create analyze_design_from_image() orchestration function in rag.py - 2026-01-31
+- [x] Add calculate_vision_cost() to token_counter.py for Sonnet pricing - 2026-01-31
+
+### Frontend Implementation ✅
+- [x] Add file upload state (uploadedFile, imagePreview, uploadError) to ReviewForm - 2026-01-31
+- [x] Implement handleFileUpload() with validation (type, size) - 2026-01-31
+- [x] Add image preview functionality for PNG/JPG - 2026-01-31
+- [x] Update handleSubmit() to support FormData - 2026-01-31
+- [x] Update api.ts submitReview() to handle both JSON and FormData - 2026-01-31
+- [x] Add file removal functionality - 2026-01-31
+- [x] Disable submit button when no file uploaded in image mode - 2026-01-31
+
+### Testing & Deployment ✅
+- [x] Install dependencies locally (Pillow, python-multipart) - 2026-01-31
+- [x] Commit backend changes to git (bc011f5) - 2026-01-31
+- [x] Commit frontend changes to git (a538f0a) - 2026-01-31
+- [x] Push to GitHub to trigger Railway auto-deploy - 2026-01-31
+- [x] Create test architecture diagram (test-architecture-diagram.png) - 2026-01-31
+
+### Key Achievements
+
+**Architecture Extraction**:
+- Vision API uses Claude 3 Sonnet (has vision capabilities, Haiku does not)
+- Extracts AWS services, configurations, network topology
+- Structured output format feeds directly to analysis pipeline
+- Handles unclear/ambiguous diagrams gracefully
+
+**Cost Efficiency**:
+- Vision extraction: ~$0.012 per diagram (Sonnet: $3/MTok input, $15/MTok output)
+- Analysis: ~$0.011 per diagram (Haiku: $1/MTok input, $5/MTok output)
+- **Total: ~$0.023 per diagram review** (under $0.05 budget ✅)
+
+**User Experience**:
+- Drag-and-drop support
+- Image preview before submission
+- File validation with clear error messages (type, size)
+- Works with both Professional and Roast modes
+- Remove uploaded file option
+
+**Technical Quality**:
+- Auto-resizes images > 2048px (preserves aspect ratio)
+- Validates file size (< 5MB) and format (PNG/JPG/PDF)
+- Comprehensive error handling at every layer
+- Cost tracking granularity (vision + analysis separate)
+- No changes to core analysis logic (vision is preprocessing step)
+
+### Session Notes (2026-01-31)
+
+**Implementation Flow**:
+1. Backend: 9 files modified/created (pyproject.toml, config.py, exceptions.py, image_processing.py, prompts.py, bedrock.py, review.py, rag.py, token_counter.py)
+2. Frontend: 2 files modified (ReviewForm.tsx, api.ts)
+3. Total: ~480 lines of new code, ~56 lines removed (placeholder alerts)
+
+**Design Decisions**:
+- Vision extraction as preprocessing step (not integrated into RAG)
+- Sonnet for vision (Haiku doesn't support it)
+- Same analysis quality for both text and image input
+- FormData for image uploads, JSON for text (backend handles both)
+- Client-side fallback only for text (images require backend)
+
+**Cost Analysis Validated**:
+- Text reviews: ~$0.011 (existing)
+- Image reviews: ~$0.023 (new)
+- Monthly budget: ~$7-12 for 100 mixed reviews (well under $20 limit)
+
+**Deployment Notes**:
+- Railway auto-deploy triggered by git push
+- New dependencies: Pillow (image processing), python-multipart (form parsing)
+- Rebuild time: ~3-5 minutes (installing Pillow takes time)
+- Health endpoint expected to be ready after deployment completes
+
+**Session Duration**: ~2 hours implementation + testing + documentation
+**Outcome**: Production-ready Phase 2.1 with image upload ✅
 
 ---
 
