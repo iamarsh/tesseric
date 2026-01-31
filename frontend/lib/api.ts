@@ -31,16 +31,20 @@ export interface ReviewResponse {
   created_at: string;
 }
 
-export async function submitReview(request: ReviewRequest): Promise<ReviewResponse> {
+export async function submitReview(
+  request: ReviewRequest | FormData
+): Promise<ReviewResponse> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+  // Determine if request is FormData (image) or JSON (text)
+  const isFormData = request instanceof FormData;
 
   try {
     const response = await fetch(`${apiUrl}/review`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(request),
+      // Only set Content-Type for JSON; browser sets multipart boundary for FormData
+      headers: isFormData ? {} : { "Content-Type": "application/json" },
+      body: isFormData ? request : JSON.stringify(request),
     });
 
     if (!response.ok) {
@@ -50,12 +54,17 @@ export async function submitReview(request: ReviewRequest): Promise<ReviewRespon
 
     return response.json();
   } catch (error) {
-    // Backend unavailable - use client-side fallback
-    console.warn("Backend unavailable, using client-side fallback analyzer:", error);
+    // Backend unavailable - only use fallback for text requests
+    if (!isFormData) {
+      console.warn("Backend unavailable, using client-side fallback analyzer:", error);
 
-    // Dynamically import fallback to reduce initial bundle size
-    const { analyzeFallback } = await import("./fallback-analyzer");
-    return analyzeFallback(request);
+      // Dynamically import fallback to reduce initial bundle size
+      const { analyzeFallback } = await import("./fallback-analyzer");
+      return analyzeFallback(request as ReviewRequest);
+    } else {
+      // Image uploads require backend - cannot fallback
+      throw new Error("Image analysis requires backend connection. Please try again later.");
+    }
   }
 }
 

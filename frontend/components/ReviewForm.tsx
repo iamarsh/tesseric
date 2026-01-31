@@ -14,6 +14,9 @@ export function ReviewForm({ onSubmit, loading }: ReviewFormProps) {
   const [designText, setDesignText] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const [tone, setTone] = useState<"standard" | "roast">("standard");
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -25,37 +28,86 @@ export function ReviewForm({ onSubmit, loading }: ReviewFormProps) {
     setIsDragging(false);
   }, []);
 
+  const handleFileUpload = useCallback((file: File) => {
+    // Reset errors
+    setUploadError(null);
+
+    // Validate file type
+    const allowedTypes = ['image/png', 'image/jpeg', 'application/pdf'];
+    if (!allowedTypes.includes(file.type)) {
+      setUploadError('Only PNG, JPG, and PDF files are supported');
+      return;
+    }
+
+    // Validate file size (< 5 MB)
+    const maxSizeMB = 5;
+    if (file.size > maxSizeMB * 1024 * 1024) {
+      setUploadError(`File must be smaller than ${maxSizeMB} MB`);
+      return;
+    }
+
+    setUploadedFile(file);
+
+    // Generate preview for images (not PDFs)
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => setImagePreview(e.target?.result as string);
+      reader.readAsDataURL(file);
+    } else {
+      setImagePreview(null); // No preview for PDFs
+    }
+  }, []);
+
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
 
     const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith("image/")) {
-      // TODO(Phase 3): Implement image upload and OCR
-      alert(
-        "Image upload feature coming in v1.1! For now, please describe your architecture using text."
-      );
+    if (file) {
+      handleFileUpload(file);
     }
-  }, []);
+  }, [handleFileUpload]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!designText.trim()) {
-      alert("Please provide an architecture description");
-      return;
+    // Validate based on input mode
+    if (inputMode === "text") {
+      if (!designText.trim()) {
+        alert("Please provide an architecture description");
+        return;
+      }
+
+      if (designText.length < 50) {
+        alert("Please provide a more detailed description (at least 50 characters)");
+        return;
+      }
     }
 
-    if (designText.length < 50) {
-      alert("Please provide a more detailed description (at least 50 characters)");
-      return;
+    if (inputMode === "image") {
+      if (!uploadedFile) {
+        alert("Please upload an architecture diagram");
+        return;
+      }
     }
 
-    await onSubmit({
-      design_text: designText,
-      format: "text",
-      tone,
-    });
+    // Build request based on input mode
+    if (inputMode === "image" && uploadedFile) {
+      // Create FormData for image upload
+      const formData = new FormData();
+      formData.append('file', uploadedFile);
+      formData.append('tone', tone);
+      formData.append('provider', 'aws');
+
+      await onSubmit(formData as any); // Type assertion for compatibility
+    } else {
+      // Create JSON request for text
+      await onSubmit({
+        design_text: designText,
+        format: "text",
+        tone,
+      });
+    }
   };
 
   return (
@@ -111,35 +163,79 @@ export function ReviewForm({ onSubmit, loading }: ReviewFormProps) {
 
       {/* Drag & Drop Mode */}
       {inputMode === "image" && (
-        <div
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          className={`border-2 border-dashed rounded-lg p-12 text-center transition-all ${
-            isDragging
-              ? "border-primary bg-primary/10"
-              : "border-border bg-card hover:border-primary/50"
-          }`}
-        >
-          <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-          <p className="text-lg font-medium mb-2">Drag & drop your architecture diagram</p>
-          <p className="text-sm text-muted-foreground mb-4">
-            or click to browse (PNG, JPG, PDF)
-          </p>
-          <button
-            type="button"
-            onClick={() =>
-              alert(
-                "Image upload feature coming in v1.1! For now, please use text description."
-              )
-            }
-            className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+        <div className="space-y-4">
+          <div
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`border-2 border-dashed rounded-lg p-12 text-center transition-all ${
+              isDragging
+                ? "border-primary bg-primary/10"
+                : "border-border bg-card hover:border-primary/50"
+            }`}
           >
-            Browse Files
-          </button>
-          <p className="text-xs text-muted-foreground mt-4">
-            Feature coming in v1.1 - For now, please use text input
-          </p>
+            <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <p className="text-lg font-medium mb-2">Drag & drop your architecture diagram</p>
+            <p className="text-sm text-muted-foreground mb-4">
+              or click to browse (PNG, JPG, PDF - max 5 MB)
+            </p>
+            <input
+              type="file"
+              id="file-upload"
+              accept="image/png,image/jpeg,application/pdf"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleFileUpload(file);
+              }}
+              className="hidden"
+            />
+            <label
+              htmlFor="file-upload"
+              className="inline-block px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"
+            >
+              Browse Files
+            </label>
+          </div>
+
+          {/* Image Preview */}
+          {uploadedFile && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-card rounded-lg border border-border">
+                <div>
+                  <p className="text-sm font-medium">{uploadedFile.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {(uploadedFile.size / 1024).toFixed(1)} KB
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUploadedFile(null);
+                    setImagePreview(null);
+                    setUploadError(null);
+                  }}
+                  className="text-sm text-destructive hover:underline"
+                >
+                  Remove
+                </button>
+              </div>
+
+              {imagePreview && (
+                <img
+                  src={imagePreview}
+                  alt="Architecture diagram preview"
+                  className="w-full max-h-64 object-contain rounded-lg border border-border"
+                />
+              )}
+            </div>
+          )}
+
+          {/* Upload Error */}
+          {uploadError && (
+            <div className="p-3 bg-destructive/10 border border-destructive rounded-lg">
+              <p className="text-sm text-destructive">{uploadError}</p>
+            </div>
+          )}
         </div>
       )}
 
@@ -182,7 +278,7 @@ export function ReviewForm({ onSubmit, loading }: ReviewFormProps) {
       {/* Submit Button */}
       <button
         type="submit"
-        disabled={loading || (inputMode === "text" && designText.length < 50)}
+        disabled={loading || (inputMode === "text" && designText.length < 50) || (inputMode === "image" && !uploadedFile)}
         className="w-full px-8 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
       >
         {loading ? (
