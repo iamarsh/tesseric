@@ -146,6 +146,124 @@ class BedrockClient:
             logger.error(f"Unexpected error calling Bedrock: {e}")
             raise BedrockServiceException(f"Unexpected error: {e}")
 
+    async def extract_architecture_from_image(
+        self, image_data: str, image_format: str
+    ) -> dict:
+        """
+        Extract AWS architecture description from diagram using Bedrock vision.
+
+        Uses Claude 3 Sonnet with vision capabilities to analyze architecture diagrams
+        and extract structured descriptions of AWS services, configurations, and topology.
+
+        Args:
+            image_data: Base64-encoded image data
+            image_format: "png" | "jpeg" | "pdf"
+
+        Returns:
+            dict with:
+                - content: Extracted architecture description (str)
+                - usage: Token usage (dict with input_tokens, output_tokens)
+                - metadata: Model ID, stop reason, etc.
+
+        Raises:
+            BedrockException subclasses: Same error handling as generate()
+        """
+        from app.services.prompts import VISION_SYSTEM_PROMPT
+
+        logger.info(f"Calling Bedrock vision API with {image_format} image")
+
+        # Build vision API request (Anthropic Messages API format)
+        body = {
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 2048,  # Sufficient for architecture extraction
+            "temperature": 0.1,  # Low temperature for accurate extraction
+            "system": VISION_SYSTEM_PROMPT,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "image",
+                            "source": {
+                                "type": "base64",
+                                "media_type": f"image/{image_format}",
+                                "data": image_data,
+                            },
+                        },
+                        {
+                            "type": "text",
+                            "text": "Extract the AWS architecture from this diagram. Describe all services, configurations, and connections you can identify.",
+                        },
+                    ],
+                }
+            ],
+        }
+
+        try:
+            # Call Bedrock with vision model
+            response = self.client.invoke_model(
+                modelId=settings.bedrock_vision_model_id,
+                body=json.dumps(body),
+                contentType="application/json",
+                accept="application/json",
+            )
+
+            # Parse response
+            response_body = json.loads(response["body"].read())
+
+            # Extract content from response
+            content = ""
+            if "content" in response_body:
+                for block in response_body["content"]:
+                    if block.get("type") == "text":
+                        content += block.get("text", "")
+
+            if not content:
+                raise BedrockValidationException("Vision API returned empty content")
+
+            logger.info(
+                f"Vision extraction successful: {len(content)} chars, "
+                f"{response_body.get('usage', {}).get('input_tokens', 0)} input tokens, "
+                f"{response_body.get('usage', {}).get('output_tokens', 0)} output tokens"
+            )
+
+            return {
+                "content": content,
+                "usage": response_body.get("usage", {}),
+                "metadata": {
+                    "model_id": settings.bedrock_vision_model_id,
+                    "stop_reason": response_body.get("stop_reason"),
+                },
+            }
+
+        except ClientError as e:
+            # Map AWS errors to custom exceptions (same pattern as generate())
+            error_code = e.response["Error"]["Code"]
+            error_message = e.response["Error"]["Message"]
+
+            if error_code == "ThrottlingException":
+                raise BedrockThrottlingException(f"Bedrock vision API throttled: {error_message}")
+            elif error_code == "AccessDeniedException":
+                raise BedrockAccessDeniedException(
+                    f"Bedrock vision access denied: {error_message}"
+                )
+            elif error_code == "ResourceNotFoundException":
+                raise BedrockModelNotFoundException(f"Vision model not found: {error_message}")
+            elif error_code == "ValidationException":
+                raise BedrockValidationException(
+                    f"Vision request validation failed: {error_message}"
+                )
+            else:
+                raise BedrockServiceException(f"Bedrock vision error: {error_message}")
+
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse Bedrock vision response: {e}")
+            raise BedrockServiceException(f"Invalid JSON in vision response: {e}")
+
+        except Exception as e:
+            logger.error(f"Unexpected error calling Bedrock vision: {e}")
+            raise BedrockServiceException(f"Unexpected vision error: {e}")
+
 
 # Singleton instance
 bedrock_client = BedrockClient()

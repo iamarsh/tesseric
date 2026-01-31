@@ -22,6 +22,17 @@ class Settings(BaseSettings):
     bedrock_kb_id: str | None = None  # Knowledge Base ID
     bedrock_model_id: str = "anthropic.claude-3-5-haiku-20241022-v1:0"
 
+    # Bedrock Vision Model (Claude 3 Sonnet - has vision capabilities)
+    bedrock_vision_model_id: str = "anthropic.claude-3-sonnet-20240229-v1:0"
+
+    # Image Upload Settings
+    max_image_size_mb: int = 5
+    allowed_image_formats: list[str] = ["image/png", "image/jpeg", "application/pdf"]
+
+    # Vision API Cost Tracking (Claude 3 Sonnet pricing)
+    vision_input_cost_per_1k: float = 0.003   # $3 per MTok
+    vision_output_cost_per_1k: float = 0.015  # $15 per MTok
+
     # Cost Tracking
     enable_cost_logging: bool = True
 

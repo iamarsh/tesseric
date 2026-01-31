@@ -39,3 +39,27 @@ class BedrockServiceException(BedrockException):
     """Raised for other Bedrock service errors."""
 
     pass
+
+
+class ImageProcessingException(Exception):
+    """Base exception for image processing errors."""
+
+    pass
+
+
+class ImageTooLargeException(ImageProcessingException):
+    """Raised when uploaded image exceeds max size."""
+
+    pass
+
+
+class UnsupportedImageFormatException(ImageProcessingException):
+    """Raised when image format is not supported."""
+
+    pass
+
+
+class ImageCorruptedException(ImageProcessingException):
+    """Raised when image file is corrupted or unreadable."""
+
+    pass

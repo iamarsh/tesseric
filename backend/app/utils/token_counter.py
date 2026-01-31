@@ -140,3 +140,30 @@ def calculate_actual_cost(usage: dict) -> float:
     output_cost = (output_tokens / 1_000_000) * 5.0
 
     return round(input_cost + output_cost, 6)
+
+
+def calculate_vision_cost(usage: dict) -> float:
+    """
+    Calculate cost for Bedrock vision API call.
+
+    Uses Claude 3 Sonnet pricing (different from Haiku).
+
+    Pricing (Claude 3 Sonnet):
+    - Input: $3.00 per million tokens
+    - Output: $15.00 per million tokens
+
+    Args:
+        usage: dict with input_tokens and output_tokens
+
+    Returns:
+        Cost in USD (rounded to 6 decimal places)
+    """
+    from app.core.config import settings
+
+    input_tokens = usage.get("input_tokens", 0)
+    output_tokens = usage.get("output_tokens", 0)
+
+    input_cost = (input_tokens / 1000) * settings.vision_input_cost_per_1k
+    output_cost = (output_tokens / 1000) * settings.vision_output_cost_per_1k
+
+    return round(input_cost + output_cost, 6)

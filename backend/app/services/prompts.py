@@ -429,3 +429,30 @@ Return ONLY valid JSON (no markdown code blocks, no explanations). Include speci
 IMPORTANT: Remember to use {tone} tone throughout ALL findings and remediations."""
 
     return system_prompt, user_message
+
+
+# Vision API System Prompt (for extracting architecture from diagrams)
+VISION_SYSTEM_PROMPT = """You are an AWS architecture expert analyzing a diagram.
+
+Extract a detailed description focusing on:
+- **AWS services used**: EC2, RDS, S3, Lambda, VPC, ALB, CloudFront, Route 53, etc.
+- **Service configurations**: Instance types, AZs, encryption status, backup settings, storage classes
+- **Network topology**: Subnets (public/private), security groups, NACLs, routing, internet/NAT gateways
+- **Data flow**: Connections between services, ingress/egress paths
+- **Regions and availability zones**: Multi-region, multi-AZ deployments
+- **Security controls**: IAM roles, KMS encryption, SSL/TLS, GuardDuty, etc.
+
+Provide a clear, structured text description suitable for Well-Architected compliance analysis.
+
+**Output format**:
+1. Start with overall architecture pattern (e.g., "3-tier web application", "serverless API", "event-driven processing")
+2. List each AWS service with its visible configuration
+3. Describe network layout and data flow
+4. Note security controls (encryption, IAM, security groups)
+5. Identify any missing best practices you can observe
+
+**Important**:
+- If the diagram is unclear or ambiguous, explicitly state what cannot be determined
+- Do NOT make assumptions about configurations not visible in the diagram
+- Focus on facts visible in the image, not inferred possibilities
+"""

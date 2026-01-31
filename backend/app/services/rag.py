@@ -9,6 +9,7 @@ import uuid
 import logging
 import asyncio
 from datetime import datetime, timezone
+from fastapi import UploadFile
 
 from app.models.request import ReviewRequest
 from app.models.response import ReviewResponse, RiskItem
@@ -379,3 +380,103 @@ async def analyze_design_stub(request: ReviewRequest) -> ReviewResponse:
     }
 
     return response
+
+
+async def analyze_design_from_image(
+    file: UploadFile, tone: str, provider: str
+) -> ReviewResponse:
+    """
+    Extract architecture from image, then analyze using existing pipeline.
+
+    Steps:
+    1. Validate and process image (resize, base64 encode)
+    2. Extract architecture description using Bedrock vision
+    3. Create ReviewRequest from extracted text
+    4. Analyze through existing analyze_design() pipeline
+    5. Add image metadata to response
+
+    Args:
+        file: Uploaded image file (PNG/JPG/PDF)
+        tone: "standard" or "roast"
+        provider: "aws" (only supported provider in v0.1)
+
+    Returns:
+        ReviewResponse with additional metadata:
+            - input_method: "image"
+            - image_format: "png" | "jpeg" | "pdf"
+            - image_size_kb: original file size
+            - extraction_model: vision model ID
+            - vision_cost_usd: cost of vision extraction
+            - total_cost_usd: vision + analysis cost
+
+    Raises:
+        ImageProcessingException: Image validation or processing failed
+        BedrockException: Vision or analysis API failed
+    """
+    from app.services.image_processing import validate_and_process_image
+    from app.services.bedrock import bedrock_client
+    from app.utils.token_counter import calculate_vision_cost
+
+    logger.info(f"Validating image: {file.filename}")
+    # Step 1: Validate and process image
+    processed_image = await validate_and_process_image(file)
+    logger.info(
+        f"Image processed: {processed_image['format']}, "
+        f"{processed_image['size_kb']} KB, "
+        f"dimensions={processed_image.get('dimensions')}"
+    )
+
+    # Step 2: Extract architecture using Bedrock vision
+    logger.info("Extracting architecture from image using Bedrock vision")
+    vision_result = await bedrock_client.extract_architecture_from_image(
+        image_data=processed_image["image_data"],
+        image_format=processed_image["format"],
+    )
+
+    extracted_text = vision_result["content"]
+    vision_usage = vision_result["usage"]
+    vision_cost = calculate_vision_cost(vision_usage)
+
+    logger.info(
+        f"Vision extraction complete: {len(extracted_text)} chars, "
+        f"{vision_usage.get('input_tokens', 0)} input tokens, "
+        f"{vision_usage.get('output_tokens', 0)} output tokens, "
+        f"cost=${vision_cost:.6f}"
+    )
+
+    # Step 3: Create ReviewRequest from extracted text
+    request = ReviewRequest(
+        design_text=extracted_text,
+        format="text",  # Internal: treat extracted text as plain text
+        tone=tone,
+        provider=provider,
+    )
+
+    # Step 4: Analyze using existing pipeline
+    logger.info("Analyzing extracted architecture through RAG pipeline")
+    review = await analyze_design(request)
+
+    # Step 5: Add image metadata to response
+    if review.metadata is None:
+        review.metadata = {}
+
+    review.metadata["input_method"] = "image"
+    review.metadata["image_filename"] = file.filename
+    review.metadata["image_format"] = processed_image["format"]
+    review.metadata["image_size_kb"] = processed_image["size_kb"]
+    if processed_image.get("dimensions"):
+        review.metadata["image_dimensions"] = processed_image["dimensions"]
+    review.metadata["extraction_model"] = vision_result["metadata"]["model_id"]
+    review.metadata["vision_tokens"] = vision_usage
+    review.metadata["vision_cost_usd"] = vision_cost
+
+    # Update total cost (vision + analysis)
+    analysis_cost = review.metadata.get("cost_usd", 0)
+    review.metadata["total_cost_usd"] = vision_cost + analysis_cost
+
+    logger.info(
+        f"Image review complete: score={review.architecture_score}, "
+        f"total_cost=${review.metadata['total_cost_usd']:.6f}"
+    )
+
+    return review
