@@ -1,1 +1,1 @@
-"""Business logic services (RAG, Bedrock, storage)."""
+"""Business logic services (RAG, Bedrock, image processing)."""
