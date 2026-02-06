@@ -31,6 +31,16 @@ export interface ReviewResponse {
   created_at: string;
 }
 
+class ApiError extends Error {
+  status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
+}
+
 export async function submitReview(
   request: ReviewRequest | FormData
 ): Promise<ReviewResponse> {
@@ -49,11 +59,18 @@ export async function submitReview(
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ detail: "Unknown error" }));
-      throw new Error(error.detail || `API error: ${response.statusText}`);
+      throw new ApiError(
+        error.detail || `API error: ${response.statusText}`,
+        response.status
+      );
     }
 
     return response.json();
   } catch (error) {
+    if (error instanceof ApiError && error.status < 500) {
+      throw error;
+    }
+
     // Backend unavailable - only use fallback for text requests
     if (!isFormData) {
       console.warn("Backend unavailable, using client-side fallback analyzer:", error);
