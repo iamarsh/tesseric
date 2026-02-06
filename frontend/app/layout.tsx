@@ -7,10 +7,10 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: {
-    default: 'Tesseric - AI-Powered AWS Architecture Review',
+    default: 'Tesseric - Instant AWS Architecture Reviews',
     template: '%s | Tesseric'
   },
-  description: 'AI-powered AWS architecture review service. Get instant, Well-Architected-aligned feedback on your cloud designs in seconds. Powered by Amazon Bedrock and Claude 3.5 Haiku. ~$0.01 per review, no signup required.',
+  description: 'Instant AWS architecture reviews with a clear architecture score and Well-Architected-aligned risks in seconds. Powered by Amazon Bedrock and Claude 3.5 Haiku. Beta pricing: ~$0.01 per review, no signup required.',
   keywords: [
     'AWS architecture review',
     'Well-Architected Framework',
@@ -44,8 +44,8 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: 'Tesseric - AI-Powered AWS Architecture Review',
-    description: 'Get instant, expert feedback on your AWS architectures aligned with the Well-Architected Framework. Powered by Amazon Bedrock. ~$0.01 per review, no signup required.',
+    title: 'Tesseric - Instant AWS Architecture Reviews',
+    description: 'Get an instant architecture score with Well-Architected-aligned risks and remediations. Powered by Amazon Bedrock. Beta pricing: ~$0.01 per review, no signup required.',
     type: 'website',
     locale: 'en_US',
     url: 'https://tesseric.ca',
@@ -55,15 +55,15 @@ export const metadata: Metadata = {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Tesseric - Architecture, piece by piece',
+        alt: 'Tesseric - Instant AWS Architecture Reviews',
         type: 'image/png',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Tesseric - AI-Powered AWS Architecture Review',
-    description: 'Get instant, expert feedback on your AWS architectures aligned with the Well-Architected Framework',
+    title: 'Tesseric - Instant AWS Architecture Reviews',
+    description: 'Get an instant architecture score with Well-Architected-aligned risks and remediations',
     images: ['/og-image.png'],
     creator: '@iamarsh',
     site: '@tesseric'

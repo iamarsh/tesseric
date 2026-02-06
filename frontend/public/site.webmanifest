@@ -1,7 +1,7 @@
 {
   "name": "Tesseric - AWS Architecture Review",
   "short_name": "Tesseric",
-  "description": "AI-powered AWS architecture review service aligned with the Well-Architected Framework",
+  "description": "Instant AWS architecture reviews with Well-Architected-aligned scores",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0A1628",

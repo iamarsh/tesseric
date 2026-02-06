@@ -67,7 +67,7 @@ export default function Home() {
       "priceCurrency": "USD",
       "description": "Pay per review, no subscription required"
     },
-    "description": "AI-powered AWS architecture review service that analyzes your designs and returns structured, Well-Architected-aligned feedback",
+    "description": "Instant AWS architecture reviews that deliver a Well-Architected-aligned score, risks, and remediations",
     "operatingSystem": "Web",
     "url": "https://tesseric.ca",
     "author": {
@@ -85,6 +85,7 @@ export default function Home() {
     "featureList": [
       "AWS Well-Architected Framework alignment",
       "Powered by Amazon Bedrock and Claude 3.5 Haiku",
+      "Architecture score from 0 to 100",
       "Structured risk identification with severity levels",
       "Remediation recommendations",
       "Professional and Roast tone modes",
