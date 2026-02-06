@@ -288,7 +288,7 @@ export function ReviewForm({ onSubmit, loading }: ReviewFormProps) {
         ) : (
           <span className="flex items-center justify-center gap-2">
             <Sparkles className="h-5 w-5" />
-            Review My Architecture
+            Get My Architecture Score
           </span>
         )}
       </button>

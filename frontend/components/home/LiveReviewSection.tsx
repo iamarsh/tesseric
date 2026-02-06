@@ -29,11 +29,11 @@ export function LiveReviewSection({
       {/* Section Header */}
       <div className="text-center mb-12 max-w-3xl mx-auto">
         <h2 className="text-4xl font-bold text-foreground mb-4">
-          Try It Now
+          Get Your Architecture Score
         </h2>
         <p className="text-lg text-muted-foreground">
-          Paste your AWS architecture description and get instant, AI-powered feedback
-          aligned with the Well-Architected Framework.
+          Paste your AWS architecture description to receive a Well-Architected-aligned
+          score, risks, and remediations in seconds.
         </p>
       </div>
 

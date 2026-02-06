@@ -8,18 +8,18 @@ export function HeroSection() {
         <div className="space-y-6">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-full text-sm font-medium text-primary">
             <Sparkles className="h-4 w-4" />
-            AWS-Powered Architecture Review
+            Instant AWS Architecture Score
           </div>
 
           <h1 className="text-5xl md:text-6xl font-bold text-foreground text-balance">
-            Architecture,
+            Instant AWS
             <br />
-            <span className="text-primary">piece by piece</span>
+            <span className="text-primary">Architecture Reviews</span>
           </h1>
 
           <p className="text-xl text-muted-foreground text-balance">
-            AI-powered AWS architecture review service that analyzes your designs
-            and returns structured, Well-Architected-aligned feedback in seconds.
+            Find hidden risks, get a clear architecture score, and map fixes to the
+            Well-Architected Framework in seconds.
           </p>
 
           <div className="flex flex-wrap gap-4">
@@ -28,13 +28,13 @@ export function HeroSection() {
               className="px-8 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors inline-flex items-center gap-2"
             >
               <Sparkles className="h-5 w-5" />
-              Review My Architecture
+              Get My Architecture Score
             </a>
             <a
               href="#how-it-works"
               className="px-8 py-3 bg-card border border-border text-foreground rounded-lg font-semibold hover:bg-muted transition-colors"
             >
-              How It Works
+              See How It Works
             </a>
           </div>
 
@@ -42,11 +42,11 @@ export function HeroSection() {
           <div className="flex items-center gap-6 pt-4 flex-wrap">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Shield className="h-4 w-4 text-primary" />
-              AWS Well-Architected
+              Well-Architected aligned
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Zap className="h-4 w-4 text-primary" />
-              ~$0.01 per review
+              Beta pricing: ~$0.01 per review
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Lock className="h-4 w-4 text-primary" />
