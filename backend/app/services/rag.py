@@ -13,6 +13,7 @@ from fastapi import UploadFile
 
 from app.models.request import ReviewRequest
 from app.models.response import ReviewResponse, RiskItem
+from app.core.config import settings
 from app.services.bedrock import bedrock_client
 from app.services.prompts import build_analysis_prompt
 from app.utils.token_counter import (
@@ -65,6 +66,10 @@ async def analyze_design(request: ReviewRequest) -> ReviewResponse:
     Returns:
         ReviewResponse with risks, score, summary, metadata
     """
+    if settings.disable_bedrock:
+        logger.info("Bedrock disabled; using fallback analysis")
+        return await analyze_design_stub(request)
+
     try:
         return await analyze_with_bedrock(request)
     except Exception as e:

@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     # Bedrock Configuration (Phase 1+)
     bedrock_kb_id: str | None = None  # Knowledge Base ID
     bedrock_model_id: str = "anthropic.claude-3-5-haiku-20241022-v1:0"
+    disable_bedrock: bool = False
 
     # Bedrock Vision Model (Claude 3 Sonnet - has vision capabilities)
     bedrock_vision_model_id: str = "anthropic.claude-3-sonnet-20240229-v1:0"
