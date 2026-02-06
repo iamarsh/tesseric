@@ -5,13 +5,13 @@
 ## Project Identity
 
 - **Name**: Tesseric
-- **Tagline**: "Architecture, piece by piece."
+- **Tagline**: "Instant AWS architecture reviews."
 - **Domain**: tesseric.ca (future)
 - **Repository**: github.com/iamarsh/tesseric
 
 ## Vision
 
-Tesseric is an AI-powered **AWS architecture review service** that analyzes cloud designs and returns **structured, Well-Architected-aligned feedback**. Unlike generic AI chatbots, Tesseric provides:
+Tesseric is an **instant AWS architecture review service** that analyzes cloud designs and returns **structured, Well-Architected-aligned feedback**. Unlike generic AI chatbots, Tesseric provides:
 
 - **AWS-Specific Expertise**: Deep knowledge of AWS Well-Architected Framework + security best practices
 - **Structured Output**: JSON with risks, severity scores, pillar mappings, and remediation steps

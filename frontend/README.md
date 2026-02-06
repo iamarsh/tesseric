@@ -185,7 +185,7 @@ The frontend communicates with the backend via REST API:
 2. **Input Selection**: Choose text description or image upload
 3. **Text Entry**: Type/paste architecture description (min 50 chars)
 4. **Tone Selection**: Choose Professional or Roast mode
-5. **Submit**: Click "Review My Architecture"
+5. **Submit**: Click "Get My Architecture Score"
 6. **Loading**: See animated loading state
 7. **Results**: View score, summary, and risk cards
 8. **Tone Toggle**: Switch between Professional/Roast without re-submitting

@@ -1,8 +1,8 @@
 # Tesseric
 
-**Architecture, piece by piece.**
+**Instant AWS architecture reviews.**
 
-AI-powered AWS architecture review service that analyzes your cloud designs and returns structured, AWS Well-Architected Framework-aligned feedback with actionable remediation steps.
+Instant AWS architecture review service that returns a Well-Architected-aligned score, risks, and remediation steps in seconds.
 
 ![Version](https://img.shields.io/badge/version-0.1.0--alpha-blue)
 ![Python](https://img.shields.io/badge/python-3.11+-green)
@@ -543,4 +543,4 @@ This is currently a portfolio/learning project for AWS Solutions Architect prepa
 
 **Built with ❤️ for AWS Solutions Architect preparation and real-world architecture reviews**
 
-*"Architecture, piece by piece."* — Tesseric
+*"Instant AWS architecture reviews."* — Tesseric
