@@ -4,7 +4,7 @@ Request models for Tesseric API.
 Pydantic models for validating incoming requests.
 """
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from typing import Literal
 
 
@@ -48,8 +48,8 @@ class ReviewRequest(BaseModel):
             )
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "design_text": "Single AZ deployment with EC2 instances behind an ALB. "
                 "RDS MySQL database in the same AZ. No backups configured.",
@@ -58,3 +58,4 @@ class ReviewRequest(BaseModel):
                 "provider": "aws",
             }
         }
+    )

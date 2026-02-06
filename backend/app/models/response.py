@@ -4,9 +4,9 @@ Response models for Tesseric API.
 Pydantic models for structured architecture review responses.
 """
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional, Literal, Any
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class RiskItem(BaseModel):
@@ -111,14 +111,14 @@ class ReviewResponse(BaseModel):
         ],
     )
 
-    tone: str = Field(
+    tone: Literal["standard", "roast"] = Field(
         ...,
         description="Tone used in the response (echoes request)",
         examples=["standard", "roast"],
     )
 
     created_at: datetime = Field(
-        default_factory=datetime.utcnow,
+        default_factory=lambda: datetime.now(timezone.utc),
         description="Review creation timestamp (ISO 8601)",
     )
 
@@ -127,8 +127,8 @@ class ReviewResponse(BaseModel):
         description="Analysis metadata (method, provider, cost, token usage)",
     )
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "review_id": "review-550e8400-e29b-41d4-a716-446655440000",
                 "architecture_score": 67,
@@ -152,3 +152,4 @@ class ReviewResponse(BaseModel):
                 "created_at": "2026-01-21T12:00:00Z",
             }
         }
+    )
