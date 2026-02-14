@@ -39,7 +39,7 @@ export function HeroSection() {
               </a>
             </div>
             <p className="text-xs text-muted-foreground">
-              Beta pricing — Limited time offer
+              Beta pricing: $0.01 · No signup required
             </p>
           </div>
 

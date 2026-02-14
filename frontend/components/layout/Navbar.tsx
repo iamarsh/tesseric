@@ -54,7 +54,7 @@ export function Navbar() {
               href="/#review"
               className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
             >
-              Try It Free
+              Get My Architecture Score
             </a>
           </div>
 
@@ -106,7 +106,7 @@ export function Navbar() {
               onClick={() => setMobileMenuOpen(false)}
               className="block w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors text-center"
             >
-              Try It Free
+              Get My Architecture Score
             </a>
           </div>
         )}
