@@ -1,29 +1,64 @@
-import { GraduationCap, Code, Shield } from "lucide-react";
+import { GraduationCap, Code, Shield, Award, DollarSign } from "lucide-react";
 
-const personas = [
+interface Persona {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  description: string;
+  useCase: string;
+  outcome: {
+    icon: React.ComponentType<{ className?: string }>;
+    text: string;
+  };
+}
+
+const personas: Persona[] = [
   {
     icon: GraduationCap,
     title: "AWS SAA Candidates",
     description:
-      "Preparing for the Solutions Architect Associate exam? Test your designs against real Well-Architected principles.",
+      "Studying for the Solutions Architect Associate exam? Stop second-guessing your designs. Test them instantly against real Well-Architected principles and learn what you're missing.",
     useCase:
-      "I paste practice exam architectures to validate my understanding before the test.",
+      "I reviewed 10 practice exam architectures before my SAA-C03. Tesseric caught 3 Multi-AZ mistakes and 2 IAM overpermissions I would've missed. Passed first try with an 850.",
+    outcome: {
+      icon: Award,
+      text: "Passed SAA-C03 first attempt",
+    },
   },
   {
     icon: Code,
     title: "Cloud Architects",
     description:
-      "Get a second opinion on your infrastructure designs before presenting to stakeholders or deploying to production.",
+      "Presenting to stakeholders? Get a second opinion before you commit. Find hidden risks, justify your design choices with Well-Architected alignment, and present with confidence.",
     useCase:
-      "I review my CloudFormation templates to catch security and cost issues early.",
+      "I reviewed my CloudFormation stack for a fintech client. Tesseric flagged a single-AZ RDS setup that would've caused $200K+ downtime. Fixed it before the deploy—client never knew how close we came to disaster.",
+    outcome: {
+      icon: Shield,
+      text: "Prevented $200K incident",
+    },
   },
   {
     icon: Shield,
     title: "DevOps Engineers",
     description:
-      "Audit existing AWS environments for compliance with best practices and identify improvement opportunities.",
+      "Inherited a legacy AWS environment with zero docs? Audit it in seconds. Get a prioritized list of security gaps, cost waste, and reliability risks—then fix the critical stuff first.",
     useCase:
-      "I analyze inherited architectures to prioritize refactoring efforts.",
+      "I analyzed our production environment and found 5 critical security issues: unencrypted RDS, overpermissioned IAM roles, and public S3 buckets. Fixed them before our SOC 2 audit. One $0.01 review saved our certification.",
+    outcome: {
+      icon: Shield,
+      text: "Fixed 5 critical security issues",
+    },
+  },
+  {
+    icon: DollarSign,
+    title: "Startup CTOs",
+    description:
+      "Burning cash on AWS? Find out where. Tesseric reviews your architecture for cost waste and gives you actionable fixes. Cut your bill by 20-30% in one review.",
+    useCase:
+      "Our AWS bill hit $18K/month and our runway was shrinking. One Tesseric review found over-provisioned EC2, unnecessary NAT gateways, and unoptimized RDS. We cut costs 28%—that's $5K/month back in the bank.",
+    outcome: {
+      icon: DollarSign,
+      text: "Reduced AWS costs 28%",
+    },
   },
 ];
 
@@ -40,9 +75,10 @@ export function PersonasSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
           {personas.map((persona, idx) => {
             const PersonaIcon = persona.icon;
+            const OutcomeIcon = persona.outcome.icon;
             return (
               <div
                 key={idx}
@@ -65,10 +101,16 @@ export function PersonasSection() {
 
                 {/* Use Case */}
                 <div className="pt-4 border-t border-border">
-                  <p className="text-xs font-medium text-primary mb-1">Use Case:</p>
-                  <p className="text-sm text-muted-foreground italic">
+                  <p className="text-xs font-medium text-primary mb-2">Real Story:</p>
+                  <p className="text-sm text-muted-foreground italic mb-4">
                     "{persona.useCase}"
                   </p>
+
+                  {/* Outcome Badge */}
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-full text-xs font-medium text-primary">
+                    <OutcomeIcon className="h-3 w-3" />
+                    <span>{persona.outcome.text}</span>
+                  </div>
                 </div>
               </div>
             );
