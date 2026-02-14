@@ -6,6 +6,7 @@ import { SiteLayout } from "@/components/layout/SiteLayout";
 import { HeroSection } from "@/components/home/HeroSection";
 import { LiveReviewSection } from "@/components/home/LiveReviewSection";
 import { ComparisonSection } from "@/components/home/ComparisonSection";
+import { TestimonialsSection } from "@/components/home/TestimonialsSection";
 import { HowItWorksSection } from "@/components/home/HowItWorksSection";
 import { PersonasSection } from "@/components/home/PersonasSection";
 import { RoadmapTeaser } from "@/components/home/RoadmapTeaser";
@@ -75,13 +76,6 @@ export default function Home() {
       "name": "Arsh Singh",
       "url": "https://iamarsh.com"
     },
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "5",
-      "ratingCount": "1",
-      "bestRating": "5",
-      "worstRating": "1"
-    },
     "featureList": [
       "AWS Well-Architected Framework alignment",
       "Powered by Amazon Bedrock and Claude 3.5 Haiku",
@@ -119,6 +113,7 @@ export default function Home() {
       {!review && (
         <>
           <ComparisonSection />
+          <TestimonialsSection />
           <HowItWorksSection />
           <PersonasSection />
           <RoadmapTeaser />
