@@ -50,21 +50,22 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: 'https://tesseric.ca',
     siteName: 'Tesseric',
-    images: [
-      {
-        url: '/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'Tesseric - Instant AWS Architecture Reviews',
-        type: 'image/png',
-      },
-    ],
+    // TODO: Add og-image.png (1200x630px) to /public/ for social preview
+    // images: [
+    //   {
+    //     url: '/og-image.png',
+    //     width: 1200,
+    //     height: 630,
+    //     alt: 'Tesseric - Instant AWS Architecture Reviews',
+    //     type: 'image/png',
+    //   },
+    // ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Tesseric - Instant AWS Architecture Reviews',
     description: 'Get an instant architecture score with Well-Architected-aligned risks and remediations',
-    images: ['/og-image.png'],
+    // images: ['/og-image.png'], // TODO: Add og-image.png to /public/
     creator: '@iamarsh',
     site: '@tesseric'
   },

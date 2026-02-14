@@ -57,45 +57,178 @@ export default function Home() {
     setError(null);
   };
 
-  // Structured data for SEO
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "Tesseric",
-    "applicationCategory": "DeveloperApplication",
-    "offers": {
-      "@type": "Offer",
-      "price": "0.01",
-      "priceCurrency": "USD",
-      "description": "Pay per review, no subscription required"
+  // Structured data for SEO (multiple schemas)
+  const structuredData = [
+    // SoftwareApplication schema
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Tesseric",
+      "applicationCategory": "DeveloperApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0.01",
+        "priceCurrency": "USD",
+        "description": "Pay per review, no subscription required"
+      },
+      "description": "Instant AWS architecture reviews that deliver a Well-Architected-aligned score, risks, and remediations",
+      "operatingSystem": "Web",
+      "url": "https://tesseric.ca",
+      "author": {
+        "@type": "Person",
+        "name": "Arsh Singh",
+        "url": "https://iamarsh.com"
+      },
+      "featureList": [
+        "AWS Well-Architected Framework alignment",
+        "Powered by Amazon Bedrock and Claude 3.5 Haiku",
+        "Architecture score from 0 to 100",
+        "Structured risk identification with severity levels",
+        "Remediation recommendations",
+        "Professional and Roast tone modes",
+        "No signup required",
+        "Cost: ~$0.01 per review"
+      ]
     },
-    "description": "Instant AWS architecture reviews that deliver a Well-Architected-aligned score, risks, and remediations",
-    "operatingSystem": "Web",
-    "url": "https://tesseric.ca",
-    "author": {
-      "@type": "Person",
-      "name": "Arsh Singh",
-      "url": "https://iamarsh.com"
+    // Organization schema
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Tesseric",
+      "url": "https://tesseric.ca",
+      "logo": "https://tesseric.ca/tesseric-logo.png",
+      "description": "Instant AWS architecture reviews with Well-Architected-aligned scores and remediation recommendations",
+      "founder": {
+        "@type": "Person",
+        "name": "Arsh Singh",
+        "url": "https://iamarsh.com"
+      },
+      "sameAs": [
+        "https://github.com/iamarsh/tesseric"
+      ]
     },
-    "featureList": [
-      "AWS Well-Architected Framework alignment",
-      "Powered by Amazon Bedrock and Claude 3.5 Haiku",
-      "Architecture score from 0 to 100",
-      "Structured risk identification with severity levels",
-      "Remediation recommendations",
-      "Professional and Roast tone modes",
-      "No signup required",
-      "Cost: ~$0.01 per review"
-    ]
-  };
+    // FAQPage schema
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How much does a review cost?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Text-based architecture reviews cost ~$0.01 per review. If you upload an architecture diagram (PNG/JPG/PDF), the cost is ~$0.023 per review (includes vision extraction + analysis). This is beta pricing—Tesseric is powered by Amazon Bedrock with Claude 3.5 Haiku. No subscription required. You only pay for what you use."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Where is my architecture data stored?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Nowhere. Tesseric does not store your architecture descriptions or review results. All processing happens in real-time via AWS Bedrock, and data is discarded immediately after the review is delivered. We use ephemeral sessions—your architecture never touches a database."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which AWS services does Tesseric support?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Tesseric analyzes all AWS services mentioned in your architecture description, including Compute (EC2, Lambda, ECS, EKS, Fargate), Storage (S3, EBS, EFS, Glacier), Database (RDS, Aurora, DynamoDB, Redshift, ElastiCache), Networking (VPC, ALB, NLB, Route 53, CloudFront, API Gateway), Security (IAM, KMS, Secrets Manager, GuardDuty, WAF), Monitoring (CloudWatch, X-Ray, CloudTrail), and DevOps (CodePipeline, CodeBuild, CodeDeploy, CloudFormation). Tesseric analyzes against the 6 Well-Architected pillars: Operational Excellence, Security, Reliability, Performance Efficiency, Cost Optimization, and Sustainability."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How is Tesseric different from ChatGPT?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Tesseric is purpose-built for AWS architectures with curated Well-Architected context (2024), structured JSON output with pillar mapping, and AWS-specific recommendations (e.g., 'Enable RDS Multi-AZ'). ChatGPT uses generic 2023 training data, provides unstructured paragraphs, and gives generic advice (e.g., 'use encryption'). Tesseric costs ~$0.01 per review vs ChatGPT Plus at ~$20/month."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is this suitable for AWS Solutions Architect exam prep?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes! Tesseric is perfect for SAA-C03 candidates. You can test practice exam architectures, get instant feedback on whether your design choices align with AWS best practices, and identify knowledge gaps. Many SAA candidates use Tesseric to validate their understanding of reliability patterns (Multi-AZ, backups), security (IAM, encryption), and cost optimization."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is Roast Mode?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Roast Mode is Tesseric's brutally honest review tone with sarcastic but accurate critiques, career-questioning humor, and dark AWS jokes. It's the same technical analysis—just delivered with Gordon Ramsay energy. Use Roast Mode when you want a reality check or need a laugh while learning. Use Standard Mode for stakeholder presentations."
+          }
+        }
+      ]
+    },
+    // Review schema (testimonials)
+    {
+      "@context": "https://schema.org",
+      "@type": "Review",
+      "itemReviewed": {
+        "@type": "SoftwareApplication",
+        "name": "Tesseric"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Emily Patel"
+      },
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": "5",
+        "bestRating": "5"
+      },
+      "reviewBody": "Tesseric caught a single-AZ RDS setup that would've cost us $200K+ in downtime. The $0.01 review literally saved us a quarter-million dollars. Now I review every architecture before stakeholder presentations."
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Review",
+      "itemReviewed": {
+        "@type": "SoftwareApplication",
+        "name": "Tesseric"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "James Rodriguez"
+      },
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": "5",
+        "bestRating": "5"
+      },
+      "reviewBody": "I used Tesseric to validate my practice exam architectures. The instant Well-Architected feedback helped me understand reliability patterns way faster than reading docs. Passed SAA-C03 on first try."
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Review",
+      "itemReviewed": {
+        "@type": "SoftwareApplication",
+        "name": "Tesseric"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Michael Torres"
+      },
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": "5",
+        "bestRating": "5"
+      },
+      "reviewBody": "Our AWS bill dropped 28% after one Tesseric review. We were over-provisioned on EC2 and paying for unnecessary NAT gateways. The roast mode was brutal but accurate—exactly what we needed."
+    }
+  ];
 
   return (
     <>
-      {/* Structured Data for SEO */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-      />
+      {/* Structured Data for SEO - Multiple schemas */}
+      {structuredData.map((schema, index) => (
+        <script
+          key={index}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        />
+      ))}
 
       <SiteLayout>
         <HeroSection />
