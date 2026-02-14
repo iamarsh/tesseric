@@ -8,7 +8,7 @@ export function HeroSection() {
         <div className="space-y-6">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-full text-sm font-medium text-primary">
             <Sparkles className="h-4 w-4" />
-            Instant AWS Architecture Score
+            Beta Pricing: $0.01 per review — Lock in early access
           </div>
 
           <h1 className="text-5xl md:text-6xl font-bold text-foreground text-balance">
@@ -18,24 +18,29 @@ export function HeroSection() {
           </h1>
 
           <p className="text-xl text-muted-foreground text-balance">
-            Find hidden risks, get a clear architecture score, and map fixes to the
-            Well-Architected Framework in seconds.
+            Catch multi-AZ misconfigurations, unencrypted data, and cost leaks
+            in 10 seconds—before your next sprint planning.
           </p>
 
-          <div className="flex flex-wrap gap-4">
-            <a
-              href="#review"
-              className="px-8 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors inline-flex items-center gap-2"
-            >
-              <Sparkles className="h-5 w-5" />
-              Get My Architecture Score
-            </a>
-            <a
-              href="#how-it-works"
-              className="px-8 py-3 bg-card border border-border text-foreground rounded-lg font-semibold hover:bg-muted transition-colors"
-            >
-              See How It Works
-            </a>
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-wrap gap-4">
+              <a
+                href="#review"
+                className="px-8 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors inline-flex items-center gap-2"
+              >
+                <Sparkles className="h-5 w-5" />
+                Get My Architecture Score
+              </a>
+              <a
+                href="#how-it-works"
+                className="px-8 py-3 bg-card border border-border text-foreground rounded-lg font-semibold hover:bg-muted transition-colors"
+              >
+                See How It Works
+              </a>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Beta pricing — Limited time offer
+            </p>
           </div>
 
           {/* Trust Indicators */}
@@ -46,7 +51,7 @@ export function HeroSection() {
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Zap className="h-4 w-4 text-primary" />
-              Beta pricing: ~$0.01 per review
+              $0.01 per review
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Lock className="h-4 w-4 text-primary" />
@@ -71,39 +76,17 @@ export function HeroSection() {
               </div>
             </div>
 
-            {/* Mini Score Gauge */}
-            <div className="flex items-center gap-4 mb-4">
-              <div className="relative w-20 h-20">
-                <svg className="transform -rotate-90 w-20 h-20">
-                  <circle
-                    cx="40"
-                    cy="40"
-                    r="36"
-                    stroke="currentColor"
-                    strokeWidth="6"
-                    fill="none"
-                    className="text-muted opacity-20"
-                  />
-                  <circle
-                    cx="40"
-                    cy="40"
-                    r="36"
-                    stroke="currentColor"
-                    strokeWidth="6"
-                    fill="none"
-                    strokeDasharray="226"
-                    strokeDashoffset="45"
-                    className="text-primary"
-                    strokeLinecap="round"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-2xl font-bold text-primary">82</span>
-                </div>
+            {/* Before/After Score Comparison */}
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="text-center p-3 bg-muted rounded-lg">
+                <p className="text-xs text-muted-foreground mb-1">Before</p>
+                <p className="text-3xl font-bold text-warning">61</p>
+                <p className="text-xs text-muted-foreground">5 critical risks</p>
               </div>
-              <div>
-                <p className="text-sm font-semibold text-foreground">Excellent</p>
-                <p className="text-xs text-muted-foreground">5 risks identified</p>
+              <div className="text-center p-3 bg-primary/10 rounded-lg border-2 border-primary">
+                <p className="text-xs text-primary mb-1">After fixes</p>
+                <p className="text-3xl font-bold text-primary">94</p>
+                <p className="text-xs text-muted-foreground">Well-Architected</p>
               </div>
             </div>
 
