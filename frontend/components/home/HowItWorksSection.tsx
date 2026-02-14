@@ -5,19 +5,22 @@ const steps = [
     icon: FileText,
     title: "Describe Your Architecture",
     description:
-      "Paste your AWS architecture description (EC2, RDS, S3, etc.) or upload a diagram (coming soon).",
+      "Describe your AWS setup in plain English—takes 30 seconds. List your services (EC2, RDS, S3) or upload a diagram. No JSON, no code, just your architecture.",
+    benefit: "No complex setup, no learning curve",
   },
   {
     icon: Sparkles,
     title: "AI Analysis via Bedrock",
     description:
-      "Claude 3.5 Haiku analyzes your design against the Well-Architected Framework with 6K tokens of context.",
+      "Our AI (powered by AWS Bedrock) reviews your design against AWS best practices. We've built in deep Well-Architected expertise so you don't have to memorize it.",
+    benefit: "Same quality as a $200/hour consultant, in 10 seconds",
   },
   {
     icon: CheckCircle2,
     title: "Get Actionable Feedback",
     description:
-      "Receive structured risks, remediation steps, and AWS documentation references in seconds.",
+      "Get your results in 8-10 seconds: specific risks (like 'Single-AZ database'), fix recommendations (like 'Enable RDS Multi-AZ'), and AWS doc links. Ready to act on immediately.",
+    benefit: "Faster than reading a blog post, more accurate than ChatGPT",
   },
 ];
 
@@ -61,6 +64,11 @@ export function HowItWorksSection() {
                 {/* Content */}
                 <p className="text-sm text-muted-foreground">
                   {step.description}
+                </p>
+
+                {/* Benefit Sub-text */}
+                <p className="text-xs text-muted-foreground italic mt-3">
+                  {step.benefit}
                 </p>
               </div>
             </div>
