@@ -9,6 +9,7 @@ import { ComparisonSection } from "@/components/home/ComparisonSection";
 import { TestimonialsSection } from "@/components/home/TestimonialsSection";
 import { HowItWorksSection } from "@/components/home/HowItWorksSection";
 import { PersonasSection } from "@/components/home/PersonasSection";
+import { FAQSection } from "@/components/home/FAQSection";
 import { RoadmapTeaser } from "@/components/home/RoadmapTeaser";
 import { FinalCTA } from "@/components/home/FinalCTA";
 
@@ -116,6 +117,7 @@ export default function Home() {
           <TestimonialsSection />
           <HowItWorksSection />
           <PersonasSection />
+          <FAQSection />
           <RoadmapTeaser />
         </>
       )}
