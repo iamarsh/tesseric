@@ -37,6 +37,12 @@ class Settings(BaseSettings):
     # Cost Tracking
     enable_cost_logging: bool = True
 
+    # Neo4j Configuration (Knowledge Graph)
+    neo4j_uri: str | None = None
+    neo4j_username: str = "neo4j"
+    neo4j_password: str | None = None
+    neo4j_enabled: bool = True  # Graceful degradation if False
+
     # Backend Configuration
     backend_port: int = 8000
     log_level: str = "INFO"

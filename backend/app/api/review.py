@@ -9,14 +9,37 @@ from fastapi.exceptions import RequestValidationError
 from pydantic import ValidationError
 from typing import Optional
 import logging
+import asyncio
 
 from app.models.request import ReviewRequest
 from app.models.response import ReviewResponse
 from app.services.rag import analyze_design, analyze_design_from_image
 from app.utils.exceptions import ImageProcessingException
+from app.graph.neo4j_client import neo4j_client
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
+
+
+async def write_to_graph_background(review_response: ReviewResponse):
+    """
+    Background task to write review to Neo4j knowledge graph.
+
+    Runs async after response is returned to user - does not block review.
+    Handles Neo4j failures gracefully (logs error but doesn't crash).
+    """
+    try:
+        # Convert Pydantic model to dict for Neo4j client
+        review_dict = review_response.model_dump()
+
+        async with neo4j_client as client:
+            success = await client.write_analysis(review_dict)
+            if success:
+                logger.info(f"Successfully wrote review {review_response.review_id} to graph")
+            else:
+                logger.warning(f"Failed to write review {review_response.review_id} to graph")
+    except Exception as e:
+        logger.error(f"Background graph write error: {e}", exc_info=True)
 
 
 @router.post("/review", response_model=ReviewResponse)
@@ -57,6 +80,10 @@ async def review_architecture(
             # Image processing path
             logger.info(f"Processing image upload: {file.filename} ({file.content_type})")
             review = await analyze_design_from_image(file, tone, provider)
+
+            # Write to knowledge graph in background (don't block response)
+            asyncio.create_task(write_to_graph_background(review))
+
             return review
 
         # Text processing path (JSON or form)
@@ -84,6 +111,10 @@ async def review_architecture(
                 raise RequestValidationError(exc.errors()) from exc
 
         review = await analyze_design(review_request)
+
+        # Write to knowledge graph in background (don't block response)
+        asyncio.create_task(write_to_graph_background(review))
+
         return review
 
     except ImageProcessingException as e:
