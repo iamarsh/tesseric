@@ -44,9 +44,22 @@ jobs:
           uvicorn app.main:app --port 8000 > /tmp/backend.log 2>&1 &
           echo $! > /tmp/backend.pid
           # Wait for server to start
+          echo "Waiting for backend to start..."
           for i in {1..30}; do
-            curl -s http://localhost:8000/health && break || sleep 1
+            if curl -s http://localhost:8000/health > /dev/null; then
+              echo "Backend is up!"
+              break
+            fi
+            echo "Attempt $i/30..."
+            sleep 1
           done
+
+          # Verify server is actually running
+          if ! curl -s http://localhost:8000/health; then
+            echo "ERROR: Backend failed to start"
+            cat /tmp/backend.log
+            exit 1
+          fi
 
       - name: Run integration tests
         run: |
@@ -57,8 +70,20 @@ jobs:
             -F "tone=standard" \
             -F "provider=aws")
 
+          echo "Response: $RESULT"
+
+          # Check if response is valid JSON
+          if ! echo "$RESULT" | jq empty 2>/dev/null; then
+            echo "ERROR: Invalid JSON response from API"
+            echo "Raw response: $RESULT"
+            exit 1
+          fi
+
           METHOD=$(echo "$RESULT" | jq -r '.metadata.analysis_method')
           SCORE=$(echo "$RESULT" | jq -r '.architecture_score')
+
+          echo "Analysis method: $METHOD"
+          echo "Score: $SCORE"
 
           if [ "$METHOD" != "bedrock_claude_3_5_haiku" ]; then
             echo "ERROR: Using fallback instead of Bedrock!"
@@ -79,8 +104,21 @@ jobs:
             -F "tone=standard" \
             -F "provider=aws")
 
+          echo "Response: $RESULT"
+
+          # Check if response is valid JSON
+          if ! echo "$RESULT" | jq empty 2>/dev/null; then
+            echo "ERROR: Invalid JSON response from API"
+            echo "Raw response: $RESULT"
+            cat /tmp/backend.log
+            exit 1
+          fi
+
           METHOD=$(echo "$RESULT" | jq -r '.metadata.analysis_method')
           SCORE=$(echo "$RESULT" | jq -r '.architecture_score')
+
+          echo "Analysis method: $METHOD"
+          echo "Score: $SCORE"
 
           if [ "$METHOD" != "bedrock_claude_3_5_haiku" ]; then
             echo "ERROR: Using fallback instead of Bedrock!"
