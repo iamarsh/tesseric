@@ -85,17 +85,17 @@ const phases: Phase[] = [
   {
     version: "Phase 2.1",
     title: "AWS Diagram Parsing",
-    status: "planned",
-    date: "Q1 2026",
+    status: "completed",
+    date: "February 2026",
     description:
       "Accept AWS architecture diagrams and drawings as input using Bedrock vision capabilities.",
     features: [
       "Image upload support (PNG, JPG, PDF up to 5MB)",
-      "Bedrock vision API integration (Claude with vision)",
+      "Bedrock vision API integration (Claude 3 Sonnet with vision)",
       "Architecture component extraction from diagrams",
       "Visual element to text conversion",
       "Feed extracted text to existing RAG pipeline",
-      "Maintain quality and cost efficiency (~$0.023/diagram)",
+      "Cost: ~$0.015-0.023 per diagram analysis",
     ],
   },
   {

@@ -2,20 +2,20 @@ import { CheckCircle2, Clock, ArrowRight } from "lucide-react";
 
 const phases = [
   {
-    label: "In Development",
+    label: "Live Now",
     title: "Knowledge Graph Explorer",
     description: "Visualize your AWS architecture as a traversable knowledge graph. See how services relate, where risks cluster, and which patterns repeat across your reviews - powered by Neo4j.",
+    status: "completed" as const,
+  },
+  {
+    label: "In Development",
+    title: "Review History & Analytics",
+    description: "Track your architecture improvements over time. View past analyses, compare scores, and monitor remediation progress with persistent review storage.",
     status: "current" as const,
   },
   {
     label: "Planned",
-    title: "Multi-Architecture Diff",
-    description: "Compare two architecture versions side-by-side. Track how your risk score changes as you implement remediations.",
-    status: "planned" as const,
-  },
-  {
-    label: "Planned",
-    title: "Diagram Upload (IaC)",
+    title: "IaC Analysis",
     description: "Upload your IaC directly - CloudFormation templates or Terraform plans - for automated architecture extraction and review.",
     status: "planned" as const,
   },
@@ -39,7 +39,9 @@ export function RoadmapTeaser() {
             <div key={idx} className="flex-1 w-full">
               <div
                 className={`p-6 rounded-2xl border h-full ${
-                  phase.status === "current"
+                  phase.status === "completed"
+                    ? "bg-green-50/50 dark:bg-green-950/20 border-green-200 dark:border-green-900"
+                    : phase.status === "current"
                     ? "bg-warning/10 border-warning/30"
                     : "bg-muted border-border"
                 }`}
@@ -48,13 +50,18 @@ export function RoadmapTeaser() {
                 <div className="flex items-center justify-between mb-3">
                   <span
                     className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                      phase.status === "current"
+                      phase.status === "completed"
+                        ? "bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300"
+                        : phase.status === "current"
                         ? "bg-warning/20 text-warning"
                         : "bg-muted text-muted-foreground"
                     }`}
                   >
                     {phase.label}
                   </span>
+                  {phase.status === "completed" && (
+                    <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  )}
                   {phase.status === "current" && (
                     <Clock className="h-4 w-4 text-warning" />
                   )}

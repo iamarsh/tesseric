@@ -60,10 +60,10 @@ function getLayoutedElements(
   dagreGraph.setDefaultEdgeLabel(() => ({}));
   dagreGraph.setGraph({
     rankdir: "TB",  // Top-to-bottom for better visualization
-    nodesep: 100,   // Increased spacing between nodes
-    ranksep: 150,   // Increased spacing between ranks
-    marginx: 50,
-    marginy: 50,
+    nodesep: 50,    // Horizontal spacing between nodes at same rank
+    ranksep: 80,    // Vertical spacing between ranks
+    marginx: 20,
+    marginy: 20,
   });
 
   // Add nodes to dagre
