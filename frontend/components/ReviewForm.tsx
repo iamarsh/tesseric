@@ -33,9 +33,17 @@ export function ReviewForm({ onSubmit, loading }: ReviewFormProps) {
     setUploadError(null);
 
     // Validate file type
-    const allowedTypes = ['image/png', 'image/jpeg', 'application/pdf'];
+    const allowedTypes = [
+      'image/png',
+      'image/jpeg',
+      'image/webp',
+      'image/gif',
+      'image/bmp',
+      'image/tiff',
+      'application/pdf'
+    ];
     if (!allowedTypes.includes(file.type)) {
-      setUploadError('Only PNG, JPG, and PDF files are supported');
+      setUploadError('Only PNG, JPG, WebP, GIF, BMP, TIFF, and PDF files are supported');
       return;
     }
 
@@ -177,12 +185,12 @@ export function ReviewForm({ onSubmit, loading }: ReviewFormProps) {
             <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
             <p className="text-lg font-medium mb-2">Drag & drop your architecture diagram</p>
             <p className="text-sm text-muted-foreground mb-4">
-              or click to browse (PNG, JPG, PDF - max 5 MB)
+              or click to browse (PNG, JPG, WebP, GIF, BMP, TIFF, PDF - max 5 MB)
             </p>
             <input
               type="file"
               id="file-upload"
-              accept="image/png,image/jpeg,application/pdf"
+              accept="image/png,image/jpeg,image/webp,image/gif,image/bmp,image/tiff,application/pdf"
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) handleFileUpload(file);

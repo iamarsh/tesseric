@@ -67,6 +67,10 @@ async def validate_and_process_image(file: UploadFile) -> dict:
     format_map = {
         "image/png": "png",
         "image/jpeg": "jpeg",
+        "image/webp": "webp",
+        "image/gif": "gif",
+        "image/bmp": "bmp",
+        "image/tiff": "tiff",
         "application/pdf": "pdf",
     }
     image_format = format_map.get(file.content_type, "jpeg")

@@ -28,7 +28,15 @@ class Settings(BaseSettings):
 
     # Image Upload Settings
     max_image_size_mb: int = 5
-    allowed_image_formats: list[str] = ["image/png", "image/jpeg", "application/pdf"]
+    allowed_image_formats: list[str] = [
+        "image/png",
+        "image/jpeg",
+        "image/webp",
+        "image/gif",
+        "image/bmp",
+        "image/tiff",
+        "application/pdf",
+    ]
 
     # Vision API Cost Tracking (Claude 3 Sonnet pricing)
     vision_input_cost_per_1k: float = 0.003   # $3 per MTok
