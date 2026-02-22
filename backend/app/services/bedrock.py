@@ -264,6 +264,125 @@ class BedrockClient:
             logger.error(f"Unexpected error calling Bedrock vision: {e}")
             raise BedrockServiceException(f"Unexpected vision error: {e}")
 
+    async def validate_architecture_diagram(
+        self, image_data: str, image_format: str
+    ) -> dict:
+        """
+        Validate if an image is a valid architecture diagram before extraction.
+
+        Uses Claude vision to detect if the image contains an architecture diagram
+        or something else (photos, memes, screenshots, etc.).
+
+        Args:
+            image_data: Base64-encoded image data
+            image_format: "png" | "jpeg" | "pdf"
+
+        Returns:
+            dict with:
+                - is_valid_diagram: bool
+                - content_type: str ("architecture_diagram", "photo", "screenshot", etc.)
+                - detected_subjects: list[str]
+                - confidence: str ("high", "medium", "low")
+
+        Raises:
+            BedrockException subclasses: Same error handling as other methods
+        """
+        from app.services.prompts import VISION_VALIDATION_PROMPT
+
+        logger.info(f"Validating image content as architecture diagram")
+
+        # Build validation request
+        body = {
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 512,  # Short validation response
+            "temperature": 0.1,  # Low temperature for consistent validation
+            "system": VISION_VALIDATION_PROMPT,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "image",
+                            "source": {
+                                "type": "base64",
+                                "media_type": f"image/{image_format}",
+                                "data": image_data,
+                            },
+                        },
+                        {
+                            "type": "text",
+                            "text": "Is this a valid cloud architecture diagram? Respond in JSON format only.",
+                        },
+                    ],
+                }
+            ],
+        }
+
+        try:
+            # Call Bedrock with vision model
+            response = self.client.invoke_model(
+                modelId=settings.bedrock_vision_model_id,
+                body=json.dumps(body),
+                contentType="application/json",
+                accept="application/json",
+            )
+
+            # Parse response
+            response_body = json.loads(response["body"].read())
+
+            # Extract content
+            content = ""
+            if "content" in response_body:
+                for block in response_body["content"]:
+                    if block.get("type") == "text":
+                        content += block.get("text", "")
+
+            if not content:
+                raise BedrockValidationException("Validation API returned empty content")
+
+            # Parse JSON response
+            validation_result = json.loads(content)
+
+            logger.info(
+                f"Validation complete: is_valid={validation_result.get('is_valid_diagram')}, "
+                f"content_type={validation_result.get('content_type')}, "
+                f"confidence={validation_result.get('confidence')}"
+            )
+
+            return validation_result
+
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse validation response as JSON: {e}, content={content[:200]}")
+            # Fallback: assume valid if we can't parse the response
+            return {
+                "is_valid_diagram": True,
+                "content_type": "unknown",
+                "detected_subjects": ["validation failed"],
+                "confidence": "low",
+            }
+
+        except ClientError as e:
+            # Map AWS errors (same pattern as other methods)
+            error_code = e.response["Error"]["Code"]
+            error_message = e.response["Error"]["Message"]
+
+            if error_code == "ThrottlingException":
+                raise BedrockThrottlingException(f"Bedrock validation API throttled: {error_message}")
+            elif error_code == "AccessDeniedException":
+                raise BedrockAccessDeniedException(f"Bedrock validation access denied: {error_message}")
+            else:
+                raise BedrockServiceException(f"Bedrock validation error: {error_message}")
+
+        except Exception as e:
+            logger.error(f"Unexpected error during validation: {e}")
+            # Fallback: assume valid if unexpected error
+            return {
+                "is_valid_diagram": True,
+                "content_type": "unknown",
+                "detected_subjects": ["validation error"],
+                "confidence": "low",
+            }
+
 
 # Singleton instance
 bedrock_client = BedrockClient()

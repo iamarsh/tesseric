@@ -395,10 +395,11 @@ async def analyze_design_from_image(
 
     Steps:
     1. Validate and process image (resize, base64 encode)
-    2. Extract architecture description using Bedrock vision
-    3. Create ReviewRequest from extracted text
-    4. Analyze through existing analyze_design() pipeline
-    5. Add image metadata to response
+    2. Validate image is an architecture diagram (not a cat photo!)
+    3. Extract architecture description using Bedrock vision
+    4. Create ReviewRequest from extracted text
+    5. Analyze through existing analyze_design() pipeline
+    6. Add image metadata to response
 
     Args:
         file: Uploaded image file (PNG/JPG/PDF)
@@ -431,7 +432,77 @@ async def analyze_design_from_image(
         f"dimensions={processed_image.get('dimensions')}"
     )
 
-    # Step 2: Extract architecture using Bedrock vision
+    # Step 2: Validate that image is an architecture diagram (not a cat photo!)
+    # Skip validation if Bedrock is disabled or unavailable (graceful degradation)
+    logger.info("Validating image content as architecture diagram")
+    validation_result = None
+    try:
+        validation_result = await bedrock_client.validate_architecture_diagram(
+            image_data=processed_image["image_data"],
+            image_format=processed_image["format"],
+        )
+    except Exception as e:
+        logger.warning(f"Image validation skipped due to error: {e}")
+        # Assume valid if validation fails (graceful degradation)
+        validation_result = {
+            "is_valid_diagram": True,
+            "content_type": "unknown",
+            "detected_subjects": ["validation unavailable"],
+            "confidence": "low",
+        }
+
+    if not validation_result.get("is_valid_diagram", False):
+        # Generate clever error message based on what was detected
+        content_type = validation_result.get("content_type", "other")
+        subjects = validation_result.get("detected_subjects", [])
+
+        # Build contextual error message
+        if content_type == "photo" and any(word in " ".join(subjects).lower() for word in ["cat", "dog", "animal", "pet"]):
+            error_msg = (
+                f"Adorable! But Tesseric can't analyze {', '.join(subjects[:2])} for architecture reviews yet. "
+                "Please upload a cloud architecture diagram with AWS services (EC2, RDS, S3, etc.)."
+            )
+        elif content_type == "photo":
+            error_msg = (
+                f"Looks like a photo of {', '.join(subjects[:2])}! "
+                "Tesseric needs a cloud architecture diagram, not a photograph. "
+                "Please upload a diagram showing AWS services and their connections."
+            )
+        elif content_type == "screenshot":
+            error_msg = (
+                "This appears to be a screenshot of a website or application, not an architecture diagram. "
+                "Please upload a technical diagram showing cloud infrastructure (AWS services, network topology, etc.)."
+            )
+        elif content_type == "document":
+            error_msg = (
+                "This looks like a text document or presentation slide. "
+                "Tesseric needs an architecture diagram with cloud service icons, connections, and topology. "
+                "If your document contains a diagram, please crop it and upload just the diagram."
+            )
+        elif content_type == "meme":
+            error_msg = (
+                "Nice meme! But Tesseric isn't ready for that level of entertainment. "
+                "Please upload a serious cloud architecture diagram for analysis."
+            )
+        elif content_type == "blank":
+            error_msg = (
+                "The uploaded image appears to be blank or empty. "
+                "Please upload a valid architecture diagram showing AWS services."
+            )
+        else:
+            error_msg = (
+                f"This doesn't look like an architecture diagram (detected: {', '.join(subjects[:2])}). "
+                "Tesseric analyzes cloud architecture diagrams with AWS service icons, network topology, "
+                "and technical labels. Please upload a diagram created with tools like draw.io, Lucidchart, "
+                "AWS Architecture Icons, or similar."
+            )
+
+        logger.warning(f"Image validation failed: {error_msg}")
+        raise ImageProcessingException(error_msg)
+
+    logger.info(f"Image validation passed: {validation_result.get('content_type')}, confidence={validation_result.get('confidence')}")
+
+    # Step 3: Extract architecture using Bedrock vision
     logger.info("Extracting architecture from image using Bedrock vision")
     vision_result = await bedrock_client.extract_architecture_from_image(
         image_data=processed_image["image_data"],
@@ -449,7 +520,7 @@ async def analyze_design_from_image(
         f"cost=${vision_cost:.6f}"
     )
 
-    # Step 3: Create ReviewRequest from extracted text
+    # Step 4: Create ReviewRequest from extracted text
     request = ReviewRequest(
         design_text=extracted_text,
         format="text",  # Internal: treat extracted text as plain text
@@ -457,11 +528,11 @@ async def analyze_design_from_image(
         provider=provider,
     )
 
-    # Step 4: Analyze using existing pipeline
+    # Step 5: Analyze using existing pipeline
     logger.info("Analyzing extracted architecture through RAG pipeline")
     review = await analyze_design(request)
 
-    # Step 5: Add image metadata to response
+    # Step 6: Add image metadata to response
     if review.metadata is None:
         review.metadata = {}
 

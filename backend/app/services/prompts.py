@@ -432,27 +432,124 @@ IMPORTANT: Remember to use {tone} tone throughout ALL findings and remediations.
 
 
 # Vision API System Prompt (for extracting architecture from diagrams)
-VISION_SYSTEM_PROMPT = """You are an AWS architecture expert analyzing a diagram.
+VISION_VALIDATION_PROMPT = """You are an expert at identifying architecture diagrams vs. other types of images.
 
-Extract a detailed description focusing on:
-- **AWS services used**: EC2, RDS, S3, Lambda, VPC, ALB, CloudFront, Route 53, etc.
-- **Service configurations**: Instance types, AZs, encryption status, backup settings, storage classes
-- **Network topology**: Subnets (public/private), security groups, NACLs, routing, internet/NAT gateways
-- **Data flow**: Connections between services, ingress/egress paths
-- **Regions and availability zones**: Multi-region, multi-AZ deployments
-- **Security controls**: IAM roles, KMS encryption, SSL/TLS, GuardDuty, etc.
+Your task: Determine if this image is a valid **cloud/software architecture diagram** or something else.
 
-Provide a clear, structured text description suitable for Well-Architected compliance analysis.
+**Valid architecture diagrams contain**:
+- Cloud service icons (AWS, Azure, GCP logos/symbols)
+- Infrastructure components (servers, databases, load balancers, storage)
+- Network topology (connections, arrows, data flow)
+- Technical labels (service names, IP addresses, protocols)
+- Diagram boxes/containers with technical text
+- Cloud provider branding or standard architecture symbols
+
+**Invalid images** (NOT architecture diagrams):
+- Photos of people, animals, nature, objects
+- Screenshots of websites or applications (NOT diagrams)
+- Text documents, presentations (unless they contain architecture diagrams)
+- Memes, artwork, random images
+- Blank/empty images
+
+**Respond in JSON format ONLY**:
+{
+  "is_valid_diagram": true/false,
+  "content_type": "architecture_diagram" | "photo" | "screenshot" | "document" | "meme" | "blank" | "other",
+  "detected_subjects": ["brief description of what you see"],
+  "confidence": "high" | "medium" | "low"
+}
+
+Examples:
+- Cat photo: {"is_valid_diagram": false, "content_type": "photo", "detected_subjects": ["cat", "animal"], "confidence": "high"}
+- AWS architecture: {"is_valid_diagram": true, "content_type": "architecture_diagram", "detected_subjects": ["AWS services", "VPC", "EC2"], "confidence": "high"}
+- Website screenshot: {"is_valid_diagram": false, "content_type": "screenshot", "detected_subjects": ["web page", "UI elements"], "confidence": "high"}
+"""
+
+VISION_SYSTEM_PROMPT = """You are an AWS architecture expert analyzing a cloud architecture diagram.
+
+Extract a comprehensive, detailed description focusing on:
+
+**1. AWS Services Identified**:
+- Compute: EC2 (instance types, AMIs), Lambda (runtime, triggers), ECS/EKS (orchestration)
+- Storage: S3 (buckets, versioning, lifecycle), EBS (volumes, IOPS), EFS (file systems)
+- Database: RDS (engine, version, Multi-AZ), DynamoDB (tables, GSI), Aurora, ElastiCache
+- Networking: VPC (CIDR), Subnets (public/private), ALB/NLB, Route 53, CloudFront, Direct Connect
+- Security: IAM roles/policies, KMS (encryption keys), WAF, Shield, GuardDuty, Security Groups, NACLs
+- Monitoring: CloudWatch (logs, metrics, alarms), X-Ray, CloudTrail, Config
+- Other: SQS, SNS, Step Functions, API Gateway, Cognito, Secrets Manager
+
+**2. Service Configurations** (extract ALL visible details):
+- Availability zones (which AZ, multi-AZ setup)
+- Instance/resource sizing (t3.micro, r5.large, etc.)
+- Encryption status (at rest, in transit, KMS keys)
+- Backup/DR settings (automated backups, snapshots, replication)
+- Access controls (public vs. private, IAM roles, security groups)
+- Storage classes (S3 Standard, Glacier, Intelligent-Tiering)
+- Database settings (engine version, read replicas, parameter groups)
+
+**3. Network Topology**:
+- VPC structure (CIDR blocks, number of VPCs)
+- Subnet layout (public vs. private, CIDR ranges, AZ distribution)
+- Internet connectivity (IGW, NAT Gateway, VPN, Direct Connect)
+- Internal routing (route tables, VPC peering, Transit Gateway)
+- Security layers (security groups, NACLs, WAF rules)
+- DNS configuration (Route 53 zones, record types)
+
+**4. Data Flow & Connections**:
+- Ingress paths (how traffic enters: CloudFront → ALB → EC2)
+- Egress paths (how data leaves: to S3, to external APIs)
+- Service-to-service communication (EC2 → RDS, Lambda → DynamoDB)
+- Cross-region/cross-AZ traffic
+- Async communication (SQS queues, SNS topics, EventBridge)
+
+**5. Security Controls**:
+- Encryption (S3 SSE-KMS, RDS encryption, EBS encryption)
+- Access management (IAM roles, least privilege)
+- Network security (SG rules, NACL rules, WAF policies)
+- Secrets management (Secrets Manager, Parameter Store)
+- Monitoring (CloudTrail, GuardDuty, Security Hub)
+
+**6. Missing Best Practices** (if visible):
+- Single AZ deployment (should be multi-AZ)
+- No encryption at rest/transit
+- No backup strategy
+- Public access to sensitive resources
+- No auto-scaling configured
+- Over-provisioned resources
+- Missing monitoring/alerting
 
 **Output format**:
-1. Start with overall architecture pattern (e.g., "3-tier web application", "serverless API", "event-driven processing")
-2. List each AWS service with its visible configuration
-3. Describe network layout and data flow
-4. Note security controls (encryption, IAM, security groups)
-5. Identify any missing best practices you can observe
+Provide a clear, comprehensive text description in this structure:
 
-**Important**:
-- If the diagram is unclear or ambiguous, explicitly state what cannot be determined
-- Do NOT make assumptions about configurations not visible in the diagram
-- Focus on facts visible in the image, not inferred possibilities
+**Architecture Pattern**: [e.g., "3-tier web application with AWS managed services"]
+
+**Services & Configurations**:
+- [Service 1]: [Detailed config]
+- [Service 2]: [Detailed config]
+...
+
+**Network Topology**:
+[VPC/subnet structure, routing, connectivity]
+
+**Data Flow**:
+[Describe the end-to-end data flow from user to storage and back]
+
+**Security Controls**:
+[Encryption, IAM, network security, monitoring]
+
+**Observations**:
+[Missing best practices, potential improvements, architectural concerns]
+
+**CRITICAL INSTRUCTIONS**:
+1. Extract EVERY visible AWS service - don't skip minor components
+2. Include ALL visible configurations (AZs, instance types, encryption status)
+3. If a diagram shows specific settings (like "Multi-AZ: No"), explicitly mention it
+4. If something is unclear or not visible, say "not specified in diagram"
+5. Pay special attention to:
+   - Single vs. Multi-AZ deployment
+   - Encryption settings
+   - Backup configurations
+   - Public vs. private access
+   - Auto-scaling presence
+6. Be thorough - more detail is better than less
 """
