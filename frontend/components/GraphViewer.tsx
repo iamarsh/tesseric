@@ -228,8 +228,8 @@ const nodeTypes = {
 };
 
 export default function GraphViewer({ nodes, edges, className = "" }: GraphViewerProps) {
-  const [reactFlowNodes, setReactFlowNodes, onNodesChange] = useNodesState([]);
-  const [reactFlowEdges, setReactFlowEdges, onEdgesChange] = useEdgesState([]);
+  const [reactFlowNodes, setReactFlowNodes, onNodesChange] = useNodesState<Node>([]);
+  const [reactFlowEdges, setReactFlowEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
   const { nodes: layoutedNodes, edges: layoutedEdges } = useMemo(
     () => getLayoutedElements(nodes, edges),

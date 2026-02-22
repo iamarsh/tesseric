@@ -1,0 +1,109 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  integration-test:
+    name: API Integration Tests
+    runs-on: ubuntu-latest
+
+    # Only run integration tests on main branch or manual trigger
+    # (saves CI minutes and AWS Bedrock costs)
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Start backend server
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          BEDROCK_MODEL_ID: ${{ secrets.BEDROCK_MODEL_ID }}
+          NEO4J_ENABLED: false
+          LOG_LEVEL: INFO
+        run: |
+          cd backend
+          uvicorn app.main:app --port 8000 > /tmp/backend.log 2>&1 &
+          echo $! > /tmp/backend.pid
+          # Wait for server to start
+          for i in {1..30}; do
+            curl -s http://localhost:8000/health && break || sleep 1
+          done
+
+      - name: Run integration tests
+        run: |
+          # Test 1: Single AZ (should score low)
+          echo "Testing Single AZ deployment..."
+          RESULT=$(curl -s -X POST http://localhost:8000/review \
+            -F "design_text=I am deploying a web application on EC2 in a single availability zone us-east-1a with RDS MySQL database and Application Load Balancer" \
+            -F "tone=standard" \
+            -F "provider=aws")
+
+          METHOD=$(echo "$RESULT" | jq -r '.metadata.analysis_method')
+          SCORE=$(echo "$RESULT" | jq -r '.architecture_score')
+
+          if [ "$METHOD" != "bedrock_claude_3_5_haiku" ]; then
+            echo "ERROR: Using fallback instead of Bedrock!"
+            exit 1
+          fi
+
+          if [ "$SCORE" -gt 70 ]; then
+            echo "ERROR: Single AZ scored too high ($SCORE > 70)"
+            exit 1
+          fi
+
+          echo "✓ Single AZ test passed (score: $SCORE, method: $METHOD)"
+
+          # Test 2: Well-Architected (should score high)
+          echo "Testing Well-Architected deployment..."
+          RESULT=$(curl -s -X POST http://localhost:8000/review \
+            -F "design_text=Multi-AZ deployment across us-east-1a and us-east-1b with Auto Scaling Groups, encrypted RDS with automated daily backups, private S3 buckets with CloudFront, CloudWatch monitoring with SNS alerts" \
+            -F "tone=standard" \
+            -F "provider=aws")
+
+          METHOD=$(echo "$RESULT" | jq -r '.metadata.analysis_method')
+          SCORE=$(echo "$RESULT" | jq -r '.architecture_score')
+
+          if [ "$METHOD" != "bedrock_claude_3_5_haiku" ]; then
+            echo "ERROR: Using fallback instead of Bedrock!"
+            exit 1
+          fi
+
+          if [ "$SCORE" -lt 75 ]; then
+            echo "ERROR: Well-Architected scored too low ($SCORE < 75)"
+            exit 1
+          fi
+
+          echo "✓ Well-Architected test passed (score: $SCORE, method: $METHOD)"
+
+      - name: Stop backend server
+        if: always()
+        run: |
+          if [ -f /tmp/backend.pid ]; then
+            kill $(cat /tmp/backend.pid) || true
+          fi
+
+      - name: Upload backend logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-logs
+          path: /tmp/backend.log
