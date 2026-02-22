@@ -60,10 +60,10 @@ function getLayoutedElements(
   dagreGraph.setDefaultEdgeLabel(() => ({}));
   dagreGraph.setGraph({
     rankdir: "TB",  // Top-to-bottom for better visualization
-    nodesep: 50,    // Horizontal spacing between nodes at same rank
-    ranksep: 80,    // Vertical spacing between ranks
-    marginx: 20,
-    marginy: 20,
+    nodesep: 20,    // Tight horizontal spacing between nodes
+    ranksep: 40,    // Tight vertical spacing between ranks
+    marginx: 10,
+    marginy: 10,
   });
 
   // Add nodes to dagre
@@ -296,9 +296,10 @@ export default function GraphViewer({ nodes, edges, className = "" }: GraphViewe
         onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
         fitView
+        fitViewOptions={{ padding: 0.1 }}
         minZoom={0.1}
-        maxZoom={1.5}
-        defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
+        maxZoom={2.0}
+        defaultViewport={{ x: 0, y: 0, zoom: 0.5 }}
       >
         <Background color="#475569" gap={16} />
         <Controls className="bg-card border-border" />
