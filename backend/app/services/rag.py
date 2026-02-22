@@ -452,49 +452,55 @@ async def analyze_design_from_image(
         }
 
     if not validation_result.get("is_valid_diagram", False):
-        # Generate clever error message based on what was detected
+        # Build intelligent, personalized error message using AI's visual description
+        visual_desc = validation_result.get("visual_description", "")
+        clever_obs = validation_result.get("clever_observation", "")
         content_type = validation_result.get("content_type", "other")
-        subjects = validation_result.get("detected_subjects", [])
 
-        # Build contextual error message
-        if content_type == "photo" and any(word in " ".join(subjects).lower() for word in ["cat", "dog", "animal", "pet"]):
-            error_msg = (
-                f"Adorable! But Tesseric can't analyze {', '.join(subjects[:2])} for architecture reviews yet. "
-                "Please upload a cloud architecture diagram with AWS services (EC2, RDS, S3, etc.)."
-            )
-        elif content_type == "photo":
-            error_msg = (
-                f"Looks like a photo of {', '.join(subjects[:2])}! "
-                "Tesseric needs a cloud architecture diagram, not a photograph. "
-                "Please upload a diagram showing AWS services and their connections."
+        # Start with what Tesseric actually saw (make it feel alive!)
+        if visual_desc:
+            error_msg = f"I can see: {visual_desc}\n\n"
+        else:
+            error_msg = ""
+
+        # Add the clever observation if available
+        if clever_obs:
+            error_msg += f"{clever_obs}\n\n"
+
+        # Add helpful guidance based on content type
+        if content_type == "photo":
+            error_msg += (
+                "Tesseric analyzes cloud architecture diagrams, not photographs. "
+                "Please upload a technical diagram showing AWS services like EC2, RDS, S3, VPC, etc., "
+                "with their connections and configurations."
             )
         elif content_type == "screenshot":
-            error_msg = (
-                "This appears to be a screenshot of a website or application, not an architecture diagram. "
-                "Please upload a technical diagram showing cloud infrastructure (AWS services, network topology, etc.)."
+            error_msg += (
+                "Screenshots of applications aren't architecture diagrams. "
+                "Please upload a diagram showing your cloud infrastructure - the services, "
+                "network topology, and how everything connects."
             )
         elif content_type == "document":
-            error_msg = (
-                "This looks like a text document or presentation slide. "
-                "Tesseric needs an architecture diagram with cloud service icons, connections, and topology. "
-                "If your document contains a diagram, please crop it and upload just the diagram."
+            error_msg += (
+                "This looks like a document or slide. Tesseric needs an architecture diagram with "
+                "cloud service icons and connections. If your document contains a diagram, "
+                "please crop and upload just that portion."
             )
         elif content_type == "meme":
-            error_msg = (
-                "Nice meme! But Tesseric isn't ready for that level of entertainment. "
-                "Please upload a serious cloud architecture diagram for analysis."
+            error_msg += (
+                "While I appreciate the humor, Tesseric needs a serious cloud architecture diagram "
+                "to perform a Well-Architected review. Please upload a technical diagram."
             )
         elif content_type == "blank":
-            error_msg = (
-                "The uploaded image appears to be blank or empty. "
-                "Please upload a valid architecture diagram showing AWS services."
+            error_msg += (
+                "The image appears to be blank or empty. Please upload a valid architecture "
+                "diagram showing AWS services and their relationships."
             )
         else:
-            error_msg = (
-                f"This doesn't look like an architecture diagram (detected: {', '.join(subjects[:2])}). "
-                "Tesseric analyzes cloud architecture diagrams with AWS service icons, network topology, "
-                "and technical labels. Please upload a diagram created with tools like draw.io, Lucidchart, "
-                "AWS Architecture Icons, or similar."
+            error_msg += (
+                "This doesn't appear to be a cloud architecture diagram. Tesseric analyzes diagrams "
+                "created with tools like draw.io, Lucidchart, or AWS Architecture Icons that show "
+                "services, connections, and infrastructure topology."
             )
 
         logger.warning(f"Image validation failed: {error_msg}")
