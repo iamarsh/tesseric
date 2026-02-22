@@ -19,7 +19,7 @@ const faqItems: FAQItem[] = [
           Text-based architecture reviews cost <strong>~$0.01</strong> per review. If you upload an architecture diagram (PNG/JPG/PDF), the cost is <strong>~$0.023</strong> per review (includes vision extraction + analysis).
         </p>
         <p className="mb-3">
-          This is beta pricing—Tesseric is powered by Amazon Bedrock with Claude 3.5 Haiku, one of the most cost-efficient AI models available.
+          This is beta pricing-Tesseric is powered by Amazon Bedrock with Claude 3.5 Haiku, one of the most cost-efficient AI models available.
         </p>
         <p>
           <strong>No subscription required.</strong> You only pay for what you use.
@@ -50,7 +50,7 @@ const faqItems: FAQItem[] = [
           <strong>Nowhere.</strong> Tesseric does not store your architecture descriptions or review results. All processing happens in real-time via AWS Bedrock, and data is discarded immediately after the review is delivered.
         </p>
         <p>
-          We use <strong>ephemeral sessions</strong>—your architecture never touches a database. This means maximum privacy: no data breaches, no retention policies, no compliance headaches.
+          We use <strong>ephemeral sessions</strong>-your architecture never touches a database. This means maximum privacy: no data breaches, no retention policies, no compliance headaches.
         </p>
       </>
     ),
@@ -64,7 +64,7 @@ const faqItems: FAQItem[] = [
           Yes. Your architecture description is sent over <strong>HTTPS</strong> to our backend (hosted on Railway with AWS credentials via secrets management), then directly to <strong>Amazon Bedrock</strong> (AWS's fully managed AI service).
         </p>
         <p>
-          Bedrock does not train models on your input data. Once the review is complete, all data is immediately discarded. We recommend <strong>not including specific IPs, account IDs, or credentials</strong> in your architecture descriptions—focus on design patterns and service configurations.
+          Bedrock does not train models on your input data. Once the review is complete, all data is immediately discarded. We recommend <strong>not including specific IPs, account IDs, or credentials</strong> in your architecture descriptions-focus on design patterns and service configurations.
         </p>
       </>
     ),
@@ -267,7 +267,7 @@ const faqItems: FAQItem[] = [
           <li><strong>Dark AWS jokes</strong> (e.g., "When us-east-1a inevitably goes down, you'll be updating your résumé")</li>
         </ul>
         <p>
-          <strong>It's the same technical analysis</strong>—just delivered with Gordon Ramsay energy. Use Roast Mode when you want a reality check or need a laugh while learning. Use Standard Mode for stakeholder presentations.
+          <strong>It's the same technical analysis</strong>-just delivered with Gordon Ramsay energy. Use Roast Mode when you want a reality check or need a laugh while learning. Use Standard Mode for stakeholder presentations.
         </p>
       </>
     ),

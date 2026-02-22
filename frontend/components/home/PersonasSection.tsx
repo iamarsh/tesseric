@@ -30,7 +30,7 @@ const personas: Persona[] = [
     description:
       "Presenting to stakeholders? Get a second opinion before you commit. Find hidden risks, justify your design choices with Well-Architected alignment, and present with confidence.",
     useCase:
-      "I reviewed my CloudFormation stack for a fintech client. Tesseric flagged a single-AZ RDS setup that would've caused $200K+ downtime. Fixed it before the deploy—client never knew how close we came to disaster.",
+      "I reviewed my CloudFormation stack for a fintech client. Tesseric flagged a single-AZ RDS setup that would've caused $200K+ downtime. Fixed it before the deploy-client never knew how close we came to disaster.",
     outcome: {
       icon: Shield,
       text: "Prevented $200K incident",
@@ -40,7 +40,7 @@ const personas: Persona[] = [
     icon: Shield,
     title: "DevOps Engineers",
     description:
-      "Inherited a legacy AWS environment with zero docs? Audit it in seconds. Get a prioritized list of security gaps, cost waste, and reliability risks—then fix the critical stuff first.",
+      "Inherited a legacy AWS environment with zero docs? Audit it in seconds. Get a prioritized list of security gaps, cost waste, and reliability risks-then fix the critical stuff first.",
     useCase:
       "I analyzed our production environment and found 5 critical security issues: unencrypted RDS, overpermissioned IAM roles, and public S3 buckets. Fixed them before our SOC 2 audit. One $0.01 review saved our certification.",
     outcome: {
@@ -54,7 +54,7 @@ const personas: Persona[] = [
     description:
       "Burning cash on AWS? Find out where. Tesseric reviews your architecture for cost waste and gives you actionable fixes. Cut your bill by 20-30% in one review.",
     useCase:
-      "Our AWS bill hit $18K/month and our runway was shrinking. One Tesseric review found over-provisioned EC2, unnecessary NAT gateways, and unoptimized RDS. We cut costs 28%—that's $5K/month back in the bank.",
+      "Our AWS bill hit $18K/month and our runway was shrinking. One Tesseric review found over-provisioned EC2, unnecessary NAT gateways, and unoptimized RDS. We cut costs 28%-that's $5K/month back in the bank.",
     outcome: {
       icon: DollarSign,
       text: "Reduced AWS costs 28%",
@@ -95,23 +95,9 @@ export function PersonasSection() {
                 </h3>
 
                 {/* Description */}
-                <p className="text-sm text-muted-foreground mb-4">
+                <p className="text-sm text-muted-foreground">
                   {persona.description}
                 </p>
-
-                {/* Use Case */}
-                <div className="pt-4 border-t border-border">
-                  <p className="text-xs font-medium text-primary mb-2">Real Story:</p>
-                  <p className="text-sm text-muted-foreground italic mb-4">
-                    "{persona.useCase}"
-                  </p>
-
-                  {/* Outcome Badge */}
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-full text-xs font-medium text-primary">
-                    <OutcomeIcon className="h-3 w-3" />
-                    <span>{persona.outcome.text}</span>
-                  </div>
-                </div>
               </div>
             );
           })}

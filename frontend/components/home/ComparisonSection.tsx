@@ -87,7 +87,7 @@ export function ComparisonSection() {
               sanity check for every design."
             </p>
             <p className="mt-3 text-sm font-semibold text-foreground">
-              Arsh Singh — AWS practitioner &amp; SAA candidate
+              Arsh Singh - AWS practitioner &amp; SAA candidate
             </p>
           </div>
         </div>

@@ -2,21 +2,21 @@ import { CheckCircle2, Clock, ArrowRight } from "lucide-react";
 
 const phases = [
   {
-    label: "Phase 1",
-    title: "AWS Foundation",
-    description: "AI-powered analysis with Claude 3.5 Haiku via Bedrock",
-    status: "completed" as const,
-  },
-  {
-    label: "Phase 2",
-    title: "Diagram Upload",
-    description: "Accept architecture diagrams using Bedrock vision",
+    label: "In Development",
+    title: "Knowledge Graph Explorer",
+    description: "Visualize your AWS architecture as a traversable knowledge graph. See how services relate, where risks cluster, and which patterns repeat across your reviews - powered by Neo4j.",
     status: "current" as const,
   },
   {
-    label: "Phase 3",
-    title: "Multi-Cloud",
-    description: "Expand to Azure, GCP, and n8n workflows",
+    label: "Planned",
+    title: "Multi-Architecture Diff",
+    description: "Compare two architecture versions side-by-side. Track how your risk score changes as you implement remediations.",
+    status: "planned" as const,
+  },
+  {
+    label: "Planned",
+    title: "Diagram Upload (IaC)",
+    description: "Upload your IaC directly - CloudFormation templates or Terraform plans - for automated architecture extraction and review.",
     status: "planned" as const,
   },
 ];
@@ -29,7 +29,7 @@ export function RoadmapTeaser() {
           What's Next?
         </h2>
         <p className="text-lg text-muted-foreground">
-          From AWS-first to multi-cloud SaaS platform
+          Roadmap for technical depth and analysis capabilities
         </p>
       </div>
 
@@ -39,10 +39,8 @@ export function RoadmapTeaser() {
             <div key={idx} className="flex-1 w-full">
               <div
                 className={`p-6 rounded-2xl border h-full ${
-                  phase.status === "completed"
-                    ? "bg-success/10 border-success/30"
-                    : phase.status === "current"
-                    ? "bg-primary/10 border-primary/30"
+                  phase.status === "current"
+                    ? "bg-warning/10 border-warning/30"
                     : "bg-muted border-border"
                 }`}
               >
@@ -50,20 +48,15 @@ export function RoadmapTeaser() {
                 <div className="flex items-center justify-between mb-3">
                   <span
                     className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                      phase.status === "completed"
-                        ? "bg-success/20 text-success"
-                        : phase.status === "current"
-                        ? "bg-primary/20 text-primary"
+                      phase.status === "current"
+                        ? "bg-warning/20 text-warning"
                         : "bg-muted text-muted-foreground"
                     }`}
                   >
                     {phase.label}
                   </span>
-                  {phase.status === "completed" && (
-                    <CheckCircle2 className="h-4 w-4 text-success" />
-                  )}
                   {phase.status === "current" && (
-                    <Clock className="h-4 w-4 text-primary" />
+                    <Clock className="h-4 w-4 text-warning" />
                   )}
                 </div>
 

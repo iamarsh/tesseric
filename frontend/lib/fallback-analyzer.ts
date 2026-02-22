@@ -65,7 +65,7 @@ function generateSummary(risks: RiskItem[], tone: string): string {
   const pillarsStr = Array.from(pillarSet).sort().join(", ");
 
   if (tone === "roast") {
-    return `Oof. Found ${severityStr} severity issues across ${pillarSet.size} pillars (${pillarsStr}). This is basic pattern matching—imagine what a real AI would find. Fix these before your infrastructure becomes a cautionary tale.`;
+    return `Oof. Found ${severityStr} severity issues across ${pillarSet.size} pillars (${pillarsStr}). This is basic pattern matching-imagine what a real AI would find. Fix these before your infrastructure becomes a cautionary tale.`;
   } else {
     return `Found ${severityStr} severity issues across ${pillarSet.size} pillars: ${pillarsStr}. Note: This is a basic pattern-matching fallback. For comprehensive AI-powered analysis, please try again when the backend service is available.`;
   }

@@ -7,6 +7,13 @@
 *.crt
 secrets/
 
+# Deployment guides with credentials (NEVER COMMIT)
+AWS_IAM_AND_DEPLOYMENT_GUIDE.md
+DEPLOYMENT_READY.md
+TEST_RESULTS_SUMMARY.md
+test_analysis.sh
+run_all_tests.sh
+
 # Memory Bank & AI Working Contract (local only)
 # memory-bank/  # TEMPORARILY DISABLED for Perplexity access - 2026-01-25
 Claude.md

@@ -5,7 +5,7 @@ const steps = [
     icon: FileText,
     title: "Describe Your Architecture",
     description:
-      "Describe your AWS setup in plain English—takes 30 seconds. List your services (EC2, RDS, S3) or upload a diagram. No JSON, no code, just your architecture.",
+      "Describe your AWS setup in plain English-takes 30 seconds. List your services (EC2, RDS, S3) or upload a diagram. No JSON, no code, just your architecture.",
     benefit: "No complex setup, no learning curve",
   },
   {

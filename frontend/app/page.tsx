@@ -5,12 +5,13 @@ import { ReviewRequest, ReviewResponse, submitReview } from "@/lib/api";
 import { SiteLayout } from "@/components/layout/SiteLayout";
 import { HeroSection } from "@/components/home/HeroSection";
 import { LiveReviewSection } from "@/components/home/LiveReviewSection";
-import { ComparisonSection } from "@/components/home/ComparisonSection";
+import { UnderTheHoodSection } from "@/components/home/UnderTheHoodSection";
 import { TestimonialsSection } from "@/components/home/TestimonialsSection";
 import { HowItWorksSection } from "@/components/home/HowItWorksSection";
 import { PersonasSection } from "@/components/home/PersonasSection";
 import { FAQSection } from "@/components/home/FAQSection";
 import { RoadmapTeaser } from "@/components/home/RoadmapTeaser";
+import { ComparisonSection } from "@/components/home/ComparisonSection";
 import { FinalCTA } from "@/components/home/FinalCTA";
 
 export default function Home() {
@@ -117,7 +118,7 @@ export default function Home() {
           "name": "How much does a review cost?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Text-based architecture reviews cost ~$0.01 per review. If you upload an architecture diagram (PNG/JPG/PDF), the cost is ~$0.023 per review (includes vision extraction + analysis). This is beta pricing—Tesseric is powered by Amazon Bedrock with Claude 3.5 Haiku. No subscription required. You only pay for what you use."
+            "text": "Text-based architecture reviews cost ~$0.01 per review. If you upload an architecture diagram (PNG/JPG/PDF), the cost is ~$0.023 per review (includes vision extraction + analysis). This is beta pricing-Tesseric is powered by Amazon Bedrock with Claude 3.5 Haiku. No subscription required. You only pay for what you use."
           }
         },
         {
@@ -125,7 +126,7 @@ export default function Home() {
           "name": "Where is my architecture data stored?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Nowhere. Tesseric does not store your architecture descriptions or review results. All processing happens in real-time via AWS Bedrock, and data is discarded immediately after the review is delivered. We use ephemeral sessions—your architecture never touches a database."
+            "text": "Nowhere. Tesseric does not store your architecture descriptions or review results. All processing happens in real-time via AWS Bedrock, and data is discarded immediately after the review is delivered. We use ephemeral sessions-your architecture never touches a database."
           }
         },
         {
@@ -157,7 +158,7 @@ export default function Home() {
           "name": "What is Roast Mode?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Roast Mode is Tesseric's brutally honest review tone with sarcastic but accurate critiques, career-questioning humor, and dark AWS jokes. It's the same technical analysis—just delivered with Gordon Ramsay energy. Use Roast Mode when you want a reality check or need a laugh while learning. Use Standard Mode for stakeholder presentations."
+            "text": "Roast Mode is Tesseric's brutally honest review tone with sarcastic but accurate critiques, career-questioning humor, and dark AWS jokes. It's the same technical analysis-just delivered with Gordon Ramsay energy. Use Roast Mode when you want a reality check or need a laugh while learning. Use Standard Mode for stakeholder presentations."
           }
         }
       ]
@@ -215,7 +216,7 @@ export default function Home() {
         "ratingValue": "5",
         "bestRating": "5"
       },
-      "reviewBody": "Our AWS bill dropped 28% after one Tesseric review. We were over-provisioned on EC2 and paying for unnecessary NAT gateways. The roast mode was brutal but accurate—exactly what we needed."
+      "reviewBody": "Our AWS bill dropped 28% after one Tesseric review. We were over-provisioned on EC2 and paying for unnecessary NAT gateways. The roast mode was brutal but accurate-exactly what we needed."
     }
   ];
 
@@ -246,10 +247,11 @@ export default function Home() {
       {/* Only show marketing sections if no active review */}
       {!review && (
         <>
-          <ComparisonSection />
-          <TestimonialsSection />
           <HowItWorksSection />
+          <UnderTheHoodSection />
           <PersonasSection />
+          <TestimonialsSection />
+          <ComparisonSection />
           <FAQSection />
           <RoadmapTeaser />
         </>

@@ -8,7 +8,7 @@ export function HeroSection() {
         <div className="space-y-6">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-full text-sm font-medium text-primary">
             <Sparkles className="h-4 w-4" />
-            Beta Pricing: $0.01 per review — Lock in early access
+            Production-ready AWS architecture analysis
           </div>
 
           <h1 className="text-5xl md:text-6xl font-bold text-foreground text-balance">
@@ -18,8 +18,7 @@ export function HeroSection() {
           </h1>
 
           <p className="text-xl text-muted-foreground text-balance">
-            Catch multi-AZ misconfigurations, unencrypted data, and cost leaks
-            in 10 seconds—before your next sprint planning.
+            Paste your AWS architecture description and receive a Well-Architected aligned score, structured findings, and remediation steps in seconds. Built with Claude via AWS Bedrock, Next.js, and Neo4j.
           </p>
 
           <div className="flex flex-col gap-2">
@@ -39,7 +38,7 @@ export function HeroSection() {
               </a>
             </div>
             <p className="text-xs text-muted-foreground">
-              Beta pricing: $0.01 · No signup required
+              No signup required · Pay per use
             </p>
           </div>
 
@@ -51,7 +50,7 @@ export function HeroSection() {
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Zap className="h-4 w-4 text-primary" />
-              $0.01 per review
+              ~10 second reviews
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Lock className="h-4 w-4 text-primary" />
@@ -104,7 +103,7 @@ export function HeroSection() {
 
             <div className="mt-4 pt-4 border-t border-border text-center">
               <p className="text-xs text-muted-foreground">
-                Powered by Claude 3.5 Haiku via AWS Bedrock
+                Powered by Claude via AWS Bedrock
               </p>
             </div>
           </div>

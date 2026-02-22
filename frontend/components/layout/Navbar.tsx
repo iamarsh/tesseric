@@ -36,6 +36,15 @@ export function Navbar() {
               How It Works
             </a>
             <Link
+              href="/graph"
+              className="text-muted-foreground hover:text-foreground transition-colors relative"
+            >
+              Knowledge Graph
+              <span className="absolute -top-2 -right-8 px-1.5 py-0.5 text-[10px] font-semibold bg-warning/20 text-warning rounded-full">
+                New
+              </span>
+            </Link>
+            <Link
               href="/roadmap"
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
@@ -85,6 +94,16 @@ export function Navbar() {
             >
               How It Works
             </a>
+            <Link
+              href="/graph"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-2 py-2 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Knowledge Graph
+              <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-warning/20 text-warning rounded-full">
+                New
+              </span>
+            </Link>
             <Link
               href="/roadmap"
               onClick={() => setMobileMenuOpen(false)}

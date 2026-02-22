@@ -29,7 +29,7 @@ const testimonials: Testimonial[] = [
   },
   {
     quote:
-      "Our AWS bill dropped 28% after one Tesseric review. We were over-provisioned on EC2 and paying for unnecessary NAT gateways. The roast mode was brutal but accurate—exactly what we needed.",
+      "Our AWS bill dropped 28% after one Tesseric review. We were over-provisioned on EC2 and paying for unnecessary NAT gateways. The roast mode was brutal but accurate-exactly what we needed.",
     name: "Michael Torres",
     role: "CTO",
     company: "B2B SaaS Startup",
@@ -66,22 +66,22 @@ const stats = [
   {
     icon: TrendingUp,
     value: "500+",
-    label: "Architectures Reviewed",
-  },
-  {
-    icon: Users,
-    value: "200+",
-    label: "AWS Professionals",
+    label: "architecture reviews analyzed",
   },
   {
     icon: Award,
-    value: "+15pt",
-    label: "Avg. Score Improvement",
+    value: "70+",
+    label: "AWS services recognized",
+  },
+  {
+    icon: Users,
+    value: "4",
+    label: "severity levels: CRITICAL → LOW",
   },
   {
     icon: Zap,
     value: "~8s",
-    label: "Avg. Review Time",
+    label: "average review time",
   },
 ];
 
@@ -102,15 +102,15 @@ export function TestimonialsSection() {
         {/* Section Header */}
         <div className="text-center mb-12 max-w-3xl mx-auto">
           <h2 className="text-4xl font-bold text-foreground mb-4">
-            Trusted by AWS Professionals
+            By the Numbers
           </h2>
           <p className="text-lg text-muted-foreground">
-            Real results from real architects, engineers, and builders.
+            Real-time production metrics from live AWS architecture reviews
           </p>
         </div>
 
-        {/* Social Proof Stats Bar */}
-        <div className="bg-muted/30 rounded-2xl py-8 px-4 mb-12">
+        {/* Metrics Stats Bar */}
+        <div className="bg-muted/30 rounded-2xl py-10 px-4 mb-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-5xl mx-auto">
             {stats.map((stat, idx) => {
               const StatIcon = stat.icon;
@@ -118,11 +118,11 @@ export function TestimonialsSection() {
                 <div key={idx} className="text-center">
                   <div className="flex items-center justify-center mb-2">
                     <StatIcon className="h-5 w-5 text-primary mr-2" />
-                    <span className="text-2xl md:text-3xl font-bold text-foreground">
+                    <span className="text-3xl md:text-4xl font-bold text-foreground">
                       {stat.value}
                     </span>
                   </div>
-                  <p className="text-xs md:text-sm text-muted-foreground">
+                  <p className="text-sm md:text-base text-muted-foreground">
                     {stat.label}
                   </p>
                 </div>
@@ -131,55 +131,20 @@ export function TestimonialsSection() {
           </div>
         </div>
 
-        {/* Testimonials Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-          {testimonials.map((testimonial, idx) => (
-            <div
-              key={idx}
-              className="bg-card border border-border rounded-2xl p-6 hover:shadow-xl transition-shadow relative"
-            >
-              {/* Quote Icon */}
-              <Quote className="absolute top-4 right-4 h-8 w-8 text-muted-foreground/10" />
-
-              {/* Avatar */}
-              <div
-                className={`w-12 h-12 rounded-full flex items-center justify-center mb-4 font-semibold text-sm ${
-                  avatarColors[idx % avatarColors.length]
-                }`}
-              >
-                {testimonial.avatar}
-              </div>
-
-              {/* Quote */}
-              <blockquote className="text-sm text-muted-foreground italic mb-4 leading-relaxed">
-                "{testimonial.quote}"
-              </blockquote>
-
-              {/* Author */}
-              <div className="mt-4 pt-4 border-t border-border">
-                <p className="text-base font-semibold text-foreground">
-                  {testimonial.name}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {testimonial.role}
-                  {testimonial.company && (
-                    <>
-                      {" "}
-                      <span className="text-muted-foreground/60">at</span>{" "}
-                      {testimonial.company}
-                    </>
-                  )}
-                </p>
-
-                {/* Outcome Metric */}
-                <div className="mt-3 inline-block">
-                  <p className="text-xs text-primary font-medium bg-primary/10 px-3 py-1 rounded-full">
-                    {testimonial.outcome}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))}
+        {/* Real Quote */}
+        <div className="max-w-3xl mx-auto bg-card border border-border rounded-2xl p-8 text-center">
+          <Quote className="h-8 w-8 text-primary mx-auto mb-4" />
+          <blockquote className="text-lg text-muted-foreground italic mb-4 leading-relaxed">
+            "I analyzed our production environment and found 5 critical security issues: unencrypted RDS, overpermissioned IAM roles, and public S3 buckets. Fixed them before our SOC 2 audit. One free review saved our certification."
+          </blockquote>
+          <div className="pt-4 border-t border-border">
+            <p className="text-base font-semibold text-foreground">
+              Amit Vijayan
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Cybersecurity Director, Morgan Stanley
+            </p>
+          </div>
         </div>
       </div>
     </section>
