@@ -79,7 +79,7 @@ export function ComparisonSection() {
           </div>
 
           <p className="text-center text-sm text-muted-foreground mt-6">
-            Built by an AWS practitioner and SAA candidate, for AWS professionals.
+            Built by an AWS practitioner for AWS professionals.
           </p>
           <div className="mt-6 bg-background border border-border rounded-2xl p-6 text-center">
             <p className="text-sm text-muted-foreground">
@@ -87,7 +87,7 @@ export function ComparisonSection() {
               sanity check for every design."
             </p>
             <p className="mt-3 text-sm font-semibold text-foreground">
-              Arsh Singh - AWS practitioner &amp; SAA candidate
+              Arshdeep Singh - Tech Lead
             </p>
           </div>
         </div>

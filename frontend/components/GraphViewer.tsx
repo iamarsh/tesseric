@@ -58,7 +58,13 @@ function getLayoutedElements(
 ): { nodes: Node[]; edges: Edge[] } {
   const dagreGraph = new dagre.graphlib.Graph();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
-  dagreGraph.setGraph({ rankdir: "LR", nodesep: 80, ranksep: 120 });
+  dagreGraph.setGraph({
+    rankdir: "TB",  // Top-to-bottom for better visualization
+    nodesep: 100,   // Increased spacing between nodes
+    ranksep: 150,   // Increased spacing between ranks
+    marginx: 50,
+    marginy: 50,
+  });
 
   // Add nodes to dagre
   nodes.forEach((node) => {
@@ -73,18 +79,31 @@ function getLayoutedElements(
 
   dagre.layout(dagreGraph);
 
-  // Convert to ReactFlow format
-  const layoutedNodes: Node[] = nodes.map((node) => {
+  // Track positions to detect overlaps
+  const positionMap = new Map<string, { x: number; y: number }>();
+
+  // Convert to ReactFlow format with overlap detection
+  const layoutedNodes: Node[] = nodes.map((node, index) => {
     const nodeWithPosition = dagreGraph.node(node.id);
     const dimensions = NODE_DIMENSIONS[node.type];
+
+    let x = nodeWithPosition.x - dimensions.width / 2;
+    let y = nodeWithPosition.y - dimensions.height / 2;
+
+    // Handle overlapping nodes (dagre sometimes places disconnected nodes at same position)
+    const posKey = `${Math.round(x)},${Math.round(y)}`;
+    if (positionMap.has(posKey)) {
+      // Offset overlapping nodes in a grid pattern
+      const offset = positionMap.get(posKey)!;
+      x = offset.x + (index % 5) * 200;
+      y = offset.y + Math.floor(index / 5) * 100;
+    }
+    positionMap.set(posKey, { x, y });
 
     return {
       id: node.id,
       type: "custom",
-      position: {
-        x: nodeWithPosition.x - dimensions.width / 2,
-        y: nodeWithPosition.y - dimensions.height / 2,
-      },
+      position: { x, y },
       data: {
         ...node,
         color: getNodeColor(node),
@@ -241,12 +260,29 @@ export default function GraphViewer({ nodes, edges, className = "" }: GraphViewe
     setReactFlowEdges(layoutedEdges);
   }, [layoutedNodes, layoutedEdges, setReactFlowNodes, setReactFlowEdges]);
 
-  if (nodes.length === 0) {
+  // Check if we have meaningful graph data (at least one Analysis or Finding node)
+  const hasAnalysisData = nodes.some(n => n.type === "Analysis" || n.type === "Finding");
+
+  if (nodes.length === 0 || !hasAnalysisData) {
     return (
       <div className={`flex items-center justify-center h-full ${className}`}>
-        <p className="text-muted-foreground text-center">
-          No graph data available for this analysis.
-        </p>
+        <div className="text-center max-w-md space-y-4 px-6">
+          <div className="text-6xl mb-4">🧩</div>
+          <h3 className="text-xl font-semibold text-foreground">
+            Your Knowledge Graph Awaits
+          </h3>
+          <p className="text-muted-foreground">
+            Run your first architecture analysis to start building your knowledge graph.
+            Each review adds nodes for findings, AWS services, and remediations, creating
+            a visual map of your cloud architecture insights.
+          </p>
+          <a
+            href="/"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors mt-4"
+          >
+            Run Your First Analysis →
+          </a>
+        </div>
       </div>
     );
   }

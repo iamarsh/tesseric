@@ -100,24 +100,41 @@ const phases: Phase[] = [
   },
   {
     version: "Phase 3",
-    title: "Production Deployment & Polish",
-    status: "current",
-    date: "Q1 2026",
+    title: "Knowledge Graph & Production Polish",
+    status: "completed",
+    date: "February 2026",
     description:
-      "Deploy frontend to Vercel with custom domain, add review history, and enhance user experience.",
+      "Neo4j knowledge graph integration for visualizing architecture insights, frontend deployed to Vercel with custom domain.",
     features: [
+      "Neo4j knowledge graph backend integration",
+      "Interactive graph visualization at /graph",
+      "Automatic analysis-to-graph persistence",
+      "Relationship mapping (Analyses → Findings → AWS Services → Remediations)",
       "Deploy frontend to Vercel (tesseric.ca)",
-      "Custom domain setup (tesseric.ca, api.tesseric.ca)",
-      "Review history storage (DynamoDB)",
-      "Loading spinners and error boundaries",
-      "Rate limiting on backend API",
-      "Monitoring and analytics (Vercel Analytics, Sentry)",
-      "Performance optimization (Lighthouse score 90+)",
-      "Production-ready error handling",
+      "Custom domain setup with Vercel",
+      "Production-ready error handling and loading states",
+      "CI/CD workflows (GitHub Actions for backend/frontend/integration tests)",
     ],
   },
   {
     version: "Phase 4",
+    title: "Review History & Advanced Features",
+    status: "current",
+    date: "Q1 2026",
+    description:
+      "Add persistent review history, rate limiting, monitoring, and enhanced knowledge graph capabilities.",
+    features: [
+      "Review history storage (DynamoDB or Neo4j time-series)",
+      "User session tracking (anonymous for now)",
+      "Rate limiting on backend API (prevent abuse)",
+      "Monitoring and analytics (Vercel Analytics, backend metrics)",
+      "Graph query API (search findings, AWS services)",
+      "Performance optimization (caching, query optimization)",
+      "Enhanced graph visualization (filtering, search, zoom controls)",
+    ],
+  },
+  {
+    version: "Phase 5",
     title: "Multi-Cloud Expansion",
     status: "planned",
     date: "Q2 2026",
@@ -134,7 +151,7 @@ const phases: Phase[] = [
     ],
   },
   {
-    version: "Phase 5",
+    version: "Phase 6",
     title: "IaC Analysis",
     status: "planned",
     date: "Q2-Q3 2026",
@@ -298,11 +315,11 @@ export default function RoadmapPage() {
               <strong className="text-gray-900 dark:text-white">
                 Current Focus:
               </strong>{" "}
-              AWS-first architecture analysis
+              Review history, rate limiting, and advanced graph features
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-500">
-              Multi-cloud support (Azure, GCP, n8n) coming in Phase 3 after AWS path is
-              proven and stable.
+              Multi-cloud support (Azure, GCP, n8n) coming in Phase 5 after AWS path is
+              proven and feature-complete.
             </p>
             <div className="mt-4 flex items-center justify-center gap-2">
               <a
