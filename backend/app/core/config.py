@@ -5,6 +5,7 @@ Uses pydantic-settings to load environment variables with validation.
 """
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import field_validator
 
 
 class Settings(BaseSettings):
@@ -13,6 +14,14 @@ class Settings(BaseSettings):
     # AWS Configuration
     aws_region: str = "us-east-2"
     aws_profile: str | None = None  # For local dev only
+
+    @field_validator("aws_region")
+    @classmethod
+    def validate_aws_region(cls, v: str) -> str:
+        """Ensure AWS region is not empty."""
+        if not v or v.strip() == "":
+            return "us-east-2"  # Default fallback
+        return v.strip()
 
     # AWS Credentials (for Bedrock API calls)
     aws_access_key_id: str | None = None

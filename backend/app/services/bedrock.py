@@ -29,13 +29,17 @@ class BedrockClient:
     """
 
     def __init__(self):
-        self.region = settings.aws_region
+        self.region = settings.aws_region or "us-east-2"  # Ensure region is never empty
         self.model_id = settings.bedrock_model_id
 
         # Initialize boto3 bedrock-runtime client
         logger.info(f"Initializing Bedrock client in region {self.region} with model {self.model_id}")
 
         try:
+            # Validate region is not empty
+            if not self.region or self.region.strip() == "":
+                raise ValueError("AWS_REGION cannot be empty. Set AWS_REGION environment variable or use default 'us-east-2'")
+
             self.client = boto3.client(
                 "bedrock-runtime",
                 region_name=self.region,
