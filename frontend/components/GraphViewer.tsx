@@ -243,7 +243,7 @@ function CustomNode({ data }: { data: any }) {
                 Severity: {node.properties.severity}
               </div>
             )}
-            {node.properties.occurrence_count !== undefined && node.properties.occurrence_count > 1 && (
+            {typeof node.properties.occurrence_count === 'number' && node.properties.occurrence_count > 1 && (
               <div className="text-amber-400 font-semibold">
                 ⚠️ Occurred in {node.properties.occurrence_count} reviews
               </div>
