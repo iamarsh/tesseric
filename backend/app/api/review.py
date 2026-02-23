@@ -136,12 +136,14 @@ async def review_architecture(
         return review
 
     except ImageProcessingException as e:
-        logger.error(f"Image processing failed: {str(e)}")
+        logger.error(f"Image processing failed: {str(e)}", exc_info=True)
         raise HTTPException(status_code=400, detail=str(e))
     except RequestValidationError:
         raise
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Review analysis failed: {str(e)}")
-        raise HTTPException(status_code=500, detail="Architecture review failed")
+        logger.error(f"Review analysis failed: {str(e)}", exc_info=True)
+        # Include actual error in response for debugging (only in development)
+        error_detail = f"Architecture review failed: {str(e)}" if settings.log_level == "DEBUG" else "Architecture review failed"
+        raise HTTPException(status_code=500, detail=error_detail)
