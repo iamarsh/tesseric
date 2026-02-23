@@ -5,29 +5,21 @@ const techCards = [
     icon: Zap,
     title: "Claude via AWS Bedrock",
     body: "Each review invokes Claude 3.5 Haiku via AWS Bedrock with a structured RAG pipeline over Well-Architected Framework documentation. Findings are returned as typed JSON with severity, impact, and remediation steps.",
-    badge: "In Production",
-    badgeColor: "bg-success/20 text-success",
   },
   {
     icon: Database,
     title: "Neo4j AuraDB Knowledge Graph",
     body: "Every analysis is persisted as a connected graph - findings, services, and remediations as nodes with typed relationships. AWSService nodes accumulate across reviews, enabling cross-analysis pattern detection.",
-    badge: "In Development",
-    badgeColor: "bg-warning/20 text-warning",
   },
   {
     icon: Code,
     title: "Next.js 14 + TypeScript",
     body: "App Router, server-side rendering, dynamic imports for graph visualization. React-Flow for knowledge graph rendering with dagre auto-layout.",
-    badge: "In Production",
-    badgeColor: "bg-success/20 text-success",
   },
   {
     icon: Cloud,
     title: "FastAPI + Vercel + Railway",
     body: "Python FastAPI backend deployed on Railway with async background writes. Frontend on Vercel with edge caching. Zero-downtime deploys via GitHub Actions.",
-    badge: "In Production",
-    badgeColor: "bg-success/20 text-success",
   },
 ];
 
@@ -54,14 +46,11 @@ export function UnderTheHoodSection() {
                 key={idx}
                 className="bg-card border border-border rounded-2xl p-6 hover:shadow-xl transition-shadow"
               >
-                {/* Icon and Badge */}
-                <div className="flex items-start justify-between mb-4">
+                {/* Icon */}
+                <div className="flex items-start mb-4">
                   <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
                     <CardIcon className="h-6 w-6 text-primary" />
                   </div>
-                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${card.badgeColor}`}>
-                    {card.badge}
-                  </span>
                 </div>
 
                 {/* Title */}

@@ -249,8 +249,8 @@ export default function Home() {
         <>
           <HowItWorksSection />
           <UnderTheHoodSection />
-          <PersonasSection />
           <TestimonialsSection />
+          <PersonasSection />
           <ComparisonSection />
           <FAQSection />
           <RoadmapTeaser />

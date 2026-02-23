@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, TrendingUp, Award, Zap, Quote, Database } from "lucide-react";
+import { Users, TrendingUp, Award, Zap, Quote } from "lucide-react";
 import { useEffect, useState } from "react";
 import { fetchMetrics, MetricsData } from "@/lib/metricsApi";
 
@@ -189,11 +189,19 @@ export function TestimonialsSection() {
 
               {/* Neo4j branding badge - only show when real data loaded successfully */}
               {metrics && !error && (
-                <div className="text-center mt-6 text-xs text-muted-foreground flex items-center justify-center gap-2">
-                  <Database className="h-3.5 w-3.5" />
-                  <span>
-                    Live data from Neo4j • Last updated:{" "}
-                    {new Date(metrics.last_updated).toLocaleTimeString()}
+                <div className="text-center mt-6 text-xs flex items-center justify-center gap-2">
+                  {/* Blinking live indicator */}
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                  </span>
+                  <span className="text-muted-foreground">
+                    Live data from{" "}
+                    <span className="font-semibold text-[#008CC1] dark:text-[#00A1E0]">
+                      Neo4j
+                    </span>
+                    <span className="mx-1.5">•</span>
+                    Last updated: {new Date(metrics.last_updated).toLocaleTimeString()}
                   </span>
                 </div>
               )}
