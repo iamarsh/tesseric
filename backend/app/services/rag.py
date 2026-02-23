@@ -24,6 +24,7 @@ from app.utils.token_counter import (
 from app.utils.exceptions import (
     BedrockThrottlingException,
     BedrockException,
+    ImageProcessingException,
 )
 
 logger = logging.getLogger(__name__)
