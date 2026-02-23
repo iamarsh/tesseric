@@ -10,8 +10,11 @@ Instant AWS architecture review service that returns a Well-Architected-aligned 
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-teal)
 ![AWS Bedrock](https://img.shields.io/badge/AWS-Bedrock-orange)
 ![Status](https://img.shields.io/badge/status-production-success)
+![Neo4j](https://img.shields.io/badge/Neo4j-AuraDB-008CC1)
 
+🔗 **Live Site**: [https://www.tesseric.ca](https://www.tesseric.ca)
 🔗 **Production API**: [https://tesseric-production.up.railway.app](https://tesseric-production.up.railway.app)
+🔗 **Knowledge Graph**: [https://www.tesseric.ca/graph](https://www.tesseric.ca/graph)
 
 ---
 
@@ -29,15 +32,19 @@ Unlike pasting your architecture into ChatGPT, Tesseric provides:
 | **Multi-AZ Analysis** | May or may not mention | Always evaluates (AWS best practice) |
 | **AWS Doc Links** | Rarely provided | Always included in references |
 | **Tone Options** | One | Professional + Roast modes |
+| **Knowledge Graph** | None | Neo4j-powered relationship visualization |
+| **Image Analysis** | Limited | Bedrock vision for architecture diagrams |
 
 ### Key Differentiators
 
 - ✅ **6 AWS Well-Architected Pillars**: Operational Excellence, Security, Reliability, Performance Efficiency, Cost Optimization, Sustainability
 - ✅ **Structured Risk Assessment**: Severity levels (CRITICAL, HIGH, MEDIUM, LOW) with impact analysis
 - ✅ **AWS Service-Specific**: Recommends actual AWS services (Multi-AZ RDS, ASG, KMS, CloudWatch)
+- ✅ **Knowledge Graph Visualization**: Interactive Neo4j-powered graph showing service relationships and patterns
+- ✅ **Image Upload Support**: Analyze architecture diagrams (PNG, JPG, PDF) using Bedrock vision
 - ✅ **Graceful Degradation**: Falls back to pattern matching if AI unavailable
 - ✅ **Roast Mode**: Get brutally honest feedback with dark humor (optional)
-- ✅ **Production Ready**: Live API with 2-4 second response times
+- ✅ **Production Ready**: Live at tesseric.ca with 2-4 second response times
 
 ---
 
@@ -46,51 +53,46 @@ Unlike pasting your architecture into ChatGPT, Tesseric provides:
 ### System Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                         User / Frontend                          │
-│                     (Next.js - Port 3000)                        │
-└────────────────────────────┬────────────────────────────────────┘
-                             │ HTTPS
-                             │ POST /review
-                             ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    Production API Gateway                        │
-│              Railway (tesseric-production.up.railway.app)        │
-│                         Port 8080                                │
-└────────────────────────────┬────────────────────────────────────┘
-                             │
-                             ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                      FastAPI Backend                             │
-│                     (Python 3.11)                                │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐         │
-│  │   /health    │  │   /review    │  │   /docs      │         │
-│  └──────────────┘  └──────┬───────┘  └──────────────┘         │
-│                            │                                     │
-│  ┌─────────────────────────▼──────────────────────────┐        │
-│  │           RAG Orchestration Layer                   │        │
-│  │  - Cost estimation (~$0.011/review)                 │        │
-│  │  - Prompt building (AWS Well-Architected context)   │        │
-│  │  - Response parsing & validation                    │        │
-│  │  - Graceful fallback to pattern matching            │        │
-│  └─────────────────────────┬──────────────────────────┘        │
-└────────────────────────────┼────────────────────────────────────┘
-                             │
-              ┌──────────────┴───────────────┐
-              │                              │
-              ▼                              ▼
-    ┌─────────────────┐          ┌──────────────────────┐
-    │  Amazon Bedrock │          │  Pattern Matching    │
-    │  (us-east-2)    │          │  Fallback Engine     │
-    │                 │          │  (6 AWS Patterns)    │
-    │  Claude 3.5     │          └──────────────────────┘
-    │  Haiku          │
-    │                 │
-    │  - AWS Context  │
-    │    (~6K tokens) │
-    │  - JSON Output  │
-    │  - Cost: ~$0.01 │
-    └─────────────────┘
+┌────────────────────────────────────────────────────────────────────┐
+│                      User / Frontend (Vercel)                       │
+│                         Next.js 14 + TypeScript                     │
+│   ┌─────────────┐  ┌─────────────┐  ┌──────────────────┐         │
+│   │  /review    │  │  /graph     │  │  /graph?id=X     │         │
+│   │ (Analysis)  │  │ (Global)    │  │  (Single Review) │         │
+│   └─────────────┘  └─────────────┘  └──────────────────┘         │
+└─────────┬────────────────┬──────────────────┬─────────────────────┘
+          │ POST /review   │ GET /api/graph/* │
+          │                │                   │
+          ▼                ▼                   ▼
+┌────────────────────────────────────────────────────────────────────┐
+│                   Production API (Railway)                          │
+│                    FastAPI + Python 3.11                            │
+│  ┌──────────┐  ┌──────────┐  ┌───────────────┐  ┌──────────────┐ │
+│  │ /health  │  │ /review  │  │ /api/graph/*  │  │    /docs     │ │
+│  └──────────┘  └─────┬────┘  └──────┬────────┘  └──────────────┘ │
+│                      │                │                             │
+│  ┌───────────────────▼────────────────┼─────────────────────────┐ │
+│  │       Analysis Orchestration       │     Graph API Layer     │ │
+│  │  • Image parsing (vision)          │  • Neo4j queries        │ │
+│  │  • Bedrock AI analysis             │  • Node/edge mapping    │ │
+│  │  • Cost tracking                   │  • Health checks        │ │
+│  │  • Background graph write  ────────┼───────────▶             │ │
+│  └────────────┬───────────────────────┴─────────────────────────┘ │
+└───────────────┼───────────────────────┬─────────────────────────────┘
+                │                       │
+      ┌─────────┴──────────┐           │
+      │                    │           │
+      ▼                    ▼           ▼
+┌──────────────┐   ┌──────────────┐   ┌─────────────────────────┐
+│   Bedrock    │   │   Bedrock    │   │   Neo4j AuraDB          │
+│  (us-east-2) │   │   Vision     │   │   Knowledge Graph       │
+│              │   │              │   │                         │
+│ Claude 3.5   │   │ Claude 3     │   │ • Analyses (reviews)    │
+│   Haiku      │   │   Sonnet     │   │ • Findings (risks)      │
+│              │   │              │   │ • AWS Services          │
+│ ~$0.001/call │   │ ~$0.012/img  │   │ • Remediations          │
+│ Text → JSON  │   │ Image → Text │   │ • Relationships         │
+└──────────────┘   └──────────────┘   └─────────────────────────┘
 ```
 
 ### Data Flow
@@ -297,6 +299,91 @@ curl -X POST https://tesseric-production.up.railway.app/review \
 }
 ```
 
+### Knowledge Graph Visualization (Phase 3)
+
+Every architecture review is automatically persisted to Neo4j and visualized as an interactive knowledge graph.
+
+**Access the Graph**:
+- **Global Graph**: [https://www.tesseric.ca/graph](https://www.tesseric.ca/graph) - View all analyses and service patterns
+- **Review-Specific Graph**: https://www.tesseric.ca/graph?id=review-xxxxx - View graph for a specific review
+
+**Graph API Endpoints**:
+
+```bash
+# Health check
+curl https://tesseric-production.up.railway.app/api/graph/health
+
+# Get graph for specific review
+curl https://tesseric-production.up.railway.app/api/graph/review-xxxxx
+
+# Get global graph (all analyses)
+curl https://tesseric-production.up.railway.app/api/graph/global/all?limit=100
+```
+
+**Graph Schema**:
+
+The knowledge graph uses 4 node types and 4 relationship types:
+
+**Node Types**:
+- `(:Analysis)` - Review metadata (id, score, summary, timestamp)
+- `(:Finding)` - Individual security/reliability/cost risks
+- `(:AWSService)` - AWS services (EC2, RDS, S3, etc.) - merged across reviews
+- `(:Remediation)` - Fix steps with AWS documentation links
+
+**Relationships**:
+- `(:Analysis)-[:HAS_FINDING]->(:Finding)` - Reviews contain findings
+- `(:Finding)-[:REMEDIATED_BY]->(:Remediation)` - Findings have remediation steps
+- `(:Finding)-[:INVOLVES_SERVICE]->(:AWSService)` - Findings relate to AWS services
+- `(:AWSService)-[:CO_OCCURS_WITH {count}]->(:AWSService)` - Service co-occurrence patterns
+
+**Example Graph Response**:
+
+```json
+{
+  "nodes": [
+    {
+      "id": "review-abc123",
+      "label": "Analysis",
+      "type": "Analysis",
+      "properties": {
+        "id": "review-abc123",
+        "score": 65,
+        "summary": "Found 3 security issues...",
+        "timestamp": "2026-02-22T10:00:00Z"
+      }
+    },
+    {
+      "id": "ec2-service",
+      "label": "EC2",
+      "type": "AWSService",
+      "properties": {
+        "name": "EC2",
+        "category": "compute"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "review-abc123",
+      "target": "finding-001",
+      "type": "HAS_FINDING"
+    },
+    {
+      "source": "finding-001",
+      "target": "ec2-service",
+      "type": "INVOLVES_SERVICE"
+    }
+  ]
+}
+```
+
+**Features**:
+- ✅ Interactive visualization powered by ReactFlow + Dagre layout
+- ✅ Color-coded nodes by type (Analysis=blue, Finding=by severity, Service=purple)
+- ✅ Automatic background writes (non-blocking, doesn't delay review responses)
+- ✅ Pattern discovery across multiple reviews
+- ✅ Service co-occurrence tracking (e.g., "EC2+RDS appear together 15 times")
+
 ---
 
 ## 📁 Project Structure
@@ -307,14 +394,20 @@ tesseric/
 │   ├── app/
 │   │   ├── api/                # API routers
 │   │   │   ├── health.py       # GET /health
-│   │   │   └── review.py       # POST /review
+│   │   │   ├── review.py       # POST /review (text + image)
+│   │   │   └── graph.py        # GET /api/graph/* (Neo4j queries)
 │   │   ├── core/
 │   │   │   └── config.py       # Settings (Pydantic)
+│   │   ├── graph/              # Neo4j knowledge graph
+│   │   │   ├── neo4j_client.py # Neo4j CRUD operations
+│   │   │   └── service_parser.py # AWS service extraction
 │   │   ├── models/
 │   │   │   ├── request.py      # ReviewRequest
-│   │   │   └── response.py     # ReviewResponse, RiskItem
+│   │   │   ├── response.py     # ReviewResponse, RiskItem
+│   │   │   └── graph.py        # GraphNode, GraphEdge, GraphResponse
 │   │   ├── services/
 │   │   │   ├── bedrock.py      # Bedrock client (boto3)
+│   │   │   ├── vision.py       # Image processing + Bedrock vision
 │   │   │   ├── prompts.py      # AWS Well-Architected context
 │   │   │   └── rag.py          # RAG orchestration + fallback
 │   │   └── utils/
@@ -328,13 +421,18 @@ tesseric/
 ├── frontend/                   # Next.js TypeScript frontend
 │   ├── app/                    # App Router pages
 │   │   ├── page.tsx            # Home (review form)
+│   │   ├── graph/              # Knowledge graph visualization
+│   │   │   └── page.tsx        # Interactive graph page
 │   │   ├── results/            # Review results page
 │   │   └── roadmap/            # Product roadmap
 │   ├── components/             # React components
-│   │   ├── ReviewForm.tsx
-│   │   └── ReviewResults.tsx
+│   │   ├── ReviewForm.tsx      # Text + image upload form
+│   │   ├── ReviewResults.tsx   # Results display with graph link
+│   │   ├── GraphViewer.tsx     # ReactFlow graph visualization
+│   │   └── home/               # Landing page components
 │   └── lib/
-│       └── api.ts              # API client
+│       ├── api.ts              # Review API client
+│       └── graphApi.ts         # Graph API client
 │
 ├── infra/                      # Infrastructure docs
 │   └── bedrock.md              # AWS Bedrock setup guide
@@ -413,51 +511,91 @@ tesseric/
 - ✅ Production CORS configuration
 - ✅ AWS environment variables configured
 - ✅ Health and review endpoints live
-- ⏳ Custom domain setup (api.tesseric.ca)
-- ⏳ Frontend deployment to Vercel
+- ✅ Frontend deployment to Vercel (https://www.tesseric.ca)
+- ✅ Custom domain setup (tesseric.ca)
 
-### Phase 3: Multi-Cloud Expansion (Future)
+### Phase 2.1: AWS Diagram Parsing ✅ COMPLETE (2026-02-01)
+- ✅ Image upload support (PNG, JPG, PDF up to 5MB)
+- ✅ Bedrock vision API integration (Claude 3 Sonnet)
+- ✅ Architecture component extraction from diagrams
+- ✅ Visual element to text conversion
+- ✅ Feed extracted text to existing RAG pipeline
+- ✅ Cost: ~$0.015-0.023 per diagram analysis
+
+### Phase 3: Knowledge Graph & Production Polish ✅ COMPLETE (2026-02-22)
+- ✅ Neo4j AuraDB knowledge graph backend integration
+- ✅ Interactive graph visualization at /graph (ReactFlow + Dagre)
+- ✅ Automatic analysis-to-graph persistence (background writes)
+- ✅ Relationship mapping (Analyses → Findings → AWS Services → Remediations)
+- ✅ Service co-occurrence tracking (CO_OCCURS_WITH relationships)
+- ✅ Graph API endpoints (health, single review, global graph)
+- ✅ Production-ready error handling and loading states
+- ✅ CI/CD workflows (GitHub Actions for backend/frontend/integration tests)
+- ✅ Neo4j Railway connection fix (Shared Variables → Service Variables)
+
+### Phase 4: Review History & Advanced Features (Current)
+- Review history storage (DynamoDB or Neo4j time-series)
+- User session tracking (anonymous for now)
+- Rate limiting on backend API (prevent abuse)
+- Monitoring and analytics (Vercel Analytics, backend metrics)
+- Graph query API (search findings, AWS services)
+- Performance optimization (caching, query optimization)
+- Enhanced graph visualization (filtering, search, zoom controls)
+
+### Phase 5: Multi-Cloud Expansion (Future)
 - Azure Well-Architected Framework support
 - GCP Cloud Architecture Framework support
 - n8n workflow analysis
 - Provider abstraction layer
+- Auto-detection of cloud platform
+- Multi-cloud best practices knowledge base
 
-### Phase 4: Enhanced Features (Future)
-- Review history storage (DynamoDB)
-- Image parsing (AWS diagram screenshots)
-- Terraform/CloudFormation analysis
-- Cost impact modeling
-- API authentication
+### Phase 6: IaC Analysis (Future)
+- AWS CloudFormation template analysis
+- Terraform HCL parsing and review
+- CDK/Pulumi support
+- IaC security scanning
+- Drift detection
 
-### Phase 5: SaaS Launch (Future)
+### Phase 7: SaaS Launch (Future)
 - Multi-tenant architecture
 - User authentication (Cognito)
 - Team collaboration features
 - Custom knowledge bases
 - CLI tool (`tesseric review`)
-- Launch at **tesseric.ca**
+- API authentication with rate limiting
 
 ---
 
 ## 💰 Cost Breakdown
 
 ### Per Review
-- **AI Analysis**: ~$0.011 (Claude 3.5 Haiku)
-  - Input tokens: ~7,600 ($0.0076)
-  - Output tokens: ~700 ($0.0035)
-- **Total**: ~$0.011 per architecture review
+- **Text Analysis**: ~$0.001 (Claude 3.5 Haiku)
+  - Input tokens: ~7,600 ($0.0008)
+  - Output tokens: ~700 ($0.0004)
+- **Image Analysis**: ~$0.023 total
+  - Vision extraction: ~$0.012 (Claude 3 Sonnet)
+  - Text analysis: ~$0.011 (Claude 3.5 Haiku)
+- **Knowledge Graph Storage**: $0 (Neo4j AuraDB Free tier)
 
 ### Monthly Infrastructure
-- **Railway Hosting**: $5-10/month (Hobby plan)
+- **Railway Hosting**: $5/month (Hobby plan)
+- **Vercel Hosting**: $0/month (Hobby plan, generous limits)
 - **AWS Bedrock**: Pay-per-use (no fixed costs)
-- **Total**: ~$5-10/month + $0.011 per review
+- **Neo4j AuraDB**: $0/month (Free tier: 200K nodes, 400K relationships)
+- **Total Fixed**: ~$5/month + $0.001 per text review + $0.023 per image review
 
 ### Scaling Estimates
-- 1,000 reviews/month: $11 AI + $10 hosting = **$21/month**
-- 10,000 reviews/month: $110 AI + $10 hosting = **$120/month**
-- 100,000 reviews/month: $1,100 AI + hosting = **~$1,100/month**
+- 1,000 text reviews/month: $1 AI + $5 hosting = **$6/month**
+- 10,000 text reviews/month: $10 AI + $5 hosting = **$15/month**
+- 100,000 text reviews/month: $100 AI + $5 hosting = **$105/month**
 
-**Compare**: ChatGPT API (GPT-4) costs ~$0.15/review (14x more expensive)
+**Compare**: ChatGPT API (GPT-4) costs ~$0.15/review (150x more expensive)
+
+**Neo4j Limits** (Free Tier):
+- Current usage: ~200 nodes, ~500 edges per review
+- Free tier: 200K nodes, 400K relationships
+- Capacity: ~1,000 reviews before needing paid tier ($65/month for Professional)
 
 ---
 
@@ -541,6 +679,6 @@ This is currently a portfolio/learning project for AWS Solutions Architect prepa
 
 ---
 
-**Built with ❤️ for AWS Solutions Architect preparation and real-world architecture reviews**
+**Built with ❤️ - Arsh and Claude**
 
 *"Instant AWS architecture reviews."* — Tesseric

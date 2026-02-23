@@ -1,20 +1,27 @@
 # Tesseric Backend
 
-FastAPI-based backend service for AI-powered AWS architecture review.
+FastAPI-based backend service for AI-powered AWS architecture review with Neo4j knowledge graph integration.
 
 ## Overview
 
-The Tesseric backend provides a REST API for analyzing AWS architecture descriptions and returning structured, Well-Architected-aligned feedback.
+The Tesseric backend provides a REST API for analyzing AWS architecture descriptions (text + images) and returning structured, Well-Architected-aligned feedback. Every review is automatically persisted to a Neo4j knowledge graph for pattern discovery and visualization.
 
-- **v0.1 (Current)**: Stubbed RAG service with pattern detection for local testing
-- **v1.0 (Target)**: Real Amazon Bedrock integration with Claude 3 + Knowledge Bases
+**Current Version**: v1.0 (Production)
+- ✅ Amazon Bedrock integration (Claude 3.5 Haiku + Claude 3 Sonnet vision)
+- ✅ Neo4j AuraDB knowledge graph
+- ✅ Image upload support (PNG, JPG, PDF)
+- ✅ Background graph writes (non-blocking)
+- ✅ Professional + Roast tone modes
 
 ## Tech Stack
 
 - **Framework**: FastAPI 0.109+
 - **Python**: 3.11+
 - **Validation**: Pydantic v2
-- **AWS SDK**: boto3 (for Phase 1+ Bedrock integration)
+- **AWS SDK**: boto3 (for Bedrock integration)
+- **Database**: Neo4j AuraDB (knowledge graph)
+- **Graph Driver**: neo4j-driver 5.14+
+- **Image Processing**: Pillow (PIL)
 - **Server**: uvicorn (ASGI server)
 - **Testing**: pytest + pytest-asyncio
 
@@ -41,12 +48,19 @@ Create a `.env` file in the `backend/` directory (copy from `.env.example` in re
 
 ```bash
 # AWS Configuration
-AWS_REGION=us-east-1
-AWS_PROFILE=default  # For local dev only
+AWS_REGION=us-east-2
+AWS_ACCESS_KEY_ID=your-access-key-here
+AWS_SECRET_ACCESS_KEY=your-secret-key-here
 
-# Bedrock Configuration (Phase 1+)
-BEDROCK_KB_ID=your-knowledge-base-id-here
-BEDROCK_MODEL_ID=anthropic.claude-3-sonnet-20240229-v1:0
+# Bedrock Configuration
+BEDROCK_MODEL_ID=us.anthropic.claude-3-5-haiku-20241022-v1:0
+BEDROCK_VISION_MODEL_ID=anthropic.claude-3-sonnet-20240229-v1:0
+
+# Neo4j Configuration
+NEO4J_URI=neo4j+s://your-instance.databases.neo4j.io
+NEO4J_USERNAME=your-username
+NEO4J_PASSWORD=your-password
+NEO4J_ENABLED=true
 
 # Backend Configuration
 BACKEND_PORT=8000
@@ -146,6 +160,116 @@ Health check endpoint for monitoring.
   "service": "Tesseric Backend"
 }
 ```
+
+### GET /api/graph/health
+
+Check Neo4j connection health.
+
+**Response** (200 OK):
+```json
+{
+  "neo4j_connected": true,
+  "neo4j_enabled": true,
+  "status": "healthy"
+}
+```
+
+### GET /api/graph/{analysis_id}
+
+Retrieve knowledge graph for a specific analysis/review.
+
+**Parameters**:
+- `analysis_id` (path): The review_id from a previous analysis
+
+**Response** (200 OK):
+```json
+{
+  "nodes": [
+    {
+      "id": "review-abc123",
+      "label": "Analysis",
+      "type": "Analysis",
+      "properties": {
+        "id": "review-abc123",
+        "score": 65,
+        "summary": "Found 3 security issues...",
+        "timestamp": "2026-02-22T10:00:00Z"
+      }
+    },
+    {
+      "id": "finding-001",
+      "label": "Single AZ Deployment",
+      "type": "Finding",
+      "properties": {
+        "id": "finding-001",
+        "title": "Single AZ Deployment",
+        "severity": "HIGH",
+        "category": "reliability"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "review-abc123",
+      "target": "finding-001",
+      "type": "HAS_FINDING",
+      "properties": {}
+    }
+  ]
+}
+```
+
+**Errors**:
+- 404: Analysis not found in graph
+- 503: Neo4j unavailable
+
+### GET /api/graph/global/all?limit=100
+
+Retrieve aggregated knowledge graph across all analyses.
+
+**Query Parameters**:
+- `limit` (optional): Maximum number of nodes to return (default 100, max 200)
+
+**Response** (200 OK):
+```json
+{
+  "nodes": [
+    {
+      "id": "ec2-service",
+      "label": "EC2",
+      "type": "AWSService",
+      "properties": {
+        "name": "EC2",
+        "category": "compute"
+      }
+    },
+    {
+      "id": "rds-service",
+      "label": "RDS",
+      "type": "AWSService",
+      "properties": {
+        "name": "RDS",
+        "category": "database"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "ec2-service",
+      "target": "rds-service",
+      "type": "CO_OCCURS_WITH",
+      "properties": {
+        "count": 15
+      }
+    }
+  ]
+}
+```
+
+**Use Cases**:
+- Discover common service combinations across reviews
+- Identify frequently problematic services
+- Visualize architecture patterns
 
 ## Project Structure
 
