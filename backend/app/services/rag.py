@@ -510,10 +510,22 @@ async def analyze_design_from_image(
 
     # Step 3: Extract architecture using Bedrock vision
     logger.info("Extracting architecture from image using Bedrock vision")
-    vision_result = await bedrock_client.extract_architecture_from_image(
-        image_data=processed_image["image_data"],
-        image_format=processed_image["format"],
-    )
+    try:
+        vision_result = await bedrock_client.extract_architecture_from_image(
+            image_data=processed_image["image_data"],
+            image_format=processed_image["format"],
+        )
+    except Exception as e:
+        # Vision extraction failed - provide helpful error message
+        logger.error(f"Vision extraction failed: {e}")
+        error_msg = (
+            "Image analysis requires Bedrock Vision API access, but the service is currently unavailable. "
+            "This could be due to: (1) AWS account doesn't have access to Claude vision models, "
+            "(2) Model quota exceeded, or (3) Bedrock service issue.\n\n"
+            f"Technical details: {str(e)[:200]}\n\n"
+            "Please try again later or contact support if the issue persists."
+        )
+        raise ImageProcessingException(error_msg)
 
     extracted_text = vision_result["content"]
     vision_usage = vision_result["usage"]
