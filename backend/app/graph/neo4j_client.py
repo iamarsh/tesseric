@@ -103,10 +103,9 @@ class Neo4jClient:
 
         Creates:
         - 1 Analysis node
-        - N Finding nodes (one per risk)
-        - N Remediation nodes
+        - N Finding nodes (MERGE - deduplicate across reviews by title+severity+category)
         - M AWSService nodes (MERGE - accumulate across analyses)
-        - Relationships: HAS_FINDING, REMEDIATED_BY, INVOLVES_SERVICE, CO_OCCURS_WITH
+        - Relationships: HAS_FINDING, INVOLVES_SERVICE, CO_OCCURS_WITH
 
         Args:
             review_response: ReviewResponse dict with review_id, risks, score, etc.
@@ -191,69 +190,62 @@ class Neo4jClient:
             processing_time_ms=processing_time_ms,
         )
 
-        # 2. Create Finding and Remediation nodes + relationships
+        # 2. Create/merge Finding nodes + relationships
         for risk in risks:
-            # Create Finding node
-            finding_query = """
-            CREATE (f:Finding {
-                id: $finding_id,
-                title: $title,
-                severity: $severity,
-                category: $category,
-                description: $finding,
-                impact: $impact,
-                remediation: $remediation
-            })
-            RETURN f
-            """
+            finding_id = risk.get("id")
+            title = risk.get("title")
+            severity = risk.get("severity")
+            category = risk.get("pillar")
+
+            # Use MERGE to deduplicate findings across reviews
+            # Composite key: title + severity + category
             tx.run(
-                finding_query,
-                finding_id=risk.get("id"),
-                title=risk.get("title"),
-                severity=risk.get("severity"),
-                category=risk.get("pillar"),
+                """
+                MERGE (f:Finding {
+                    title: $title,
+                    severity: $severity,
+                    category: $category
+                })
+                ON CREATE SET
+                    f.id = $finding_id,
+                    f.description = $finding,
+                    f.impact = $impact,
+                    f.remediation = $remediation,
+                    f.first_seen = datetime(),
+                    f.occurrence_count = 1,
+                    f.review_ids = [$review_id]
+                ON MATCH SET
+                    f.occurrence_count = COALESCE(f.occurrence_count, 0) + 1,
+                    f.last_seen = datetime(),
+                    f.review_ids = CASE
+                        WHEN NOT $review_id IN COALESCE(f.review_ids, [])
+                        THEN COALESCE(f.review_ids, []) + $review_id
+                        ELSE COALESCE(f.review_ids, [])
+                    END
+                RETURN f
+                """,
+                finding_id=finding_id,
+                title=title,
+                severity=severity,
+                category=category,
                 finding=risk.get("finding"),
                 impact=risk.get("impact"),
                 remediation=risk.get("remediation"),
+                review_id=review_response.get("review_id"),
             )
 
-            # Link Analysis -> Finding
+            # Link Analysis -> Finding (using title+severity+category to find merged node)
             tx.run(
                 """
                 MATCH (a:Analysis {id: $review_id})
-                MATCH (f:Finding {id: $finding_id})
-                CREATE (a)-[:HAS_FINDING]->(f)
+                MATCH (f:Finding {title: $title, severity: $severity, category: $category})
+                MERGE (a)-[:HAS_FINDING]->(f)
                 """,
                 review_id=review_response.get("review_id"),
-                finding_id=risk.get("id"),
+                title=title,
+                severity=severity,
+                category=category,
             )
-
-            # Create Remediation node and link Finding -> Remediation
-            references = risk.get("references", [])
-            if references:
-                remediation_id = f"{risk.get('id')}-remediation"
-                tx.run(
-                    """
-                    CREATE (r:Remediation {
-                        id: $remediation_id,
-                        steps: $steps,
-                        aws_doc_url: $doc_url
-                    })
-                    """,
-                    remediation_id=remediation_id,
-                    steps=risk.get("remediation"),
-                    doc_url=references[0] if references else "",
-                )
-
-                tx.run(
-                    """
-                    MATCH (f:Finding {id: $finding_id})
-                    MATCH (r:Remediation {id: $remediation_id})
-                    CREATE (f)-[:REMEDIATED_BY]->(r)
-                    """,
-                    finding_id=risk.get("id"),
-                    remediation_id=remediation_id,
-                )
 
         # 3. Create/merge AWSService nodes
         for service_name, category in all_services:
@@ -328,10 +320,36 @@ class Neo4jClient:
 
     @staticmethod
     def _fetch_analysis_graph(tx, analysis_id):
-        """Fetch all nodes and relationships for an analysis."""
+        """Fetch all nodes and relationships for an analysis (excluding CO_OCCURS_WITH)."""
+        # Simpler approach: use UNION to get nodes and edges separately
         query = """
-        MATCH path = (a:Analysis {id: $analysis_id})-[*1..3]->(n)
-        RETURN path
+        // Get Analysis node
+        MATCH (a:Analysis {id: $analysis_id})
+        RETURN a as node, null as rel, null as startNode, null as endNode
+
+        UNION
+
+        // Get Finding nodes
+        MATCH (a:Analysis {id: $analysis_id})-[:HAS_FINDING]->(f:Finding)
+        RETURN f as node, null as rel, null as startNode, null as endNode
+
+        UNION
+
+        // Get AWSService nodes
+        MATCH (a:Analysis {id: $analysis_id})-[:HAS_FINDING]->(f:Finding)-[:INVOLVES_SERVICE]->(s:AWSService)
+        RETURN s as node, null as rel, null as startNode, null as endNode
+
+        UNION
+
+        // Get HAS_FINDING relationships
+        MATCH (a:Analysis {id: $analysis_id})-[r:HAS_FINDING]->(f:Finding)
+        RETURN null as node, type(r) as rel, a as startNode, f as endNode
+
+        UNION
+
+        // Get INVOLVES_SERVICE relationships
+        MATCH (a:Analysis {id: $analysis_id})-[:HAS_FINDING]->(f:Finding)-[r:INVOLVES_SERVICE]->(s:AWSService)
+        RETURN null as node, type(r) as rel, f as startNode, s as endNode
         """
         result = tx.run(query, analysis_id=analysis_id)
 
@@ -339,28 +357,43 @@ class Neo4jClient:
         edges = []
 
         for record in result:
-            path = record["path"]
-            # Extract nodes from path
-            for node in path.nodes:
+            # Process nodes
+            node = record.get("node")
+            if node:
                 node_id = node.element_id
                 if node_id not in nodes_dict:
+                    node_labels = list(node.labels)
+                    node_type = node_labels[0] if node_labels else "Unknown"
+
+                    # Get label based on node type
+                    if node_type == "Analysis":
+                        label = node.get("id", "")
+                    elif node_type == "Finding":
+                        label = node.get("title", "")
+                    elif node_type == "AWSService":
+                        label = node.get("name", "")
+                    else:
+                        label = node.get("id", node.get("name", ""))
+
                     nodes_dict[node_id] = {
                         "id": node_id,
-                        "label": node.get("title") or node.get("name") or node.get("id"),
-                        "type": list(node.labels)[0],
+                        "label": label,
+                        "type": node_type,
                         "properties": convert_neo4j_types(dict(node)),
                     }
 
-            # Extract relationships
-            for rel in path.relationships:
-                edges.append(
-                    {
-                        "source": rel.start_node.element_id,
-                        "target": rel.end_node.element_id,
-                        "type": rel.type,
-                        "properties": convert_neo4j_types(dict(rel)),
-                    }
-                )
+            # Process relationships
+            rel_type = record.get("rel")
+            start_node = record.get("startNode")
+            end_node = record.get("endNode")
+
+            if rel_type and start_node and end_node:
+                edges.append({
+                    "source": start_node.element_id,
+                    "target": end_node.element_id,
+                    "type": rel_type,
+                    "properties": {},
+                })
 
         return {"nodes": list(nodes_dict.values()), "edges": edges}
 

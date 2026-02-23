@@ -25,7 +25,7 @@ interface GraphViewerProps {
 // Node dimensions for dagre layout
 const NODE_DIMENSIONS = {
   Analysis: { width: 220, height: 60 },
-  Finding: { width: 200, height: 70 },
+  Finding: { width: 240, height: 120 },
   AWSService: { width: 160, height: 50 },
   Remediation: { width: 180, height: 60 },
 };
@@ -56,60 +56,100 @@ function getLayoutedElements(
   nodes: GraphNode[],
   edges: GraphEdge[]
 ): { nodes: Node[]; edges: Edge[] } {
-  const dagreGraph = new dagre.graphlib.Graph();
-  dagreGraph.setDefaultEdgeLabel(() => ({}));
-  dagreGraph.setGraph({
-    rankdir: "TB",  // Top-to-bottom for better visualization
-    nodesep: 20,    // Tight horizontal spacing between nodes
-    ranksep: 40,    // Tight vertical spacing between ranks
-    marginx: 10,
-    marginy: 10,
-  });
+  // Custom structured layout for predictable, readable visualization
+  // Layout: Analysis (top center) → Findings (middle column) → Services (right column)
+  // Top-down flow: One review spawns multiple findings, each involving services
 
-  // Add nodes to dagre
-  nodes.forEach((node) => {
+  const layoutedNodes: Node[] = [];
+
+  // Separate nodes by type
+  const analysisNodes = nodes.filter(n => n.type === "Analysis");
+  const findingNodes = nodes.filter(n => n.type === "Finding");
+  const serviceNodes = nodes.filter(n => n.type === "AWSService");
+  const remediationNodes = nodes.filter(n => n.type === "Remediation");
+
+  // Layout constants
+  const ANALYSIS_X = 500;       // Top center
+  const ANALYSIS_Y = 50;
+
+  const FINDING_X = 300;        // Middle column - what was found
+  const FINDING_START_Y = 200;
+  const FINDING_SPACING_Y = 150;
+
+  const SERVICE_X = 900;        // Right column - services involved
+  const SERVICE_START_Y = 200;
+  const SERVICE_SPACING_Y = 80;
+
+  const REMEDIATION_X = 1300;   // Far right (for old reviews)
+  const REMEDIATION_START_Y = 200;
+
+  // 1. Position Analysis node at top center
+  analysisNodes.forEach((node) => {
     const dimensions = NODE_DIMENSIONS[node.type];
-    dagreGraph.setNode(node.id, dimensions);
-  });
-
-  // Add edges to dagre
-  edges.forEach((edge) => {
-    dagreGraph.setEdge(edge.source, edge.target);
-  });
-
-  dagre.layout(dagreGraph);
-
-  // Track positions to detect overlaps
-  const positionMap = new Map<string, { x: number; y: number }>();
-
-  // Convert to ReactFlow format with overlap detection
-  const layoutedNodes: Node[] = nodes.map((node, index) => {
-    const nodeWithPosition = dagreGraph.node(node.id);
-    const dimensions = NODE_DIMENSIONS[node.type];
-
-    let x = nodeWithPosition.x - dimensions.width / 2;
-    let y = nodeWithPosition.y - dimensions.height / 2;
-
-    // Handle overlapping nodes (dagre sometimes places disconnected nodes at same position)
-    const posKey = `${Math.round(x)},${Math.round(y)}`;
-    if (positionMap.has(posKey)) {
-      // Offset overlapping nodes in a grid pattern
-      const offset = positionMap.get(posKey)!;
-      x = offset.x + (index % 5) * 200;
-      y = offset.y + Math.floor(index / 5) * 100;
-    }
-    positionMap.set(posKey, { x, y });
-
-    return {
+    layoutedNodes.push({
       id: node.id,
       type: "custom",
-      position: { x, y },
+      position: { x: ANALYSIS_X, y: ANALYSIS_Y },
       data: {
         ...node,
         color: getNodeColor(node),
         dimensions,
       },
-    };
+    });
+  });
+
+  // 2. Position Findings in middle column (vertical list)
+  findingNodes.forEach((node, index) => {
+    const dimensions = NODE_DIMENSIONS[node.type];
+    layoutedNodes.push({
+      id: node.id,
+      type: "custom",
+      position: {
+        x: FINDING_X,
+        y: FINDING_START_Y + (index * FINDING_SPACING_Y)
+      },
+      data: {
+        ...node,
+        color: getNodeColor(node),
+        dimensions,
+      },
+    });
+  });
+
+  // 3. Position Services on right (vertical list)
+  serviceNodes.forEach((node, index) => {
+    const dimensions = NODE_DIMENSIONS[node.type];
+    layoutedNodes.push({
+      id: node.id,
+      type: "custom",
+      position: {
+        x: SERVICE_X,
+        y: SERVICE_START_Y + (index * SERVICE_SPACING_Y)
+      },
+      data: {
+        ...node,
+        color: getNodeColor(node),
+        dimensions,
+      },
+    });
+  });
+
+  // 4. Position Remediations far right (for old reviews with Remediation nodes)
+  remediationNodes.forEach((node, index) => {
+    const dimensions = NODE_DIMENSIONS[node.type];
+    layoutedNodes.push({
+      id: node.id,
+      type: "custom",
+      position: {
+        x: REMEDIATION_X,
+        y: REMEDIATION_START_Y + (index * FINDING_SPACING_Y)
+      },
+      data: {
+        ...node,
+        color: getNodeColor(node),
+        dimensions,
+      },
+    });
   });
 
   const layoutedEdges: Edge[] = edges.map((edge) => ({
@@ -174,8 +214,11 @@ function CustomNode({ data }: { data: any }) {
             color: "#FFFFFF",
             textAlign: "center",
             overflow: "hidden",
-            textOverflow: "ellipsis",
+            display: "-webkit-box",
+            WebkitLineClamp: 4,
+            WebkitBoxOrient: "vertical",
             maxWidth: "100%",
+            lineHeight: "1.3",
           }}
         >
           {node.label}
@@ -185,11 +228,11 @@ function CustomNode({ data }: { data: any }) {
       {/* Hover tooltip */}
       {showTooltip && (
         <div
-          className="absolute z-50 bg-card border border-border rounded-lg shadow-2xl p-3 text-xs min-w-[200px] max-w-[300px]"
+          className="absolute z-50 bg-card border border-border rounded-lg shadow-2xl p-3 text-xs min-w-[250px] max-w-[400px]"
           style={{
-            top: `${dimensions.height + 10}px`,
-            left: "50%",
-            transform: "translateX(-50%)",
+            top: "0",
+            left: `${dimensions.width + 15}px`,
+            pointerEvents: "none",
           }}
         >
           <div className="space-y-1">
@@ -198,6 +241,11 @@ function CustomNode({ data }: { data: any }) {
             {node.properties.severity && (
               <div className="text-muted-foreground">
                 Severity: {node.properties.severity}
+              </div>
+            )}
+            {node.properties.occurrence_count !== undefined && node.properties.occurrence_count > 1 && (
+              <div className="text-amber-400 font-semibold">
+                ⚠️ Occurred in {node.properties.occurrence_count} reviews
               </div>
             )}
             {node.properties.score !== undefined && (
@@ -296,10 +344,10 @@ export default function GraphViewer({ nodes, edges, className = "" }: GraphViewe
         onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
         fitView
-        fitViewOptions={{ padding: 0.1 }}
-        minZoom={0.1}
+        fitViewOptions={{ padding: 0.15, minZoom: 0.7, maxZoom: 1.0 }}
+        minZoom={0.3}
         maxZoom={2.0}
-        defaultViewport={{ x: 0, y: 0, zoom: 0.5 }}
+        defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
       >
         <Background color="#475569" gap={16} />
         <Controls className="bg-card border-border" />
