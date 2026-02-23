@@ -10,6 +10,7 @@ from pydantic import ValidationError
 from typing import Optional
 import logging
 import asyncio
+import time
 
 from app.models.request import ReviewRequest
 from app.models.response import ReviewResponse
@@ -69,6 +70,9 @@ async def review_architecture(
         HTTPException 400: Invalid request (missing input, both provided, or validation failed)
         HTTPException 500: Analysis failed
     """
+    # Start processing time tracking
+    start_time = time.time()
+
     if design_text and file:
         raise HTTPException(
             status_code=400,
@@ -80,6 +84,13 @@ async def review_architecture(
             # Image processing path
             logger.info(f"Processing image upload: {file.filename} ({file.content_type})")
             review = await analyze_design_from_image(file, tone, provider)
+
+            # Calculate processing time and add to metadata
+            processing_time_ms = int((time.time() - start_time) * 1000)
+            if not review.metadata:
+                review.metadata = {}
+            review.metadata["processing_time_ms"] = processing_time_ms
+            logger.info(f"Image review completed in {processing_time_ms}ms")
 
             # Write to knowledge graph in background (don't block response)
             asyncio.create_task(write_to_graph_background(review))
@@ -111,6 +122,13 @@ async def review_architecture(
                 raise RequestValidationError(exc.errors()) from exc
 
         review = await analyze_design(review_request)
+
+        # Calculate processing time and add to metadata
+        processing_time_ms = int((time.time() - start_time) * 1000)
+        if not review.metadata:
+            review.metadata = {}
+        review.metadata["processing_time_ms"] = processing_time_ms
+        logger.info(f"Text review completed in {processing_time_ms}ms")
 
         # Write to knowledge graph in background (don't block response)
         asyncio.create_task(write_to_graph_background(review))

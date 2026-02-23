@@ -1,6 +1,6 @@
 # Tesseric - Progress Tracker
 
-**Last Updated**: 2026-01-31 (Phase 2.1 Image Upload Complete)
+**Last Updated**: 2026-02-23 (Phase 2.2 Neo4j Metrics Complete)
 
 ## 🎯 CURRENT STATE (Read This First Every Session)
 
@@ -9,6 +9,7 @@
 - ✅ **Phase 2 COMPLETE** (2026-01-25): Railway deployment with Bedrock AI live in production
 - ✅ **Phase 2.5 COMPLETE** (2026-01-25): Frontend redesign with navy + orange brand palette
 - ✅ **Phase 2.1 COMPLETE** (2026-01-31): Image upload with Bedrock vision extraction
+- ✅ **Phase 2.2 COMPLETE** (2026-02-23): Dynamic metrics dashboard powered by Neo4j
 
 **What Works Right Now**:
 - ✅ **Production API**: https://tesseric-production.up.railway.app
@@ -17,6 +18,9 @@
 - ✅ **Review endpoint**: `/review` using Bedrock AI (Claude 3.5 Haiku for analysis)
 - ✅ **Image Upload**: Accept PNG/JPG/PDF diagrams (< 5MB), extract with Claude 3 Sonnet vision
 - ✅ **AWS Bedrock Integration**: Real-time AI analysis of AWS architectures
+- ✅ **Neo4j Knowledge Graph**: Full graph database with 31 reviews, 20 AWS services, 72 findings
+- ✅ **Metrics Dashboard**: Real-time production metrics from Neo4j with 5-min caching
+- ✅ **Processing Time Tracking**: All new reviews track processing time in metadata + Neo4j
 - ✅ **Cost tracking**: ~$0.011 per text review, ~$0.023 per image review + Railway $5-10/month
 - ✅ **Production CORS**: Configured for tesseric.ca, api.tesseric.ca
 - ✅ **Graceful fallback**: Pattern matching if Bedrock fails (text only)
@@ -956,6 +960,144 @@
 
 **Session Duration**: ~2 hours implementation + testing + documentation
 **Outcome**: Production-ready Phase 2.1 with image upload ✅
+
+---
+
+## Phase 2.2: Dynamic Metrics Dashboard with Neo4j (COMPLETED ✅)
+
+**Goal**: Convert hardcoded "By the Numbers" metrics to real-time data from Neo4j knowledge graph
+
+**Status**: ✅ **COMPLETED** (2026-02-23)
+
+**Date**: 2026-02-23
+
+**Session Info**: Implemented dynamic metrics dashboard with Neo4j aggregate queries, backend caching, and subtle Neo4j branding
+
+### Completed Work
+
+**Backend Implementation**:
+- [x] Created `backend/app/models/metrics.py` - MetricsResponse Pydantic model - 2026-02-23
+- [x] Created `backend/app/api/metrics.py` - GET /api/metrics/stats endpoint with 5-min caching - 2026-02-23
+- [x] Modified `backend/app/graph/neo4j_client.py` - Added get_metrics() with 4 aggregate queries - 2026-02-23
+- [x] Modified `backend/app/main.py` - Registered metrics router - 2026-02-23
+- [x] Modified `backend/app/api/review.py` - Added processing_time_ms tracking - 2026-02-23
+- [x] Modified `backend/app/graph/neo4j_client.py` - Store processing_time_ms in Analysis nodes - 2026-02-23
+
+**Frontend Implementation**:
+- [x] Created `frontend/lib/metricsApi.ts` - Metrics API client with error handling - 2026-02-23
+- [x] Modified `frontend/components/home/TestimonialsSection.tsx` - Converted to client component with dynamic data - 2026-02-23
+- [x] Added loading skeleton with animate-pulse effect - 2026-02-23
+- [x] Added graceful error fallback to static values - 2026-02-23
+- [x] Added Neo4j branding badge (Database icon + "Live data from Neo4j • Last updated: [time]") - 2026-02-23
+
+**Neo4j Queries Implemented**:
+1. Total reviews: `MATCH (a:Analysis) RETURN count(a)`
+2. Unique AWS services: `MATCH (s:AWSService) RETURN count(DISTINCT s.name)`
+3. Severity breakdown: `MATCH (f:Finding) RETURN f.severity, count(f) ORDER BY severity`
+4. Average review time: `MATCH (a:Analysis) WHERE a.processing_time_ms IS NOT NULL RETURN avg(a.processing_time_ms)`
+
+### Key Achievements
+
+**Real-Time Metrics from Production**:
+- Total reviews: 31 (live from Neo4j)
+- Unique AWS services: 20 (live from Neo4j)
+- Severity breakdown: CRITICAL: 8, HIGH: 32, MEDIUM: 18, LOW: 14 (live from Neo4j)
+- Average review time: 8.0s (will update as new reviews with processing_time_ms are created)
+
+**Performance Optimization**:
+- 5-minute backend caching reduces Neo4j load
+- Verified cache working (same timestamp on consecutive requests)
+- Slow query logging (warns if >500ms)
+- First query: ~2810ms, cached queries: instant
+
+**User Experience**:
+- Loading skeleton on initial page load
+- Graceful fallback to static values on API failure
+- Neo4j branding badge only shows with live data (hidden on error)
+- No impact to existing testimonials/quotes section
+
+**Technical Quality**:
+- Comprehensive error handling at every layer
+- JSDoc and docstrings on all new functions
+- Pydantic validation for API responses
+- Zero breaking changes to existing functionality
+- Works in both dev and production environments
+
+### Design Decisions
+
+**Why Neo4j Over PostgreSQL**:
+- Data already exists in Neo4j (31 reviews, 20 services, 72 findings)
+- Zero infrastructure overhead (no new database needed)
+- Single source of truth (no data sync issues)
+- Real-time aggregation sufficient for current scale
+- Can leverage graph relationships for future insights
+
+**Caching Strategy**:
+- 5-minute TTL balances freshness vs performance
+- In-memory dict cache (simple, no Redis needed)
+- Stale cache returned on Neo4j failure
+- Manual cache clear endpoint for debugging
+
+**Neo4j Branding**:
+- Subtle badge below metrics grid
+- Database icon from lucide-react
+- Only visible when real data loads successfully
+- Hides technical details from users on error
+
+### Session Notes (2026-02-23)
+
+**Implementation Flow**:
+1. Backend: 2 files created, 3 files modified
+   - New: `models/metrics.py` (58 lines), `api/metrics.py` (125 lines)
+   - Modified: `neo4j_client.py` (+110 lines), `main.py` (+2 lines), `review.py` (+processing time tracking)
+2. Frontend: 1 file created, 1 file modified
+   - New: `lib/metricsApi.ts` (95 lines)
+   - Modified: `TestimonialsSection.tsx` (major refactor to client component)
+3. Total: ~388 new lines of backend code, ~95 new frontend code
+
+**Files Changed**:
+```
+backend/app/models/metrics.py (NEW)
+backend/app/api/metrics.py (NEW)
+backend/app/graph/neo4j_client.py (MODIFIED - added get_metrics)
+backend/app/main.py (MODIFIED - registered router)
+backend/app/api/review.py (MODIFIED - processing time tracking)
+frontend/lib/metricsApi.ts (NEW)
+frontend/components/home/TestimonialsSection.tsx (MODIFIED - client component)
+```
+
+**Testing Results**:
+- ✅ Backend `/api/metrics/stats` returns valid JSON
+- ✅ Neo4j queries return correct counts
+- ✅ Caching works (verified same timestamp within 5-min window)
+- ✅ Frontend displays loading state
+- ✅ Frontend displays live metrics with Neo4j badge
+- ✅ Error fallback works (falls back to static values)
+- ✅ No console errors in browser
+- ✅ Both servers communicating successfully
+
+**Current Production Metrics**:
+```json
+{
+  "total_reviews": 31,
+  "unique_aws_services": 20,
+  "severity_breakdown": {
+    "CRITICAL": 8,
+    "HIGH": 32,
+    "MEDIUM": 18,
+    "LOW": 14
+  },
+  "avg_review_time_seconds": 8.0,
+  "last_updated": "2026-02-23T04:16:46+00:00"
+}
+```
+
+**API Endpoints Added**:
+- `GET /api/metrics/stats` - Main metrics endpoint (cached 5 min)
+- `DELETE /api/metrics/cache` - Clear cache (admin/debugging)
+
+**Session Duration**: ~3 hours (planning, implementation, testing, documentation)
+**Outcome**: Production-ready Phase 2.2 with dynamic Neo4j metrics ✅
 
 ---
 

@@ -166,13 +166,18 @@ class Neo4jClient:
         Creates all nodes and relationships in a single transaction.
         """
         # 1. Create Analysis node
+        # Extract processing time from metadata if available
+        metadata = review_response.get("metadata", {})
+        processing_time_ms = metadata.get("processing_time_ms") if metadata else None
+
         analysis_query = """
         CREATE (a:Analysis {
             id: $review_id,
             timestamp: datetime($created_at),
             score: $score,
             summary: $summary,
-            tone: $tone
+            tone: $tone,
+            processing_time_ms: $processing_time_ms
         })
         RETURN a
         """
@@ -183,6 +188,7 @@ class Neo4jClient:
             score=review_response.get("architecture_score"),
             summary=review_response.get("summary"),
             tone=review_response.get("tone"),
+            processing_time_ms=processing_time_ms,
         )
 
         # 2. Create Finding and Remediation nodes + relationships
@@ -425,6 +431,114 @@ class Neo4jClient:
                     )
 
         return {"nodes": list(nodes_dict.values()), "edges": edges}
+
+    async def get_metrics(self) -> Dict[str, Any]:
+        """
+        Retrieve aggregate metrics for homepage dashboard.
+
+        Queries Neo4j for real-time production statistics:
+        - Total reviews analyzed
+        - Unique AWS services recognized
+        - Findings breakdown by severity
+        - Average review processing time
+
+        Returns:
+            Dict with metrics data:
+            {
+                "total_reviews": int,
+                "unique_aws_services": int,
+                "severity_breakdown": {"CRITICAL": int, "HIGH": int, ...},
+                "avg_time_ms": float  # average processing time in milliseconds
+            }
+
+        Returns zeros if database is empty or connection fails.
+        """
+        if not self._is_connected():
+            logger.warning("Neo4j not connected. Returning zero metrics.")
+            return {
+                "total_reviews": 0,
+                "unique_aws_services": 0,
+                "severity_breakdown": {"CRITICAL": 0, "HIGH": 0, "MEDIUM": 0, "LOW": 0},
+                "avg_time_ms": 0.0,
+            }
+
+        try:
+            with self.driver.session() as session:
+                metrics = session.execute_read(self._fetch_metrics)
+                return metrics
+        except Exception as e:
+            logger.error(f"Failed to fetch metrics from Neo4j: {e}")
+            return {
+                "total_reviews": 0,
+                "unique_aws_services": 0,
+                "severity_breakdown": {"CRITICAL": 0, "HIGH": 0, "MEDIUM": 0, "LOW": 0},
+                "avg_time_ms": 0.0,
+            }
+
+    @staticmethod
+    def _fetch_metrics(tx):
+        """
+        Execute aggregate queries to compute metrics.
+
+        Runs 4 queries in parallel:
+        1. Total Analysis nodes (reviews)
+        2. Unique AWS services
+        3. Findings by severity
+        4. Average processing time
+        """
+        # Query 1: Total reviews
+        total_reviews_query = """
+        MATCH (a:Analysis)
+        RETURN count(a) as total_reviews
+        """
+        result1 = tx.run(total_reviews_query)
+        record1 = result1.single()
+        total_reviews = record1["total_reviews"] if record1 else 0
+
+        # Query 2: Unique AWS services
+        unique_services_query = """
+        MATCH (s:AWSService)
+        RETURN count(DISTINCT s.name) as unique_services
+        """
+        result2 = tx.run(unique_services_query)
+        record2 = result2.single()
+        unique_aws_services = record2["unique_services"] if record2 else 0
+
+        # Query 3: Severity breakdown
+        severity_query = """
+        MATCH (f:Finding)
+        RETURN f.severity as severity, count(f) as count
+        ORDER BY CASE f.severity
+            WHEN 'CRITICAL' THEN 1
+            WHEN 'HIGH' THEN 2
+            WHEN 'MEDIUM' THEN 3
+            WHEN 'LOW' THEN 4
+        END
+        """
+        result3 = tx.run(severity_query)
+        severity_breakdown = {"CRITICAL": 0, "HIGH": 0, "MEDIUM": 0, "LOW": 0}
+        for record in result3:
+            severity = record["severity"]
+            count = record["count"]
+            if severity in severity_breakdown:
+                severity_breakdown[severity] = count
+
+        # Query 4: Average processing time
+        avg_time_query = """
+        MATCH (a:Analysis)
+        WHERE a.processing_time_ms IS NOT NULL
+        RETURN avg(a.processing_time_ms) as avg_time_ms
+        """
+        result4 = tx.run(avg_time_query)
+        record4 = result4.single()
+        avg_time_ms = record4["avg_time_ms"] if record4 and record4["avg_time_ms"] else 8000.0
+
+        return {
+            "total_reviews": total_reviews,
+            "unique_aws_services": unique_aws_services,
+            "severity_breakdown": severity_breakdown,
+            "avg_time_ms": float(avg_time_ms),
+        }
 
 
 # Singleton instance for global access

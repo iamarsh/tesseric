@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import logging
 from app.core.config import settings
-from app.api import health, review, graph
+from app.api import health, review, graph, metrics
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +56,7 @@ app.add_middleware(
 app.include_router(health.router, tags=["Health"])
 app.include_router(review.router, tags=["Review"])
 app.include_router(graph.router, tags=["Graph"])
+app.include_router(metrics.router, tags=["Metrics"])
 
 
 # Root endpoint (not part of API, just for browser visits)

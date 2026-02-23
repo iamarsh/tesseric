@@ -1,4 +1,8 @@
-import { Users, TrendingUp, Award, Zap, Quote } from "lucide-react";
+"use client";
+
+import { Users, TrendingUp, Award, Zap, Quote, Database } from "lucide-react";
+import { useEffect, useState } from "react";
+import { fetchMetrics, MetricsData } from "@/lib/metricsApi";
 
 interface Testimonial {
   quote: string;
@@ -62,28 +66,12 @@ const testimonials: Testimonial[] = [
   },
 ];
 
-const stats = [
-  {
-    icon: TrendingUp,
-    value: "500+",
-    label: "architecture reviews analyzed",
-  },
-  {
-    icon: Award,
-    value: "70+",
-    label: "AWS services recognized",
-  },
-  {
-    icon: Users,
-    value: "4",
-    label: "severity levels: CRITICAL → LOW",
-  },
-  {
-    icon: Zap,
-    value: "~8s",
-    label: "average review time",
-  },
-];
+// Fallback static values (used on error or loading)
+const FALLBACK_STATS = {
+  total_reviews: 500,
+  unique_aws_services: 70,
+  avg_review_time_seconds: 8.0,
+};
 
 // Color palette for avatars (navy/orange theme variations)
 const avatarColors = [
@@ -96,6 +84,60 @@ const avatarColors = [
 ];
 
 export function TestimonialsSection() {
+  const [metrics, setMetrics] = useState<MetricsData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadMetrics() {
+      try {
+        const data = await fetchMetrics();
+        setMetrics(data);
+        setError(null);
+      } catch (err) {
+        console.error("Failed to load metrics:", err);
+        setError("Failed to load live metrics");
+        // Don't set metrics to null - let it fall back to static values
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadMetrics();
+  }, []);
+
+  // Compute display values (use live data if available, fallback otherwise)
+  const displayValues = metrics
+    ? {
+        total_reviews: metrics.total_reviews,
+        unique_aws_services: metrics.unique_aws_services,
+        avg_review_time_seconds: metrics.avg_review_time_seconds,
+      }
+    : FALLBACK_STATS;
+
+  // Build stats array dynamically
+  const stats = [
+    {
+      icon: TrendingUp,
+      value: `${displayValues.total_reviews.toLocaleString()}+`,
+      label: "architecture reviews analyzed",
+    },
+    {
+      icon: Award,
+      value: `${displayValues.unique_aws_services}+`,
+      label: "AWS services recognized",
+    },
+    {
+      icon: Users,
+      value: "4",
+      label: "severity levels: CRITICAL → LOW",
+    },
+    {
+      icon: Zap,
+      value: `~${displayValues.avg_review_time_seconds.toFixed(1)}s`,
+      label: "average review time",
+    },
+  ];
   return (
     <section className="py-16 md:py-24">
       <div className="container mx-auto px-4">
@@ -111,24 +153,52 @@ export function TestimonialsSection() {
 
         {/* Metrics Stats Bar */}
         <div className="bg-muted/30 rounded-2xl py-10 px-4 mb-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-5xl mx-auto">
-            {stats.map((stat, idx) => {
-              const StatIcon = stat.icon;
-              return (
-                <div key={idx} className="text-center">
+          {loading ? (
+            // Loading skeleton
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-5xl mx-auto">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="text-center">
                   <div className="flex items-center justify-center mb-2">
-                    <StatIcon className="h-5 w-5 text-primary mr-2" />
-                    <span className="text-3xl md:text-4xl font-bold text-foreground">
-                      {stat.value}
-                    </span>
+                    <div className="h-10 w-32 bg-muted animate-pulse rounded" />
                   </div>
-                  <p className="text-sm md:text-base text-muted-foreground">
-                    {stat.label}
-                  </p>
+                  <div className="h-4 w-40 bg-muted animate-pulse rounded mx-auto" />
                 </div>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          ) : (
+            // Actual metrics
+            <>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-5xl mx-auto">
+                {stats.map((stat, idx) => {
+                  const StatIcon = stat.icon;
+                  return (
+                    <div key={idx} className="text-center">
+                      <div className="flex items-center justify-center mb-2">
+                        <StatIcon className="h-5 w-5 text-primary mr-2" />
+                        <span className="text-3xl md:text-4xl font-bold text-foreground">
+                          {stat.value}
+                        </span>
+                      </div>
+                      <p className="text-sm md:text-base text-muted-foreground">
+                        {stat.label}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Neo4j branding badge - only show when real data loaded successfully */}
+              {metrics && !error && (
+                <div className="text-center mt-6 text-xs text-muted-foreground flex items-center justify-center gap-2">
+                  <Database className="h-3.5 w-3.5" />
+                  <span>
+                    Live data from Neo4j • Last updated:{" "}
+                    {new Date(metrics.last_updated).toLocaleTimeString()}
+                  </span>
+                </div>
+              )}
+            </>
+          )}
         </div>
 
         {/* Real Quote */}

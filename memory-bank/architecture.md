@@ -1,6 +1,6 @@
 # Tesseric - System Architecture
 
-**Last Updated**: 2026-01-22
+**Last Updated**: 2026-02-23
 
 ## Current Architecture (v0.1 - AWS-Only MVP)
 
@@ -169,20 +169,29 @@ backend/app/
 ├── main.py               # FastAPI app, CORS, routers
 ├── api/
 │   ├── health.py         # GET /health
-│   └── review.py         # POST /review
+│   ├── review.py         # POST /review
+│   ├── graph.py          # GET /api/graph/{analysis_id}, /api/graph/global/all, /api/graph/health
+│   └── metrics.py        # GET /api/metrics/stats, DELETE /api/metrics/cache
 ├── core/
 │   ├── config.py         # Settings (pydantic-settings)
 │   └── logging.py        # Logging configuration (future)
 ├── models/
 │   ├── request.py        # ReviewRequest model
-│   └── response.py       # ReviewResponse, RiskItem models
+│   ├── response.py       # ReviewResponse, RiskItem models
+│   ├── graph.py          # GraphNode, GraphEdge, GraphResponse models
+│   └── metrics.py        # MetricsResponse model
 ├── services/
-│   ├── bedrock.py        # BedrockClient (stubbed for v0.1)
-│   ├── rag.py            # analyze_design() function
+│   ├── bedrock.py        # BedrockClient for AWS Bedrock API calls
+│   ├── rag.py            # analyze_design() function with inline AWS context
 │   ├── storage.py        # DynamoDB/SQLite wrapper (future)
 │   └── parsing.py        # Architecture text parsing (future)
+├── graph/
+│   ├── neo4j_client.py   # Neo4jClient for knowledge graph operations
+│   └── service_parser.py # AWS service extraction from findings
 └── utils/
-    └── (future utilities)
+    ├── image_processing.py  # Image validation and resizing
+    ├── exceptions.py        # Custom exception classes
+    └── token_counter.py     # Token counting for cost tracking
 ```
 
 **Key Features**:
@@ -366,18 +375,150 @@ async def analyze_design(request: ReviewRequest) -> ReviewResponse:
   - `dynamodb:PutItem`, `GetItem`, `Query` on reviews table
   - `logs:CreateLogStream`, `PutLogEvents` for CloudWatch
 
+### Neo4j Knowledge Graph Integration (Phase 2.2 - Implemented)
+
+**Purpose**: Store and query architecture reviews as a knowledge graph to enable relationship discovery and aggregate metrics.
+
+**Architecture**:
+```
+┌─────────────────────┐
+│  POST /review       │
+│  (Analysis Complete)│
+└──────────┬──────────┘
+           │ Background Task
+           ▼
+┌─────────────────────┐
+│  Neo4j Client       │
+│  write_analysis()   │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────────────────────────┐
+│  Neo4j Database (Cloud)                 │
+│  ┌─────────────────────────────────┐   │
+│  │ Nodes:                          │   │
+│  │ - Analysis (review_id, score)   │   │
+│  │ - Finding (severity, pillar)    │   │
+│  │ - Remediation (steps, docs)     │   │
+│  │ - AWSService (name, category)   │   │
+│  └─────────────────────────────────┘   │
+│  ┌─────────────────────────────────┐   │
+│  │ Relationships:                  │   │
+│  │ - HAS_FINDING                   │   │
+│  │ - REMEDIATED_BY                 │   │
+│  │ - INVOLVES_SERVICE              │   │
+│  │ - CO_OCCURS_WITH (with count)   │   │
+│  └─────────────────────────────────┘   │
+└──────────┬──────────────────────────────┘
+           │
+           ▼
+┌─────────────────────┐
+│  GET /api/graph/    │
+│  - /{analysis_id}   │ → Single review graph
+│  - /global/all      │ → Aggregate patterns
+│  - /health          │ → Connection status
+└─────────────────────┘
+           │
+           ▼
+┌─────────────────────┐
+│  GET /api/metrics/  │
+│  - /stats           │ → Aggregate metrics (cached 5 min)
+│  - /cache (DELETE)  │ → Clear cache
+└─────────────────────┘
+```
+
+**Graph Schema**:
+- **Analysis Node**: `{id, timestamp, score, summary, tone, processing_time_ms}`
+- **Finding Node**: `{id, title, severity, category, description, impact, remediation}`
+- **Remediation Node**: `{id, steps, aws_doc_url}`
+- **AWSService Node**: `{name, category}` (MERGE pattern - accumulates across analyses)
+
+**Relationships**:
+1. `(Analysis)-[:HAS_FINDING]->(Finding)` - Review contains findings
+2. `(Finding)-[:REMEDIATED_BY]->(Remediation)` - Finding has remediation steps
+3. `(Finding)-[:INVOLVES_SERVICE]->(AWSService)` - Finding involves specific AWS services
+4. `(AWSService)-[:CO_OCCURS_WITH {count: int}]-(AWSService)` - Services appear together
+
+**API Endpoints**:
+- `GET /api/graph/{analysis_id}` - Fetch knowledge graph for single review
+- `GET /api/graph/global/all?limit=100` - Fetch aggregate graph (top services by co-occurrence)
+- `GET /api/graph/health` - Check Neo4j connection status
+- `GET /api/metrics/stats` - Aggregate production metrics (total reviews, services, severity breakdown, avg time)
+- `DELETE /api/metrics/cache` - Clear metrics cache (debugging)
+
+**Metrics Dashboard (Phase 2.2)**:
+- Frontend component queries `/api/metrics/stats` on page load
+- Backend caches results for 5 minutes to reduce Neo4j load
+- Displays real-time stats:
+  - Total reviews analyzed
+  - Unique AWS services recognized
+  - Findings by severity (CRITICAL, HIGH, MEDIUM, LOW)
+  - Average review processing time
+- Subtle Neo4j branding badge (Database icon + "Live data from Neo4j")
+- Graceful fallback to static values on API failure
+
+**Neo4j Query Patterns**:
+```cypher
+// Metrics: Total reviews
+MATCH (a:Analysis) RETURN count(a) as total_reviews
+
+// Metrics: Unique AWS services
+MATCH (s:AWSService) RETURN count(DISTINCT s.name) as unique_services
+
+// Metrics: Severity breakdown
+MATCH (f:Finding)
+RETURN f.severity as severity, count(f) as count
+ORDER BY CASE f.severity
+  WHEN 'CRITICAL' THEN 1
+  WHEN 'HIGH' THEN 2
+  WHEN 'MEDIUM' THEN 3
+  WHEN 'LOW' THEN 4
+END
+
+// Metrics: Average processing time
+MATCH (a:Analysis)
+WHERE a.processing_time_ms IS NOT NULL
+RETURN avg(a.processing_time_ms) as avg_time_ms
+
+// Graph: Single analysis
+MATCH path = (a:Analysis {id: $analysis_id})-[*1..3]->(n)
+RETURN path
+
+// Graph: Global patterns (top services by co-occurrence)
+MATCH (s:AWSService)
+OPTIONAL MATCH (s)-[r:CO_OCCURS_WITH]-(s2:AWSService)
+WITH s, count(r) as rel_count
+ORDER BY rel_count DESC
+LIMIT $limit
+MATCH path = (s)-[r:CO_OCCURS_WITH]-(s2:AWSService)
+RETURN path
+```
+
+**Performance**:
+- Write: Async background task (doesn't block review response)
+- Read (single): ~500-2000ms (first query), ~100-300ms (cached)
+- Read (metrics): ~1500-3000ms (first query), instant (cached for 5 min)
+- Cost: Neo4j AuraDB Free tier (200k nodes, 400k relationships) - sufficient for thousands of reviews
+
+**Environment Variables**:
+- `NEO4J_URI`: Neo4j connection URI (bolt+s://...)
+- `NEO4J_USERNAME`: Database username
+- `NEO4J_PASSWORD`: Database password
+- `NEO4J_ENABLED`: Enable/disable Neo4j integration (default: true)
+
 ### AWS SAA Focus Areas
 
 This project demonstrates:
 
 1. **Compute**: App Runner vs ECS Fargate trade-offs
 2. **AI/ML**: Amazon Bedrock integration (RAG pattern)
-3. **Storage**: S3 for knowledge base, DynamoDB for reviews
+3. **Storage**: S3 for knowledge base, DynamoDB for reviews, Neo4j for knowledge graph
 4. **Networking**: VPC design, endpoints, ALB vs direct
 5. **Security**: IAM roles, secrets management, encryption at rest/transit
 6. **Monitoring**: CloudWatch logs, metrics, alarms
 7. **Cost Optimization**: Right-sizing, Spot/Fargate Spot (future), Bedrock pricing
 8. **Well-Architected**: All 6 pillars applied to own architecture
+9. **Graph Databases**: Neo4j for relationship discovery and pattern analysis
 
 ### Future Extensions (Phase 3+ - Not v1 Scope)
 
