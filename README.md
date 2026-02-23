@@ -656,7 +656,17 @@ This is currently a portfolio/learning project for AWS Solutions Architect prepa
 
 ## 📝 License
 
-[To be determined]
+Copyright (c) 2026 Arsh Singh. All rights reserved.
+
+This project is proprietary software. The source code is publicly visible for educational
+and reference purposes only. See [LICENSE](LICENSE) for full terms.
+
+**Summary**:
+- ✅ You may view and study the code
+- ❌ No copying, modification, or redistribution without permission
+- ❌ No commercial use without a separate license agreement
+
+For licensing inquiries or permission requests, please open an issue on GitHub.
 
 ---
 
@@ -676,9 +686,3 @@ This is currently a portfolio/learning project for AWS Solutions Architect prepa
 - **Repository**: [github.com/iamarsh/tesseric](https://github.com/iamarsh/tesseric)
 - **Issues**: [github.com/iamarsh/tesseric/issues](https://github.com/iamarsh/tesseric/issues)
 - **Production API**: [https://tesseric-production.up.railway.app](https://tesseric-production.up.railway.app)
-
----
-
-**Built with ❤️ - Arsh and Claude**
-
-*"Instant AWS architecture reviews."* — Tesseric
