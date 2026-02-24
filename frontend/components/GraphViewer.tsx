@@ -14,7 +14,7 @@ import {
 } from "@xyflow/react";
 import dagre from "@dagrejs/dagre";
 import "@xyflow/react/dist/style.css";
-import {
+import type {
   GraphNode,
   GraphEdge,
   Severity,
