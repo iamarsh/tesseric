@@ -7,7 +7,14 @@ Provides access to Neo4j graph data for frontend visualization.
 from fastapi import APIRouter, HTTPException
 import logging
 
-from app.models.graph import GraphResponse, GraphNode, GraphEdge
+from app.models.graph import (
+    GraphResponse,
+    GraphNode,
+    GraphEdge,
+    ArchitectureGraphResponse,
+    ArchitectureServiceNode,
+    ArchitectureConnection,
+)
 from app.graph.neo4j_client import neo4j_client
 
 router = APIRouter(prefix="/api/graph")
@@ -81,6 +88,63 @@ async def get_analysis_graph(analysis_id: str):
         raise
     except Exception as e:
         logger.error(f"Failed to fetch analysis graph: {e}")
+        raise HTTPException(
+            status_code=503, detail="Knowledge graph service temporarily unavailable"
+        )
+
+
+@router.get("/{analysis_id}/architecture", response_model=ArchitectureGraphResponse)
+async def get_architecture_graph(analysis_id: str):
+    """
+    Retrieve architecture-first graph for visualization.
+
+    Returns AWS services with finding counts and topology relationships.
+    Optimized for architecture diagram rendering with:
+    - Service nodes with finding counts and severity breakdown
+    - Topology relationships (ROUTES_TO, READS_FROM, etc.)
+    - Architecture pattern hint for layout algorithm
+    - Original architecture description
+
+    Args:
+        analysis_id: The review_id from the analysis
+
+    Returns:
+        ArchitectureGraphResponse with services and connections
+
+    Raises:
+        404: Analysis not found or no topology data
+        503: Neo4j unavailable
+    """
+    try:
+        async with neo4j_client as client:
+            arch_data = await client.get_architecture_graph(analysis_id)
+
+            if not arch_data.get("services"):
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"No architecture data found for analysis {analysis_id}. "
+                    "This may be an old review created before topology extraction was implemented.",
+                )
+
+            # Convert to Pydantic models
+            services = [
+                ArchitectureServiceNode(**svc) for svc in arch_data["services"]
+            ]
+            connections = [
+                ArchitectureConnection(**conn) for conn in arch_data["connections"]
+            ]
+
+            return ArchitectureGraphResponse(
+                services=services,
+                connections=connections,
+                architecture_pattern=arch_data.get("architecture_pattern"),
+                architecture_description=arch_data.get("architecture_description"),
+            )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to fetch architecture graph: {e}")
         raise HTTPException(
             status_code=503, detail="Knowledge graph service temporarily unavailable"
         )

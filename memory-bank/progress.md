@@ -1,6 +1,6 @@
 # Tesseric - Progress Tracker
 
-**Last Updated**: 2026-02-23 (Phase 2.2 Neo4j Metrics Complete)
+**Last Updated**: 2026-02-23 (Phase 2.3 Architecture Visualization - Foundation Complete)
 
 ## 🎯 CURRENT STATE (Read This First Every Session)
 
@@ -10,6 +10,7 @@
 - ✅ **Phase 2.5 COMPLETE** (2026-01-25): Frontend redesign with navy + orange brand palette
 - ✅ **Phase 2.1 COMPLETE** (2026-01-31): Image upload with Bedrock vision extraction
 - ✅ **Phase 2.2 COMPLETE** (2026-02-23): Dynamic metrics dashboard powered by Neo4j
+- 🔄 **Phase 2.3 IN PROGRESS** (2026-02-23): Architecture-first graph visualization with topology
 
 **What Works Right Now**:
 - ✅ **Production API**: https://tesseric-production.up.railway.app
@@ -29,12 +30,17 @@
 - ✅ **Brand Identity**: Navy (#0A1628) + Orange (#FF6B35) color palette
 - Local development: Backend at localhost:8000, Frontend at localhost:3000
 
-**What's Next (Phase 3 - Frontend Deployment)**:
+**What's Next (Phase 2.3 - Complete Architecture Visualization)**:
+- ✅ Phase 1.1-1.4: Topology extraction foundation (AI prompts, models, Neo4j storage, validation)
+- ⏳ Phase 1.5: Test topology extraction with sample review
+- 🔜 Phase 2: Smart architecture layout (3-tier, serverless pattern detection)
+- 🔜 Phase 3: Visual problem highlighting (severity badges, pulse animations)
+- 🔜 Phase 4: Action cards UI (premium card grid with bidirectional interactions)
+
+**Then (Phase 3 - Frontend Deployment)**:
 - Deploy frontend to Vercel (tesseric.ca)
 - Configure custom domain and SSL
 - Connect frontend to production API
-- Add og-image.png for social previews
-- Test end-to-end with deployed frontend
 
 **What's After (Phase 4 - Multi-Cloud Expansion)**:
 - Azure and GCP architecture support (deferred until AWS is stable)
@@ -1098,6 +1104,231 @@ frontend/components/home/TestimonialsSection.tsx (MODIFIED - client component)
 
 **Session Duration**: ~3 hours (planning, implementation, testing, documentation)
 **Outcome**: Production-ready Phase 2.2 with dynamic Neo4j metrics ✅
+
+---
+
+## Phase 2.3: Architecture-First Graph Visualization (IN PROGRESS 🔄)
+
+**Goal**: Transform knowledge graph from generic nodes to architecture-first visualization showing user's actual AWS architecture with visual problem indicators
+
+**Status**: 🔄 **IN PROGRESS** (2026-02-23)
+
+**Date Started**: 2026-02-23
+
+**Session Info**: Implementing 4-phase plan: Phase 1 (Topology Extraction Foundation) - 4 of 5 sub-phases complete
+
+### Overall Vision
+
+**Problem**: Current graph shows generic Analysis → Finding → Service nodes which doesn't demonstrate credibility or help users understand where problems exist in their specific architecture.
+
+**Solution**:
+1. **Top**: Recreate user's actual architecture using AWS service nodes with realistic topology
+2. **Within**: Visual highlights showing where security/reliability issues exist (red borders, severity badges)
+3. **Bottom**: Premium action item cards ordered by severity, clickable to highlight affected services
+
+### Phase 1: Foundation - Topology Extraction & Storage (80% COMPLETE)
+
+**Goal**: Extract service-to-service relationships from AI analysis and store in Neo4j
+
+#### Completed Tasks ✅
+
+**Phase 1.1: Add Topology Extraction to AI Prompt** ✅ - 2026-02-23
+- [x] Enhanced `backend/app/services/prompts.py` with topology extraction section - 2026-02-23
+- [x] Request structured JSON with service connections from AI - 2026-02-23
+- [x] Defined 7 relationship types: routes_to, reads_from, writes_to, monitors, authorizes, backs_up, replicates_to - 2026-02-23
+- [x] Added examples for 3-tier, serverless, and microservices patterns - 2026-02-23
+
+**Phase 1.2: Create Topology Models** ✅ - 2026-02-23
+- [x] Created `ServiceConnection` model in `backend/app/models/response.py` - 2026-02-23
+  - Fields: source_service, target_service, relationship_type, description (optional)
+- [x] Created `ArchitectureTopology` model - 2026-02-23
+  - Fields: services (List[str]), connections (List[ServiceConnection]), architecture_pattern (optional)
+- [x] Extended `ReviewResponse` with optional topology and architecture_description fields - 2026-02-23
+- [x] Maintained backward compatibility (topology is optional) - 2026-02-23
+
+**Phase 1.3: Update Neo4j Client to Store Topology** ✅ - 2026-02-23
+- [x] Modified `backend/app/graph/neo4j_client.py` _create_analysis_graph() - 2026-02-23
+- [x] Store architecture_description and architecture_pattern in Analysis node properties - 2026-02-23
+- [x] Added Section 6: Create topology relationships - 2026-02-23
+- [x] Create Neo4j relationships: ROUTES_TO, WRITES_TO, READS_FROM, MONITORS, AUTHORIZES, BACKS_UP, REPLICATES_TO - 2026-02-23
+- [x] Use MERGE pattern to avoid duplicate relationships - 2026-02-23
+- [x] Store relationship description as property - 2026-02-23
+
+**Phase 1.4: Update Review API to Parse and Validate Topology** ✅ - 2026-02-23
+- [x] Modified `backend/app/services/rag.py` to store original design_text as architecture_description - 2026-02-23
+- [x] Added topology validation against AWS_SERVICES dictionary - 2026-02-23
+- [x] Filter out invalid service connections (not in AWS_SERVICES) - 2026-02-23
+- [x] Log warnings for invalid connections - 2026-02-23
+- [x] Handle missing topology gracefully (backward compatibility) - 2026-02-23
+
+#### Pending Tasks ⏳
+
+**Phase 1.5: Test Topology Extraction** ⏳ - Next up
+- [ ] Restart backend server with new topology code
+- [ ] Submit test review with architecture description: "ALB distributes traffic to EC2 instances which connect to RDS database"
+- [ ] Verify topology extracted in API response JSON
+- [ ] Query Neo4j to verify topology relationships stored: `MATCH (s1:AWSService)-[r:ROUTES_TO|WRITES_TO|READS_FROM]->(s2:AWSService) RETURN s1.name, type(r), s2.name LIMIT 10`
+- [ ] Verify architecture_pattern detected correctly
+- [ ] Verify backward compatibility with old reviews (no topology)
+
+### Phase 2: Architecture Visualization - Smart Positioning (NOT STARTED)
+
+**Goal**: Replace generic graph layout with architecture-first view showing user's services in realistic topology
+
+**Estimated Effort**: 4-5 days
+
+**Key Tasks**:
+- [ ] Create `GET /api/graph/{analysis_id}/architecture` endpoint
+- [ ] Add TypeScript types in `frontend/lib/graphApi.ts`
+- [ ] Implement architecture pattern detection (3-tier, serverless, microservices)
+- [ ] Create positioning algorithms for each pattern
+- [ ] Position services in layers: Edge → Compute → Data → Cross-cutting
+- [ ] Update `frontend/components/GraphViewer.tsx` with architecture-aware layout
+
+### Phase 3: Visual Problem Highlighting (NOT STARTED)
+
+**Goal**: Show where issues exist using severity-based visual indicators on service nodes
+
+**Estimated Effort**: 2-3 days
+
+**Key Tasks**:
+- [ ] Replace CustomNode with ArchitectureServiceNode component
+- [ ] Add severity-based border colors (CRITICAL: red pulse, HIGH: orange, MEDIUM: yellow, LOW: gray)
+- [ ] Add finding count badge in top-right corner
+- [ ] Add AWS service icons (Lucide or AWS architecture icon set)
+- [ ] Implement bidirectional highlighting (click service → highlight findings, click finding → highlight services)
+- [ ] Add enhanced tooltips showing mini finding list on hover
+
+### Phase 4: Action Cards UI (NOT STARTED)
+
+**Goal**: Display findings as premium, clickable cards below architecture graph, ordered by severity
+
+**Estimated Effort**: 3-4 days
+
+**Key Tasks**:
+- [ ] Create `frontend/components/ArchitectureViewer.tsx` container component
+- [ ] Create `frontend/components/ActionFindingCard.tsx` premium card component
+- [ ] Implement 2-column responsive grid layout (desktop), single column (mobile)
+- [ ] Add "Affected Services" section with service badges
+- [ ] Implement click-to-highlight functionality
+- [ ] Add collapsible remediation with `<details>` element
+- [ ] Apply premium aesthetics (ring borders, shadows, hover states)
+- [ ] Integrate into review results page
+
+### Key Technical Decisions
+
+**Topology Extraction Strategy**:
+- ✅ AI-first approach using enhanced prompt (more accurate, understands context)
+- ✅ Costs ~500 extra tokens per request (~$0.001) but worth it for accuracy
+- ✅ Regex-based extraction considered as validation backup (future enhancement)
+
+**Storage Strategy**:
+- ✅ Neo4j explicit relationships (ROUTES_TO, WRITES_TO, etc.) chosen over JSON metadata
+- ✅ Enables native graph queries, pattern aggregation, future analytics
+- ✅ Slightly more complex but follows graph database best practices
+
+**Backward Compatibility**:
+- ✅ `topology` field is optional in ReviewResponse
+- ✅ Neo4j queries handle missing topology relationships gracefully
+- ✅ Frontend will check `if (topology)` before using architecture layout
+- ✅ Old reviews fall back to current generic layout
+
+### Files Modified (Phase 1)
+
+**Backend (Python)**:
+1. `backend/app/services/prompts.py` - Added topology extraction section to AI prompt
+2. `backend/app/models/response.py` - Added ServiceConnection, ArchitectureTopology models
+3. `backend/app/graph/neo4j_client.py` - Store topology relationships in Neo4j
+4. `backend/app/services/rag.py` - Validate topology connections against AWS_SERVICES
+
+**Frontend (TypeScript/React)**: None yet (Phase 2+)
+
+### Commits Made
+
+1. `feat(phase1): Add architecture topology extraction to AI prompts and models` - 2026-02-23
+   - Added topology extraction to prompts.py
+   - Created ServiceConnection and ArchitectureTopology models
+   - Extended ReviewResponse with optional topology fields
+
+2. `feat(phase1): Store topology relationships in Neo4j and validate connections` - 2026-02-23
+   - Updated Neo4j client to store 7 relationship types
+   - Added topology validation in RAG service
+   - Maintained backward compatibility
+
+### Testing Instructions (Phase 1.5 - Next Steps)
+
+**Backend Restart Required**: Yes (new topology code added)
+
+**Test Command**:
+```bash
+curl -X POST http://localhost:8000/review \
+  -F "design_text=ALB distributes traffic to EC2 instances which connect to RDS database. CloudWatch monitors all services." \
+  -F "tone=standard" \
+  -F "provider=aws"
+```
+
+**Expected Response**:
+```json
+{
+  "review_id": "review-...",
+  "topology": {
+    "services": ["ALB", "EC2", "RDS", "CloudWatch"],
+    "connections": [
+      {"source_service": "ALB", "target_service": "EC2", "relationship_type": "routes_to"},
+      {"source_service": "EC2", "target_service": "RDS", "relationship_type": "reads_from"},
+      {"source_service": "CloudWatch", "target_service": "EC2", "relationship_type": "monitors"}
+    ],
+    "architecture_pattern": "3-tier"
+  },
+  "architecture_description": "ALB distributes traffic to EC2 instances..."
+}
+```
+
+**Neo4j Verification Query**:
+```cypher
+MATCH (s1:AWSService)-[r:ROUTES_TO|WRITES_TO|READS_FROM|MONITORS]->(s2:AWSService)
+RETURN s1.name, type(r), s2.name
+LIMIT 10
+```
+
+**Expected Neo4j Results**:
+- ALB -[:ROUTES_TO]-> EC2
+- EC2 -[:READS_FROM]-> RDS
+- CloudWatch -[:MONITORS]-> EC2
+- CloudWatch -[:MONITORS]-> RDS
+
+### Session Notes (2026-02-23)
+
+**Implementation Flow**:
+1. Planning: Created comprehensive 4-phase implementation plan in plan mode (~1 hour)
+2. Phase 1.1: Enhanced AI prompt with topology extraction (~30 min)
+3. Phase 1.2: Created Pydantic models for topology (~20 min)
+4. Phase 1.3: Updated Neo4j client to store relationships (~45 min)
+5. Phase 1.4: Added validation in RAG service (~30 min)
+6. Documentation: Updated memory-bank and created testing instructions (~30 min)
+
+**Code Stats**:
+- Lines added to `prompts.py`: ~150 (comprehensive topology extraction section)
+- Lines added to `response.py`: ~45 (ServiceConnection, ArchitectureTopology models)
+- Lines added to `neo4j_client.py`: ~80 (Section 6 for topology relationships)
+- Lines added to `rag.py`: ~25 (validation logic)
+- Total: ~300 new lines of backend code
+
+**Design Principles Applied**:
+- Backward compatibility: All topology fields optional
+- Fail gracefully: Invalid connections filtered out with warnings
+- Single source of truth: Original architecture_description stored in Review
+- Graph-native: Use explicit relationships instead of JSON metadata
+- Cost-conscious: Extra tokens (~$0.001 per review) justified by accuracy gain
+
+**Next Session Priority**:
+- Phase 1.5: Test topology extraction end-to-end
+- Verify Neo4j relationships created correctly
+- Check architecture pattern detection accuracy
+- Ensure backward compatibility with old reviews
+
+**Session Duration**: ~3.5 hours (planning + implementation + documentation)
+**Outcome**: Phase 1 foundation 80% complete, ready for testing ⏳
 
 ---
 

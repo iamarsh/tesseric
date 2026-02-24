@@ -385,6 +385,13 @@ class Neo4jClient:
         // Get INVOLVES_SERVICE relationships
         MATCH (a:Analysis {id: $analysis_id})-[:HAS_FINDING]->(f:Finding)-[r:INVOLVES_SERVICE]->(s:AWSService)
         RETURN null as node, type(r) as rel, f as startNode, s as endNode
+
+        UNION
+
+        // Get topology relationships (ROUTES_TO, READS_FROM, WRITES_TO, MONITORS, AUTHORIZES, BACKS_UP, REPLICATES_TO)
+        MATCH (a:Analysis {id: $analysis_id})-[:HAS_FINDING]->(f:Finding)-[:INVOLVES_SERVICE]->(s1:AWSService)
+        MATCH (s1)-[r:ROUTES_TO|READS_FROM|WRITES_TO|MONITORS|AUTHORIZES|BACKS_UP|REPLICATES_TO]->(s2:AWSService)
+        RETURN null as node, type(r) as rel, s1 as startNode, s2 as endNode
         """
         result = tx.run(query, analysis_id=analysis_id)
 
@@ -499,6 +506,136 @@ class Neo4jClient:
                     )
 
         return {"nodes": list(nodes_dict.values()), "edges": edges}
+
+    async def get_architecture_graph(self, analysis_id: str) -> Dict[str, Any]:
+        """
+        Retrieve architecture-first graph for a specific analysis.
+
+        Returns AWS services with finding counts and topology relationships.
+
+        Args:
+            analysis_id: review_id of the analysis
+
+        Returns:
+            Dict with:
+            - services: List of ArchitectureServiceNode dicts
+            - connections: List of ArchitectureConnection dicts
+            - architecture_pattern: str or None
+            - architecture_description: str or None
+        """
+        if not self._is_connected():
+            return {
+                "services": [],
+                "connections": [],
+                "architecture_pattern": None,
+                "architecture_description": None,
+            }
+
+        try:
+            with self.driver.session() as session:
+                result = session.execute_read(
+                    self._fetch_architecture_graph, analysis_id
+                )
+                return result
+        except Exception as e:
+            logger.error(f"Failed to fetch architecture graph: {e}")
+            return {
+                "services": [],
+                "connections": [],
+                "architecture_pattern": None,
+                "architecture_description": None,
+            }
+
+    @staticmethod
+    def _fetch_architecture_graph(tx, analysis_id):
+        """Fetch architecture topology with finding counts."""
+
+        # Step 1: Get Analysis node metadata
+        analysis_query = """
+        MATCH (a:Analysis {id: $analysis_id})
+        RETURN a.architecture_pattern as pattern,
+               a.architecture_description as description
+        """
+        analysis_result = tx.run(analysis_query, analysis_id=analysis_id).single()
+
+        if not analysis_result:
+            return {
+                "services": [],
+                "connections": [],
+                "architecture_pattern": None,
+                "architecture_description": None,
+            }
+
+        architecture_pattern = analysis_result.get("pattern")
+        architecture_description = analysis_result.get("description")
+
+        # Step 2: Get services with finding counts and severity breakdown
+        services_query = """
+        MATCH (a:Analysis {id: $analysis_id})-[:HAS_FINDING]->(f:Finding)-[:INVOLVES_SERVICE]->(s:AWSService)
+        WITH s, f
+        RETURN s.name as service_name,
+               s.category as category,
+               count(f) as finding_count,
+               collect(f.severity) as severities
+        ORDER BY finding_count DESC
+        """
+        services_result = tx.run(services_query, analysis_id=analysis_id)
+
+        services = []
+        severity_order = {"CRITICAL": 4, "HIGH": 3, "MEDIUM": 2, "LOW": 1}
+
+        for record in services_result:
+            severities = record["severities"]
+            severity_breakdown = {}
+            for sev in ["CRITICAL", "HIGH", "MEDIUM", "LOW"]:
+                severity_breakdown[sev] = severities.count(sev)
+
+            # Find max severity
+            max_severity = None
+            if severities:
+                max_severity = max(severities, key=lambda s: severity_order.get(s, 0))
+
+            services.append(
+                {
+                    "service_name": record["service_name"],
+                    "category": record["category"] or "other",
+                    "finding_count": record["finding_count"],
+                    "severity_breakdown": severity_breakdown,
+                    "max_severity": max_severity,
+                }
+            )
+
+        # Step 3: Get topology relationships between services involved in this analysis
+        connections_query = """
+        MATCH (a:Analysis {id: $analysis_id})-[:HAS_FINDING]->(f:Finding)-[:INVOLVES_SERVICE]->(s1:AWSService)
+        WITH collect(DISTINCT s1.name) as involved_services
+        UNWIND involved_services as service1
+        MATCH (s1:AWSService {name: service1})-[r:ROUTES_TO|READS_FROM|WRITES_TO|MONITORS|AUTHORIZES|BACKS_UP|REPLICATES_TO]->(s2:AWSService)
+        WHERE s2.name IN involved_services
+        RETURN s1.name as source,
+               s2.name as target,
+               type(r) as rel_type,
+               r.description as description
+        """
+        connections_result = tx.run(connections_query, analysis_id=analysis_id)
+
+        connections = []
+        for record in connections_result:
+            connections.append(
+                {
+                    "source_service": record["source"],
+                    "target_service": record["target"],
+                    "relationship_type": record["rel_type"].lower(),
+                    "description": record.get("description"),
+                }
+            )
+
+        return {
+            "services": services,
+            "connections": connections,
+            "architecture_pattern": architecture_pattern,
+            "architecture_description": architecture_description,
+        }
 
     async def get_metrics(self) -> Dict[str, Any]:
         """

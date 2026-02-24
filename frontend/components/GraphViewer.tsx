@@ -14,12 +14,27 @@ import {
 } from "@xyflow/react";
 import dagre from "@dagrejs/dagre";
 import "@xyflow/react/dist/style.css";
-import { GraphNode, GraphEdge, Severity } from "@/lib/graphApi";
+import {
+  GraphNode,
+  GraphEdge,
+  Severity,
+  ArchitectureServiceNode,
+  ArchitectureConnection,
+  ArchitecturePattern,
+} from "@/lib/graphApi";
+import {
+  calculateServicePositions,
+  detectArchitecturePattern,
+} from "@/lib/architectureLayout";
 
 interface GraphViewerProps {
   nodes: GraphNode[];
   edges: GraphEdge[];
   className?: string;
+  // Architecture-first mode (Phase 2)
+  architectureServices?: ArchitectureServiceNode[];
+  architectureConnections?: ArchitectureConnection[];
+  architecturePattern?: ArchitecturePattern | null;
 }
 
 // Node dimensions for dagre layout
@@ -169,6 +184,178 @@ function getLayoutedElements(
   return { nodes: layoutedNodes, edges: layoutedEdges };
 }
 
+// Architecture-first layout (Phase 2)
+function getArchitectureLayout(
+  services: ArchitectureServiceNode[],
+  connections: ArchitectureConnection[],
+  pattern?: ArchitecturePattern | null
+): { nodes: Node[]; edges: Edge[] } {
+  // Calculate positions using architecture layout algorithm
+  const positions = calculateServicePositions(services, connections, pattern);
+
+  const layoutedNodes: Node[] = services.map((service) => {
+    const position = positions.get(service.service_name) || { x: 0, y: 0 };
+    const dimensions = NODE_DIMENSIONS.AWSService;
+
+    // Get color based on max severity
+    let color = "#7C3AED"; // default purple for services
+    if (service.max_severity) {
+      switch (service.max_severity) {
+        case "CRITICAL":
+          color = "#DC2626"; // red
+          break;
+        case "HIGH":
+          color = "#EA580C"; // orange
+          break;
+        case "MEDIUM":
+          color = "#CA8A04"; // yellow
+          break;
+        case "LOW":
+          color = "#16A34A"; // green
+          break;
+      }
+    }
+
+    return {
+      id: service.service_name,
+      type: "architecture",
+      position,
+      data: {
+        service,
+        color,
+        dimensions,
+      },
+    };
+  });
+
+  // Create edges for topology relationships
+  const layoutedEdges: Edge[] = connections.map((conn, index) => ({
+    id: `${conn.source_service}-${conn.target_service}-${index}`,
+    source: conn.source_service,
+    target: conn.target_service,
+    label: conn.relationship_type.replace("_", " "),
+    labelStyle: { fontSize: 10, fill: "#94A3B8" },
+    labelBgStyle: { fill: "#0A1628", fillOpacity: 0.8 },
+    style: { stroke: "#475569", strokeWidth: 2 },
+    markerEnd: {
+      type: MarkerType.ArrowClosed,
+      color: "#475569",
+    },
+  }));
+
+  return { nodes: layoutedNodes, edges: layoutedEdges };
+}
+
+// Architecture service node component (Phase 2)
+function ArchitectureServiceNode({ data }: { data: any }) {
+  const [showTooltip, setShowTooltip] = useState(false);
+  const service: ArchitectureServiceNode = data.service;
+  const color = data.color;
+  const dimensions = data.dimensions;
+
+  return (
+    <div
+      className="relative"
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
+    >
+      <div
+        style={{
+          width: `${dimensions.width}px`,
+          height: `${dimensions.height}px`,
+          backgroundColor: color,
+          borderRadius: "8px",
+          padding: "8px",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          border: "2px solid rgba(255,255,255,0.1)",
+          position: "relative",
+        }}
+      >
+        {/* Service name */}
+        <div
+          style={{
+            fontSize: "14px",
+            fontWeight: 600,
+            color: "#fff",
+            textAlign: "center",
+          }}
+        >
+          {service.service_name}
+        </div>
+
+        {/* Finding count badge */}
+        {service.finding_count > 0 && (
+          <div
+            style={{
+              position: "absolute",
+              top: "-8px",
+              right: "-8px",
+              backgroundColor: service.max_severity === "CRITICAL" ? "#DC2626" : "#EA580C",
+              color: "#fff",
+              borderRadius: "12px",
+              padding: "2px 8px",
+              fontSize: "11px",
+              fontWeight: 700,
+              border: "2px solid #0A1628",
+            }}
+          >
+            {service.finding_count}
+          </div>
+        )}
+      </div>
+
+      {/* Tooltip */}
+      {showTooltip && (
+        <div
+          className="absolute z-50 bg-card border border-border rounded-lg shadow-2xl p-3 text-xs min-w-[250px] max-w-[400px]"
+          style={{
+            top: "0",
+            left: `${dimensions.width + 15}px`,
+            pointerEvents: "none",
+          }}
+        >
+          <div className="space-y-2">
+            <div className="font-semibold text-foreground">{service.service_name}</div>
+            <div className="text-muted-foreground">Category: {service.category}</div>
+            {service.finding_count > 0 && (
+              <>
+                <div className="text-muted-foreground">
+                  Findings: {service.finding_count}
+                </div>
+                <div className="space-y-1">
+                  {service.severity_breakdown.CRITICAL > 0 && (
+                    <div className="text-red-400">
+                      🔴 Critical: {service.severity_breakdown.CRITICAL}
+                    </div>
+                  )}
+                  {service.severity_breakdown.HIGH > 0 && (
+                    <div className="text-orange-400">
+                      🟠 High: {service.severity_breakdown.HIGH}
+                    </div>
+                  )}
+                  {service.severity_breakdown.MEDIUM > 0 && (
+                    <div className="text-yellow-400">
+                      🟡 Medium: {service.severity_breakdown.MEDIUM}
+                    </div>
+                  )}
+                  {service.severity_breakdown.LOW > 0 && (
+                    <div className="text-green-400">
+                      🟢 Low: {service.severity_breakdown.LOW}
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Custom node component
 function CustomNode({ data }: { data: any }) {
   const [showTooltip, setShowTooltip] = useState(false);
@@ -292,16 +479,41 @@ function CustomNode({ data }: { data: any }) {
 
 const nodeTypes = {
   custom: CustomNode,
+  architecture: ArchitectureServiceNode,
 };
 
-export default function GraphViewer({ nodes, edges, className = "" }: GraphViewerProps) {
+export default function GraphViewer({
+  nodes,
+  edges,
+  className = "",
+  architectureServices,
+  architectureConnections,
+  architecturePattern,
+}: GraphViewerProps) {
   const [reactFlowNodes, setReactFlowNodes, onNodesChange] = useNodesState<Node>([]);
   const [reactFlowEdges, setReactFlowEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
-  const { nodes: layoutedNodes, edges: layoutedEdges } = useMemo(
-    () => getLayoutedElements(nodes, edges),
-    [nodes, edges]
-  );
+  // Choose layout based on available data
+  const useArchitectureLayout =
+    architectureServices && architectureServices.length > 0;
+
+  const { nodes: layoutedNodes, edges: layoutedEdges } = useMemo(() => {
+    if (useArchitectureLayout && architectureServices && architectureConnections) {
+      return getArchitectureLayout(
+        architectureServices,
+        architectureConnections,
+        architecturePattern
+      );
+    }
+    return getLayoutedElements(nodes, edges);
+  }, [
+    useArchitectureLayout,
+    architectureServices,
+    architectureConnections,
+    architecturePattern,
+    nodes,
+    edges,
+  ]);
 
   useEffect(() => {
     setReactFlowNodes(layoutedNodes);
