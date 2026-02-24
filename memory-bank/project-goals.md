@@ -1,6 +1,6 @@
 # Tesseric - Project Goals
 
-**Last Updated**: 2026-01-22
+**Last Updated**: 2026-02-23
 
 ## Project Identity
 
@@ -75,6 +75,8 @@ Tesseric is an **AWS architecture reviewer**, not a generic cloud tool.
 | Citations | Rarely provided | AWS doc links in every remediation |
 | Tone Options | Single tone | Professional + Roast (AWS-themed) |
 | Architecture Score | No scoring | 0-100 score weighted by AWS pillars |
+| Visualization | Text only | Interactive architecture graph with topology |
+| Problem Highlighting | None | Visual indicators on affected services |
 | Cost per review | ~$0.02 (GPT-4) | ~$0.011 (Claude Haiku) |
 
 ## Version Roadmap

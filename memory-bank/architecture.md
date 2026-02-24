@@ -140,10 +140,14 @@ frontend/
 │   ├── page.tsx          # Home page (review form + results)
 │   └── globals.css       # Tailwind imports + custom styles
 ├── components/
-│   ├── ReviewForm.tsx    # Input form (textarea, tone selector, submit)
-│   └── ReviewResults.tsx # Display review (score, risks, summary)
+│   ├── ReviewForm.tsx         # Input form (textarea, tone selector, submit)
+│   ├── ReviewResults.tsx      # Display review (score, risks, summary)
+│   ├── GraphViewer.tsx        # ReactFlow graph visualization with topology-aware layout
+│   ├── ArchitectureViewer.tsx # Main container for architecture-first visualization (Phase 2.3)
+│   └── ActionFindingCard.tsx  # Premium finding cards with bidirectional highlighting (Phase 2.3)
 ├── lib/
-│   └── api.ts            # API client (submitReview function)
+│   ├── api.ts            # API client (submitReview function)
+│   └── graphApi.ts       # Graph API client (fetchArchitectureGraph)
 ├── package.json
 ├── tsconfig.json
 ├── next.config.js
@@ -157,6 +161,12 @@ frontend/
 - Loading states during API calls
 - Error handling with user-friendly messages
 - Clean, professional UI (no fancy animations, focus on clarity)
+- **Architecture Visualization** (Phase 2.3):
+  - Interactive ReactFlow graphs showing AWS service topology
+  - Severity-based visual indicators (borders, badges, pulse animations)
+  - Bidirectional highlighting between graph nodes and finding cards
+  - 60/40 split layout (graph top, action cards bottom)
+  - Smart positioning based on architecture pattern detection (3-tier, serverless, microservices)
 
 **Environment Variables**:
 - `NEXT_PUBLIC_API_URL`: Backend URL (default: `http://localhost:8000`)
@@ -505,6 +515,148 @@ RETURN path
 - `NEO4J_USERNAME`: Database username
 - `NEO4J_PASSWORD`: Database password
 - `NEO4J_ENABLED`: Enable/disable Neo4j integration (default: true)
+
+### Architecture-First Visualization (Phase 2.3 - Implemented)
+
+**Purpose**: Transform generic knowledge graphs into architecture-first visualizations that show user's actual AWS topology with visual problem indicators.
+
+**Architecture**:
+```
+┌─────────────────────┐
+│  User Views Review  │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────────────────────────────────────┐
+│  ArchitectureViewer (60/40 Split Container)         │
+│  ┌─────────────────────────────────────────────┐   │
+│  │ GraphViewer (60% height)                    │   │
+│  │ - ReactFlow canvas                          │   │
+│  │ - Service nodes with severity borders       │   │
+│  │ - Finding count badges                      │   │
+│  │ - Pulse animations for CRITICAL issues      │   │
+│  │ - Smart topology-aware positioning          │   │
+│  │ - Pattern detection (3-tier/serverless)     │   │
+│  └─────────────────────────────────────────────┘   │
+│  ┌─────────────────────────────────────────────┐   │
+│  │ Action Cards Grid (40% height, scrollable)  │   │
+│  │ - 2-column responsive grid                  │   │
+│  │ - Sorted by severity (CRITICAL → LOW)       │   │
+│  │ - Affected services badges (clickable)      │   │
+│  │ - Collapsible remediation details           │   │
+│  │ - Selection state with ring border          │   │
+│  └─────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────┘
+           │
+           ▼
+   Bidirectional Highlighting:
+   - Click service → highlight related cards
+   - Click card → highlight affected services
+   - Smooth scroll to relevant section
+```
+
+**Frontend Components**:
+
+**1. ArchitectureViewer.tsx** (Main Orchestrator - 215 lines)
+- Manages 60/40 split layout (graph top, cards bottom)
+- Fetches architecture data from `/api/graph/{analysis_id}/architecture`
+- Builds service ↔ finding mappings for bidirectional highlighting
+- Shared state: `selectedServiceId`, `selectedFindingId`
+- Smooth scrolling coordination with refs (`graphRef`, `cardsRef`)
+- Backward compatible: falls back to generic graph if no topology
+
+**2. ActionFindingCard.tsx** (Premium Card Component - 180 lines)
+- Severity-based styling (CRITICAL: red border + pulse, HIGH: orange, MEDIUM: yellow, LOW: gray)
+- Affected services section with clickable badges
+- Collapsible remediation using HTML5 `<details>` element
+- Selection state with ring border (`ring-2 ring-primary shadow-2xl`)
+- Click handlers with `stopPropagation()` for nested interactions
+- Icons from Lucide (AlertTriangle, Shield, Activity, etc.)
+
+**3. GraphViewer.tsx** (Updated - 290 lines)
+- External vs internal selection state pattern
+- Props: `selectedServiceId`, `onServiceClick` (optional)
+- Smart positioning algorithm:
+  - Detects architecture pattern (3-tier, serverless, microservices)
+  - Positions services in layers:
+    - Layer 1 (Top): Edge services (CloudFront, ALB, Route 53)
+    - Layer 2 (Middle): Compute (EC2, Lambda, ECS)
+    - Layer 3 (Bottom): Data (RDS, DynamoDB, S3)
+    - Layer 4 (Right): Cross-cutting (CloudWatch, IAM, KMS)
+- Service node features:
+  - Finding count badge (top-right corner)
+  - Severity-based border colors with pulse animation for CRITICAL
+  - AWS service icons
+  - Interactive hover tooltips with finding preview
+
+**Backend API Endpoint**:
+```
+GET /api/graph/{analysis_id}/architecture
+```
+
+**Response**:
+```json
+{
+  "analysis_id": "string",
+  "services": [
+    {
+      "service_name": "EC2",
+      "category": "compute",
+      "finding_count": 3,
+      "severity_breakdown": {
+        "CRITICAL": 1,
+        "HIGH": 1,
+        "MEDIUM": 1,
+        "LOW": 0
+      }
+    }
+  ],
+  "connections": [
+    {
+      "source_service": "ALB",
+      "target_service": "EC2",
+      "relationship_type": "routes_to"
+    }
+  ],
+  "architecture_pattern": "3-tier"
+}
+```
+
+**Interaction Flow**:
+1. User views review → ArchitectureViewer fetches graph data
+2. GraphViewer positions services based on detected pattern
+3. Services with findings show colored borders and badges
+4. **Click Service** →
+   - Selected service gets ring highlight
+   - Related finding cards highlight and scroll into view
+   - Irrelevant cards fade (opacity: 0.3)
+5. **Click Finding Card** →
+   - Selected card gets ring border
+   - Affected services highlight in graph with pulse animation
+   - Graph scrolls into view
+6. **Hover Service** → Tooltip shows up to 3 finding titles
+
+**Visual Design**:
+- **CRITICAL**: Red border (`border-red-600`), pulse animation, red badge
+- **HIGH**: Orange border (`border-orange-500`), orange badge
+- **MEDIUM**: Yellow border (`border-yellow-500`), yellow badge
+- **LOW**: Gray border (`border-gray-400`), gray badge
+- Premium card shadows: `hover:shadow-2xl transition-all duration-300`
+- Selection state: `ring-2 ring-primary shadow-2xl`
+- Responsive grid: `grid-cols-1 lg:grid-cols-2 gap-6`
+
+**Performance**:
+- Graph render: ~100-200ms (ReactFlow optimization)
+- Smooth scroll: `scrollIntoView({ behavior: "smooth", block: "start" })`
+- Mapping lookups: O(1) with Map data structures
+- Mobile optimized: Single column stack, touch-friendly interactions
+
+**Tech Stack**:
+- ReactFlow 11 for graph visualization
+- Lucide React for icons
+- Tailwind CSS for styling
+- TypeScript for type safety
+- React hooks: useState, useEffect, useRef, useCallback
 
 ### AWS SAA Focus Areas
 

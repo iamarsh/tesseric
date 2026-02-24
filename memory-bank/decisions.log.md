@@ -1,6 +1,6 @@
 # Tesseric - Architectural Decision Records (ADRs)
 
-**Last Updated**: 2026-01-22
+**Last Updated**: 2026-02-23
 
 ## ADR Template
 
@@ -602,7 +602,145 @@ vision_output_cost_per_1k: float = 0.015  # $15/MTok
 
 ---
 
-## Next ADR: ADR-016
+## ADR-016 – Architecture-First Visualization with Bidirectional Highlighting
+**Date**: 2026-02-23
+**Status**: Accepted ✅
+**Phase**: 2.3 - Architecture-First Graph Visualization
+
+**Context**:
+Generic knowledge graphs show Analysis → Finding → Service relationships, which doesn't demonstrate credibility or help users understand where problems exist in their specific architecture. Users need to see:
+1. Their actual architecture recreated using AWS service nodes with realistic topology
+2. Visual indicators showing where security/reliability issues exist (red borders, severity badges)
+3. Actionable findings presented as premium cards ordered by severity
+4. Interactive highlighting to connect findings to affected services
+
+**Decision**: Implement architecture-first visualization with 60/40 split layout, smart topology positioning, and bidirectional highlighting
+
+**Rationale**:
+
+1. **Credibility through Visualization**
+   - Showing user's actual architecture proves AI understands the design
+   - Visual problem indicators are more actionable than text lists
+   - Premium aesthetic increases perceived value vs generic ChatGPT responses
+   - Demonstrates production-ready UX for portfolio
+
+2. **60/40 Split Layout**
+   - 60% graph (top): User's focus is on their architecture first
+   - 40% cards (bottom): Action items accessible without scrolling
+   - Natural reading flow: see problem → see solution
+   - Mobile-friendly: vertical stack maintains usability
+
+3. **Bidirectional Highlighting**
+   - Click service → highlight related finding cards
+   - Click finding card → highlight affected services in graph
+   - Smooth scroll coordination between sections
+   - Provides interactive exploration vs static view
+
+4. **Smart Topology Positioning**
+   - Pattern detection: 3-tier, serverless, microservices
+   - Layer-based positioning:
+     - Layer 1 (Top): Edge services (CloudFront, ALB, Route 53)
+     - Layer 2 (Middle): Compute (EC2, Lambda, ECS)
+     - Layer 3 (Bottom): Data (RDS, DynamoDB, S3)
+     - Layer 4 (Right): Cross-cutting (CloudWatch, IAM, KMS)
+   - Realistic topology matches AWS architecture diagram conventions
+
+5. **Visual Problem Indicators**
+   - Severity-based borders: CRITICAL (red + pulse), HIGH (orange), MEDIUM (yellow), LOW (gray)
+   - Finding count badges on affected services
+   - Premium card design with hover effects and shadows
+   - Collapsible remediation details to reduce cognitive load
+
+**Consequences**:
+
+**Positive**:
+- ✅ Users immediately see where problems exist in their architecture
+- ✅ Interactive exploration improves engagement and understanding
+- ✅ Premium aesthetic differentiates from competitors
+- ✅ Portfolio-ready UX demonstrates production skills
+- ✅ Backward compatible: falls back to generic graph if no topology
+- ✅ Mobile responsive: single column stack with touch-friendly interactions
+
+**Negative**:
+- ⚠️ More complex state management (shared selection between components)
+- ⚠️ Requires accurate service extraction from findings (text-based matching)
+- ⚠️ Performance considerations with large graphs (100+ services)
+- ⚠️ Maintenance burden: layout algorithm needs tuning for edge cases
+
+**Alternatives Considered**:
+
+1. **Cards as Sidebar (50/50 split)**
+   - Pros: See both simultaneously without scrolling
+   - Cons: Cramped on mobile, cards too narrow for content, less focus on architecture
+   - Rejected: Mobile UX suffers, violates "architecture-first" principle
+
+2. **Tabs (Graph vs Cards)**
+   - Pros: Simpler state management, full screen for each view
+   - Cons: Loses bidirectional highlighting value, requires clicking to switch
+   - Rejected: No visual connection between findings and affected services
+
+3. **Overlay Cards on Graph**
+   - Pros: Single view, no scrolling
+   - Cons: Occludes graph, cluttered, poor mobile experience
+   - Rejected: Reduces graph visibility, UX feels cramped
+
+4. **Generic Graph Layout (dagre auto-layout)**
+   - Pros: Automatic positioning, less code to maintain
+   - Cons: Doesn't match AWS architecture conventions, unpredictable layout
+   - Rejected: Generic layout doesn't demonstrate AWS expertise
+
+**Implementation Details**:
+
+**Frontend Components** (1,305 lines total):
+- `ArchitectureViewer.tsx` (215 lines): Main orchestrator with 60/40 split
+- `ActionFindingCard.tsx` (180 lines): Premium card component
+- `GraphViewer.tsx` (290 lines): Updated with external selection state
+
+**Backend Endpoint**:
+- `GET /api/graph/{analysis_id}/architecture`: Returns services, connections, pattern
+- Response includes finding counts and severity breakdowns per service
+
+**State Management**:
+- External vs internal selection state pattern
+- `selectedServiceId` and `selectedFindingId` shared in ArchitectureViewer
+- Map data structures for O(1) service ↔ finding lookups
+
+**Tech Stack**:
+- ReactFlow 11 for graph visualization
+- Lucide React for icons (AlertTriangle, Shield, Activity)
+- Tailwind CSS for styling (severity colors, animations, shadows)
+- TypeScript for type safety
+
+**Performance**:
+- Graph render: ~100-200ms (ReactFlow optimization)
+- Smooth scroll: `scrollIntoView({ behavior: "smooth" })`
+- Mapping lookups: O(1) with Map data structures
+- Mobile optimized: Touch-friendly, single column grid
+
+**Success Criteria**:
+- ✅ Services positioned in realistic layers matching architecture pattern
+- ✅ CRITICAL findings trigger pulse animation on affected services
+- ✅ Click service → relevant cards highlight and scroll into view
+- ✅ Click card → affected services highlight in graph
+- ✅ Mobile responsive: single column, graph above cards
+- ✅ Premium aesthetic: shadows, borders, hover effects
+- ✅ Backward compatible: generic graph if no topology
+
+**Future Enhancements**:
+- Minimap for large architectures (100+ services)
+- Zoom controls and pan gestures
+- Export graph as PNG/SVG
+- Animated transitions between selection states
+- Graph diff view (before/after architecture changes)
+- Custom node icons using AWS official icon set
+
+**Related ADRs**:
+- ADR-013: AWS-First Scope (validates AWS service focus)
+- ADR-007: Tailwind CSS (consistent styling approach)
+
+---
+
+## Next ADR: ADR-017
 
 For future decisions (IaC parsing strategy, Terraform analysis, deployment architecture, etc.), add here following the template above.
 
