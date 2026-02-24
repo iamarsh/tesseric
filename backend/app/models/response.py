@@ -9,6 +9,62 @@ from typing import List, Optional, Literal, Any
 from datetime import datetime, timezone
 
 
+class ServiceConnection(BaseModel):
+    """Service-to-service connection in architecture topology."""
+
+    source_service: str = Field(
+        ...,
+        description="Source AWS service name",
+        examples=["ALB", "Lambda", "EC2"],
+    )
+
+    target_service: str = Field(
+        ...,
+        description="Target AWS service name",
+        examples=["EC2", "DynamoDB", "S3"],
+    )
+
+    relationship_type: Literal[
+        "routes_to",
+        "reads_from",
+        "writes_to",
+        "monitors",
+        "authorizes",
+        "backs_up",
+        "replicates_to",
+    ] = Field(
+        ...,
+        description="Type of connection between services",
+    )
+
+    description: Optional[str] = Field(
+        default=None,
+        description="Brief description of the connection",
+        examples=["Load balancer distributes traffic to EC2 instances"],
+    )
+
+
+class ArchitectureTopology(BaseModel):
+    """Complete architecture topology with services and connections."""
+
+    services: List[str] = Field(
+        default_factory=list,
+        description="List of all AWS services mentioned in the architecture",
+        examples=[["ALB", "EC2", "RDS", "CloudWatch"]],
+    )
+
+    connections: List[ServiceConnection] = Field(
+        default_factory=list,
+        description="Service-to-service relationships",
+    )
+
+    architecture_pattern: Optional[str] = Field(
+        default=None,
+        description="Detected architecture pattern",
+        examples=["3-tier", "serverless", "microservices", "event-driven", "custom"],
+    )
+
+
 class RiskItem(BaseModel):
     """Individual risk/finding in the architecture."""
 
@@ -125,6 +181,16 @@ class ReviewResponse(BaseModel):
     metadata: Optional[dict[str, Any]] = Field(
         default=None,
         description="Analysis metadata (method, provider, cost, token usage)",
+    )
+
+    topology: Optional[ArchitectureTopology] = Field(
+        default=None,
+        description="Architecture topology with service connections (Phase 1+)",
+    )
+
+    architecture_description: Optional[str] = Field(
+        default=None,
+        description="Original architecture description provided by user",
     )
 
     model_config = ConfigDict(

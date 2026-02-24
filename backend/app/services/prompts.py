@@ -353,7 +353,19 @@ You must return ONLY a valid JSON object (no markdown, no code blocks, no explan
     }
   ],
   "summary": "<2-3 sentence summary of key findings>",
-  "tone": "<standard|roast>"
+  "tone": "<standard|roast>",
+  "topology": {
+    "services": ["<service1>", "<service2>"],
+    "connections": [
+      {
+        "source_service": "<AWS service name>",
+        "target_service": "<AWS service name>",
+        "relationship_type": "<routes_to|reads_from|writes_to|monitors|authorizes|backs_up|replicates_to>",
+        "description": "<brief description of connection>"
+      }
+    ],
+    "architecture_pattern": "<3-tier|serverless|microservices|event-driven|monolith|custom>"
+  }
 }
 
 Scoring Logic:
@@ -365,6 +377,69 @@ Scoring Logic:
 - Minimum score: 0
 
 Identify 3-10 risks based on the architecture description. Map each risk to the appropriate AWS Well-Architected pillar. Provide specific AWS service recommendations in remediation steps.
+
+## Architecture Topology Extraction
+
+IMPORTANT: Extract the service-to-service relationships from the architecture description to build a topology map.
+
+**How to identify connections**:
+1. **Traffic flow** (routes_to): Load balancers → Compute, CDN → Origin, API Gateway → Lambda
+   - Example: "ALB forwards requests to EC2" → ALB routes_to EC2
+   - Example: "CloudFront serves S3 content" → CloudFront routes_to S3
+
+2. **Data operations** (reads_from, writes_to): Application → Database, Lambda → S3
+   - Example: "EC2 queries RDS database" → EC2 reads_from RDS
+   - Example: "Lambda writes logs to S3" → Lambda writes_to S3
+
+3. **Monitoring** (monitors): CloudWatch → Services, X-Ray → Lambda
+   - Example: "CloudWatch monitors EC2 metrics" → CloudWatch monitors EC2
+
+4. **Authorization** (authorizes): IAM → Resources
+   - Example: "IAM role grants Lambda access to DynamoDB" → IAM authorizes Lambda
+
+5. **Backup/Replication** (backs_up, replicates_to):
+   - Example: "RDS backups to S3" → RDS backs_up S3
+   - Example: "S3 replicates to secondary region" → S3 replicates_to S3
+
+**Relationship types**:
+- routes_to: Traffic routing (load balancers, gateways, CDN)
+- reads_from: Read operations (queries, API calls, file reads)
+- writes_to: Write operations (inserts, updates, file writes)
+- monitors: Observability and logging
+- authorizes: IAM and access control
+- backs_up: Backup and snapshot operations
+- replicates_to: Data replication and synchronization
+
+**Services list**: Include ALL AWS services mentioned in the architecture (from: EC2, Lambda, RDS, S3, DynamoDB, ECS, EKS, ALB, NLB, CloudFront, Route 53, API Gateway, SQS, SNS, CloudWatch, etc.)
+
+**Architecture pattern detection**:
+- **3-tier**: Load balancer → Compute (EC2/ECS) → Database (RDS/Aurora)
+- **serverless**: API Gateway → Lambda → DynamoDB/S3
+- **microservices**: Multiple compute services with message queues (SQS/SNS)
+- **event-driven**: EventBridge/SNS triggering Lambda functions
+- **monolith**: Single large compute service with database
+- **custom**: None of the above patterns
+
+**Example topology**:
+For "CloudFront CDN distributes traffic to ALB. ALB routes to EC2 Auto Scaling Group. EC2 instances read from RDS Multi-AZ database. CloudWatch monitors all services."
+
+{
+  "topology": {
+    "services": ["CloudFront", "ALB", "EC2", "RDS", "CloudWatch"],
+    "connections": [
+      {"source_service": "CloudFront", "target_service": "ALB", "relationship_type": "routes_to", "description": "CDN forwards traffic to load balancer"},
+      {"source_service": "ALB", "target_service": "EC2", "relationship_type": "routes_to", "description": "Load balancer distributes to Auto Scaling Group"},
+      {"source_service": "EC2", "target_service": "RDS", "relationship_type": "reads_from", "description": "Application queries Multi-AZ database"},
+      {"source_service": "CloudWatch", "target_service": "CloudFront", "relationship_type": "monitors", "description": "Metrics collection"},
+      {"source_service": "CloudWatch", "target_service": "ALB", "relationship_type": "monitors", "description": "Metrics collection"},
+      {"source_service": "CloudWatch", "target_service": "EC2", "relationship_type": "monitors", "description": "Metrics collection"},
+      {"source_service": "CloudWatch", "target_service": "RDS", "relationship_type": "monitors", "description": "Metrics collection"}
+    ],
+    "architecture_pattern": "3-tier"
+  }
+}
+
+If no clear architecture topology is described, return an empty connections array but still list services: {"topology": {"services": [...], "connections": [], "architecture_pattern": "custom"}}
 """
 
 
