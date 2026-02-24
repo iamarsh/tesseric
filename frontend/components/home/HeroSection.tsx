@@ -38,7 +38,7 @@ export function HeroSection() {
               </a>
             </div>
             <p className="text-xs text-muted-foreground">
-              No signup required · Pay per use
+              No signup required · Instant analysis
             </p>
           </div>
 

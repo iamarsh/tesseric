@@ -28,7 +28,7 @@ Unlike pasting your architecture into ChatGPT, Tesseric provides:
 | **Output Format** | Unstructured paragraphs | Structured JSON with pillar mapping |
 | **Recommendations** | Generic ("use encryption") | AWS-specific ("use AWS KMS with CMK") |
 | **Consistency** | Variable responses | Deterministic risk framework |
-| **Cost Tracking** | None | ~$0.011 per review with token logging |
+| **Cost Tracking** | None | Token usage logging and cost estimation |
 | **Multi-AZ Analysis** | May or may not mention | Always evaluates (AWS best practice) |
 | **AWS Doc Links** | Rarely provided | Always included in references |
 | **Tone Options** | One | Professional + Roast modes |
@@ -236,7 +236,7 @@ curl -X POST https://tesseric-production.up.railway.app/review \
       "input_tokens": 7623,
       "output_tokens": 687
     },
-    "cost_usd": 0.0112
+    "processing_time_ms": 2340
   }
 }
 ```
@@ -272,7 +272,6 @@ curl -X POST https://tesseric-production.up.railway.app/review \
 2. Bedrock vision API (Claude 3 Sonnet) extracts architecture details
 3. Extracted text feeds into existing analysis pipeline (Claude 3.5 Haiku)
 4. Returns same structured response as text reviews
-5. Cost: ~$0.023 per diagram review (vision $0.012 + analysis $0.011)
 
 **Example Response (Image Upload)**:
 
@@ -292,9 +291,7 @@ curl -X POST https://tesseric-production.up.railway.app/review \
     "image_dimensions": [800, 600],
     "extraction_model": "anthropic.claude-3-sonnet-20240229-v1:0",
     "analysis_method": "bedrock_claude_3_5_haiku",
-    "vision_cost_usd": 0.0118,
-    "cost_usd": 0.0112,
-    "total_cost_usd": 0.0230
+    "processing_time_ms": 3450
   }
 }
 ```
@@ -500,7 +497,7 @@ tesseric/
 ### Phase 1: AWS Bedrock Integration ✅ COMPLETE (2026-01-22)
 - ✅ Real Amazon Bedrock integration (Claude 3.5 Haiku)
 - ✅ AWS Well-Architected context (~6K tokens inline)
-- ✅ Token usage tracking and cost logging (~$0.011/review)
+- ✅ Token usage tracking and cost estimation
 - ✅ Professional + Roast tone modes
 - ✅ Graceful fallback to pattern matching
 - ✅ Provider validation (AWS-only for v1)
@@ -520,7 +517,7 @@ tesseric/
 - ✅ Architecture component extraction from diagrams
 - ✅ Visual element to text conversion
 - ✅ Feed extracted text to existing RAG pipeline
-- ✅ Cost: ~$0.015-0.023 per diagram analysis
+- ✅ Processing time tracking for performance monitoring
 
 ### Phase 3: Knowledge Graph & Production Polish ✅ COMPLETE (2026-02-22)
 - ✅ Neo4j AuraDB knowledge graph backend integration
@@ -567,35 +564,14 @@ tesseric/
 
 ---
 
-## 💰 Cost Breakdown
+## 💰 Infrastructure
 
-### Per Review
-- **Text Analysis**: ~$0.001 (Claude 3.5 Haiku)
-  - Input tokens: ~7,600 ($0.0008)
-  - Output tokens: ~700 ($0.0004)
-- **Image Analysis**: ~$0.023 total
-  - Vision extraction: ~$0.012 (Claude 3 Sonnet)
-  - Text analysis: ~$0.011 (Claude 3.5 Haiku)
-- **Knowledge Graph Storage**: $0 (Neo4j AuraDB Free tier)
-
-### Monthly Infrastructure
-- **Railway Hosting**: $5/month (Hobby plan)
-- **Vercel Hosting**: $0/month (Hobby plan, generous limits)
-- **AWS Bedrock**: Pay-per-use (no fixed costs)
-- **Neo4j AuraDB**: $0/month (Free tier: 200K nodes, 400K relationships)
-- **Total Fixed**: ~$5/month + $0.001 per text review + $0.023 per image review
-
-### Scaling Estimates
-- 1,000 text reviews/month: $1 AI + $5 hosting = **$6/month**
-- 10,000 text reviews/month: $10 AI + $5 hosting = **$15/month**
-- 100,000 text reviews/month: $100 AI + $5 hosting = **$105/month**
-
-**Compare**: ChatGPT API (GPT-4) costs ~$0.15/review (150x more expensive)
-
-**Neo4j Limits** (Free Tier):
-- Current usage: ~200 nodes, ~500 edges per review
-- Free tier: 200K nodes, 400K relationships
-- Capacity: ~1,000 reviews before needing paid tier ($65/month for Professional)
+### Technology Stack
+- **AI/ML**: Amazon Bedrock with Claude 3.5 Haiku for text analysis, Claude 3 Sonnet for vision extraction
+- **Knowledge Graph**: Neo4j AuraDB Free tier (200K nodes, 400K relationships)
+- **Backend Hosting**: Railway (Hobby plan)
+- **Frontend Hosting**: Vercel (Hobby plan)
+- **Cost Tracking**: Built-in token usage logging and cost estimation for analysis
 
 ---
 

@@ -11,37 +11,6 @@ interface FAQItem {
 
 const faqItems: FAQItem[] = [
   {
-    category: "pricing",
-    question: "How much does a review cost?",
-    answer: (
-      <>
-        <p className="mb-3">
-          Text-based architecture reviews cost <strong>~$0.01</strong> per review. If you upload an architecture diagram (PNG/JPG/PDF), the cost is <strong>~$0.023</strong> per review (includes vision extraction + analysis).
-        </p>
-        <p className="mb-3">
-          This is beta pricing-Tesseric is powered by Amazon Bedrock with Claude 3.5 Haiku, one of the most cost-efficient AI models available.
-        </p>
-        <p>
-          <strong>No subscription required.</strong> You only pay for what you use.
-        </p>
-      </>
-    ),
-  },
-  {
-    category: "pricing",
-    question: "Is there a free tier or trial?",
-    answer: (
-      <>
-        <p className="mb-3">
-          Yes! During our beta launch, all users get <strong>5 free reviews</strong> (text or diagram) to try Tesseric with no signup required.
-        </p>
-        <p>
-          We're also offering <strong>early adopter pricing</strong>: The first 1000 users lock in $0.01/review permanently (regular pricing will be $0.05/review after beta).
-        </p>
-      </>
-    ),
-  },
-  {
     category: "privacy",
     question: "Where is my architecture data stored?",
     answer: (
@@ -156,9 +125,9 @@ const faqItems: FAQItem[] = [
                 <td className="py-2 px-3">Generic (e.g., "use encryption")</td>
               </tr>
               <tr className="border-t border-border">
-                <td className="py-2 px-3">Cost per Review</td>
-                <td className="py-2 px-3">~$0.01</td>
-                <td className="py-2 px-3">~$20/month (ChatGPT Plus)</td>
+                <td className="py-2 px-3">Architecture Focus</td>
+                <td className="py-2 px-3">Purpose-built for AWS architectures</td>
+                <td className="py-2 px-3">General-purpose assistant</td>
               </tr>
             </tbody>
           </table>

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     default: 'Tesseric - Instant AWS Architecture Reviews',
     template: '%s | Tesseric'
   },
-  description: 'Instant AWS architecture reviews with a clear architecture score and Well-Architected-aligned risks in seconds. Powered by Amazon Bedrock and Claude 3.5 Haiku. Beta pricing: ~$0.01 per review, no signup required.',
+  description: 'Instant AWS architecture reviews with a clear architecture score and Well-Architected-aligned risks in seconds. Powered by Amazon Bedrock and Claude 3.5 Haiku. No signup required.',
   keywords: [
     'AWS architecture review',
     'Well-Architected Framework',
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'Tesseric - Instant AWS Architecture Reviews',
-    description: 'Get an instant architecture score with Well-Architected-aligned risks and remediations. Powered by Amazon Bedrock. Beta pricing: ~$0.01 per review, no signup required.',
+    description: 'Get an instant architecture score with Well-Architected-aligned risks and remediations. Powered by Amazon Bedrock. No signup required.',
     type: 'website',
     locale: 'en_US',
     url: 'https://tesseric.ca',

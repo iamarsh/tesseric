@@ -18,7 +18,7 @@ export function FinalCTA() {
           Get My Architecture Score
         </a>
         <p className="text-sm text-primary-foreground/70 mt-4">
-          Beta pricing: $0.01 · No signup required · ~10 seconds
+          No signup required · Instant analysis
         </p>
       </div>
     </section>

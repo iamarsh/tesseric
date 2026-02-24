@@ -66,12 +66,6 @@ export default function Home() {
       "@type": "SoftwareApplication",
       "name": "Tesseric",
       "applicationCategory": "DeveloperApplication",
-      "offers": {
-        "@type": "Offer",
-        "price": "0.01",
-        "priceCurrency": "USD",
-        "description": "Pay per review, no subscription required"
-      },
       "description": "Instant AWS architecture reviews that deliver a Well-Architected-aligned score, risks, and remediations",
       "operatingSystem": "Web",
       "url": "https://tesseric.ca",
@@ -88,7 +82,7 @@ export default function Home() {
         "Remediation recommendations",
         "Professional and Roast tone modes",
         "No signup required",
-        "Cost: ~$0.01 per review"
+        "Neo4j knowledge graph integration"
       ]
     },
     // Organization schema
@@ -115,14 +109,6 @@ export default function Home() {
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "How much does a review cost?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Text-based architecture reviews cost ~$0.01 per review. If you upload an architecture diagram (PNG/JPG/PDF), the cost is ~$0.023 per review (includes vision extraction + analysis). This is beta pricing-Tesseric is powered by Amazon Bedrock with Claude 3.5 Haiku. No subscription required. You only pay for what you use."
-          }
-        },
-        {
-          "@type": "Question",
           "name": "Where is my architecture data stored?",
           "acceptedAnswer": {
             "@type": "Answer",
@@ -142,7 +128,7 @@ export default function Home() {
           "name": "How is Tesseric different from ChatGPT?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Tesseric is purpose-built for AWS architectures with curated Well-Architected context (2024), structured JSON output with pillar mapping, and AWS-specific recommendations (e.g., 'Enable RDS Multi-AZ'). ChatGPT uses generic 2023 training data, provides unstructured paragraphs, and gives generic advice (e.g., 'use encryption'). Tesseric costs ~$0.01 per review vs ChatGPT Plus at ~$20/month."
+            "text": "Tesseric is purpose-built for AWS architectures with curated Well-Architected context (2024), structured JSON output with pillar mapping, and AWS-specific recommendations (e.g., 'Enable RDS Multi-AZ'). ChatGPT uses generic 2023 training data, provides unstructured paragraphs, and gives generic advice (e.g., 'use encryption')."
           }
         },
         {
@@ -180,7 +166,7 @@ export default function Home() {
         "ratingValue": "5",
         "bestRating": "5"
       },
-      "reviewBody": "Tesseric caught a single-AZ RDS setup that would've cost us $200K+ in downtime. The $0.01 review literally saved us a quarter-million dollars. Now I review every architecture before stakeholder presentations."
+      "reviewBody": "Tesseric caught a single-AZ RDS setup that would've cost us $200K+ in downtime. The review literally saved us a quarter-million dollars. Now I review every architecture before stakeholder presentations."
     },
     {
       "@context": "https://schema.org",

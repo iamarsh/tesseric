@@ -24,7 +24,7 @@ const testimonials: Testimonial[] = [
   },
   {
     quote:
-      "Tesseric caught a single-AZ RDS setup that would've cost us $200K+ in downtime. The $0.01 review literally saved us a quarter-million dollars. Now I review every architecture before stakeholder presentations.",
+      "Tesseric caught a single-AZ RDS setup that would've cost us $200K+ in downtime. The review literally saved us a quarter-million dollars. Now I review every architecture before stakeholder presentations.",
     name: "Emily Patel",
     role: "Cloud Solutions Architect",
     company: "Enterprise SaaS",
@@ -50,7 +50,7 @@ const testimonials: Testimonial[] = [
   },
   {
     quote:
-      "Tesseric flagged an S3 bucket with public read that contained customer PII. We didn't even know it existed. One $0.01 review prevented a potential GDPR nightmare.",
+      "Tesseric flagged an S3 bucket with public read that contained customer PII. We didn't even know it existed. One review prevented a potential GDPR nightmare.",
     name: "Priya Sharma",
     role: "Cloud Security Engineer",
     outcome: "Prevented GDPR violation",
