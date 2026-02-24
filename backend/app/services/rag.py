@@ -148,6 +148,29 @@ async def analyze_with_bedrock(request: ReviewRequest) -> ReviewResponse:
     # 6. Convert to ReviewResponse model
     review_response = ReviewResponse(**analysis_json)
 
+    # 6a. Add original architecture description
+    review_response.architecture_description = request.design_text
+
+    # 6b. Validate topology connections (ensure services exist in AWS_SERVICES)
+    if review_response.topology and review_response.topology.connections:
+        from app.graph.service_parser import AWS_SERVICES
+
+        valid_service_names = set()
+        for category_services in AWS_SERVICES.values():
+            valid_service_names.update(category_services)
+
+        # Filter out invalid connections
+        valid_connections = []
+        for conn in review_response.topology.connections:
+            if conn.source_service in valid_service_names and conn.target_service in valid_service_names:
+                valid_connections.append(conn)
+            else:
+                logger.warning(
+                    f"Invalid topology connection: {conn.source_service} -> {conn.target_service}"
+                )
+
+        review_response.topology.connections = valid_connections
+
     # 7. Add metadata
     review_response.metadata = {
         "analysis_method": "bedrock_claude_3_5_haiku",

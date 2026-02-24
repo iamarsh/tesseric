@@ -102,13 +102,14 @@ class Neo4jClient:
         Write architecture review to Neo4j as a knowledge graph.
 
         Creates:
-        - 1 Analysis node
+        - 1 Analysis node (with architecture_description and architecture_pattern)
         - N Finding nodes (MERGE - deduplicate across reviews by title+severity+category)
         - M AWSService nodes (MERGE - accumulate across analyses)
         - Relationships: HAS_FINDING, INVOLVES_SERVICE, CO_OCCURS_WITH
+        - Topology relationships: ROUTES_TO, WRITES_TO, READS_FROM, MONITORS, etc.
 
         Args:
-            review_response: ReviewResponse dict with review_id, risks, score, etc.
+            review_response: ReviewResponse dict with review_id, risks, topology, etc.
 
         Returns:
             True if write succeeded, False otherwise
@@ -169,6 +170,11 @@ class Neo4jClient:
         metadata = review_response.get("metadata", {})
         processing_time_ms = metadata.get("processing_time_ms") if metadata else None
 
+        # Extract topology and architecture description
+        topology = review_response.get("topology", {})
+        architecture_pattern = topology.get("architecture_pattern") if topology else None
+        architecture_description = review_response.get("architecture_description")
+
         analysis_query = """
         CREATE (a:Analysis {
             id: $review_id,
@@ -176,7 +182,9 @@ class Neo4jClient:
             score: $score,
             summary: $summary,
             tone: $tone,
-            processing_time_ms: $processing_time_ms
+            processing_time_ms: $processing_time_ms,
+            architecture_description: $architecture_description,
+            architecture_pattern: $architecture_pattern
         })
         RETURN a
         """
@@ -188,6 +196,8 @@ class Neo4jClient:
             summary=review_response.get("summary"),
             tone=review_response.get("tone"),
             processing_time_ms=processing_time_ms,
+            architecture_description=architecture_description,
+            architecture_pattern=architecture_pattern,
         )
 
         # 2. Create/merge Finding nodes + relationships
@@ -291,6 +301,31 @@ class Neo4jClient:
                         service1=service1,
                         service2=service2,
                     )
+
+        # 6. Create topology relationships (ROUTES_TO, WRITES_TO, etc.)
+        topology = review_response.get("topology")
+        if topology and topology.get("connections"):
+            for conn in topology["connections"]:
+                source = conn.get("source_service")
+                target = conn.get("target_service")
+                rel_type = conn.get("relationship_type", "routes_to").upper()
+                description = conn.get("description", "")
+
+                if not source or not target:
+                    continue
+
+                # Ensure services exist before creating relationship
+                tx.run(
+                    """
+                    MATCH (s1:AWSService {name: $source})
+                    MATCH (s2:AWSService {name: $target})
+                    MERGE (s1)-[r:%s]->(s2)
+                    ON CREATE SET r.description = $description, r.created_at = datetime()
+                    """ % rel_type,
+                    source=source,
+                    target=target,
+                    description=description,
+                )
 
     async def get_graph_for_analysis(self, analysis_id: str) -> Dict[str, List]:
         """
