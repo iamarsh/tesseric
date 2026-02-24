@@ -246,20 +246,64 @@ function getArchitectureLayout(
   return { nodes: layoutedNodes, edges: layoutedEdges };
 }
 
-// Architecture service node component (Phase 2)
+// Architecture service node component (Phase 3)
 function ArchitectureServiceNode({ data }: { data: any }) {
   const [showTooltip, setShowTooltip] = useState(false);
   const service: ArchitectureServiceNode = data.service;
   const color = data.color;
   const dimensions = data.dimensions;
+  const isSelected = data.isSelected || false;
+
+  // Get severity-based border styling
+  const getBorderStyle = () => {
+    if (!service.max_severity || service.finding_count === 0) {
+      return "2px solid rgba(255,255,255,0.1)";
+    }
+
+    switch (service.max_severity) {
+      case "CRITICAL":
+        return "3px solid #DC2626"; // red
+      case "HIGH":
+        return "3px solid #EA580C"; // orange
+      case "MEDIUM":
+        return "3px solid #EAB308"; // yellow
+      case "LOW":
+        return "2px solid #64748B"; // gray
+      default:
+        return "2px solid rgba(255,255,255,0.1)";
+    }
+  };
+
+  // Pulse animation for CRITICAL severity
+  const shouldPulse = service.max_severity === "CRITICAL";
 
   return (
     <div
       className="relative"
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
+      onClick={data.onClick}
+      style={{ cursor: data.onClick ? "pointer" : "default" }}
     >
+      {/* Selection ring (Phase 3) */}
+      {isSelected && (
+        <div
+          className="animate-pulse-ring"
+          style={{
+            position: "absolute",
+            top: "-6px",
+            left: "-6px",
+            right: "-6px",
+            bottom: "-6px",
+            border: "3px solid #FF6B35",
+            borderRadius: "12px",
+            pointerEvents: "none",
+          }}
+        />
+      )}
+
       <div
+        className={shouldPulse ? "animate-pulse-border" : ""}
         style={{
           width: `${dimensions.width}px`,
           height: `${dimensions.height}px`,
@@ -270,8 +314,9 @@ function ArchitectureServiceNode({ data }: { data: any }) {
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          border: "2px solid rgba(255,255,255,0.1)",
+          border: getBorderStyle(),
           position: "relative",
+          transition: "all 0.2s ease",
         }}
       >
         {/* Service name */}
@@ -493,17 +538,35 @@ export default function GraphViewer({
   const [reactFlowNodes, setReactFlowNodes, onNodesChange] = useNodesState<Node>([]);
   const [reactFlowEdges, setReactFlowEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
+  // Phase 3: Selection state for bidirectional highlighting
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
+
   // Choose layout based on available data
   const useArchitectureLayout =
     architectureServices && architectureServices.length > 0;
 
+  // Phase 3: Create nodes with click handlers and selection state
   const { nodes: layoutedNodes, edges: layoutedEdges } = useMemo(() => {
     if (useArchitectureLayout && architectureServices && architectureConnections) {
-      return getArchitectureLayout(
+      const archLayout = getArchitectureLayout(
         architectureServices,
         architectureConnections,
         architecturePattern
       );
+
+      // Add click handlers and selection state to architecture nodes
+      const nodesWithHandlers = archLayout.nodes.map((node) => ({
+        ...node,
+        data: {
+          ...node.data,
+          isSelected: node.id === selectedServiceId,
+          onClick: () => {
+            setSelectedServiceId(node.id === selectedServiceId ? null : node.id);
+          },
+        },
+      }));
+
+      return { nodes: nodesWithHandlers, edges: archLayout.edges };
     }
     return getLayoutedElements(nodes, edges);
   }, [
@@ -513,6 +576,7 @@ export default function GraphViewer({
     architecturePattern,
     nodes,
     edges,
+    selectedServiceId,
   ]);
 
   useEffect(() => {
