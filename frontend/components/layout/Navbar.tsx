@@ -28,42 +28,35 @@ export function Navbar() {
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-6">
+          <div className="hidden md:flex items-center gap-8">
             <a
               href="/#how-it-works"
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               How It Works
             </a>
             <Link
               href="/graph"
-              className="text-muted-foreground hover:text-foreground transition-colors relative"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors relative pr-10"
             >
               Knowledge Graph
-              <span className="absolute -top-2 -right-8 px-1.5 py-0.5 text-[10px] font-semibold bg-warning/20 text-warning rounded-full">
+              <span className="absolute -top-2 right-0 px-1.5 py-0.5 text-[10px] font-semibold bg-primary/20 text-primary rounded-full whitespace-nowrap">
                 New
               </span>
             </Link>
             <Link
               href="/roadmap"
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               Roadmap
             </Link>
-            <a
-              href="https://github.com/iamarsh/tesseric"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
-              GitHub
-            </a>
+            <div className="w-px h-6 bg-border" />
             <ThemeSwitcher />
             <a
               href="/#review"
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
+              className="px-5 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-semibold hover:bg-primary/90 transition-all hover:shadow-lg"
             >
-              Get My Architecture Score
+              Get Started
             </a>
           </div>
 
@@ -86,7 +79,7 @@ export function Navbar() {
 
         {/* Mobile Menu Dropdown */}
         {mobileMenuOpen && (
-          <div className="md:hidden mt-4 pb-4 border-t border-border pt-4 space-y-3 animate-slide-in">
+          <div className="md:hidden mt-4 pb-4 border-t border-border pt-4 space-y-4 animate-slide-in">
             <a
               href="/#how-it-works"
               onClick={() => setMobileMenuOpen(false)}
@@ -100,7 +93,7 @@ export function Navbar() {
               className="flex items-center gap-2 py-2 text-muted-foreground hover:text-foreground transition-colors"
             >
               Knowledge Graph
-              <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-warning/20 text-warning rounded-full">
+              <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-primary/20 text-primary rounded-full">
                 New
               </span>
             </Link>
@@ -112,20 +105,11 @@ export function Navbar() {
               Roadmap
             </Link>
             <a
-              href="https://github.com/iamarsh/tesseric"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block py-2 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              GitHub
-            </a>
-            <a
               href="/#review"
               onClick={() => setMobileMenuOpen(false)}
-              className="block w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors text-center"
+              className="block w-full px-4 py-2.5 mt-2 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors text-center"
             >
-              Get My Architecture Score
+              Get Started
             </a>
           </div>
         )}

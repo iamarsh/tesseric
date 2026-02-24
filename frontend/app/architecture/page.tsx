@@ -2,12 +2,11 @@ import { Metadata } from "next";
 import { SiteLayout } from "@/components/layout/SiteLayout";
 import { HeroSection } from "@/components/architecture/HeroSection";
 import { TechStackCards } from "@/components/architecture/TechStackCards";
-// TODO: Implement remaining architecture sections
-// import { MetaAnalysisSection } from "@/components/architecture/MetaAnalysisSection";
-// import { DataFlowDiagram } from "@/components/architecture/DataFlowDiagram";
-// import { PerformanceMetrics } from "@/components/architecture/PerformanceMetrics";
-// import { SecurityArchitecture } from "@/components/architecture/SecurityArchitecture";
-// import { FutureRoadmap } from "@/components/architecture/FutureRoadmap";
+import { MetaAnalysisSection } from "@/components/architecture/MetaAnalysisSection";
+import { DataFlowDiagram } from "@/components/architecture/DataFlowDiagram";
+import { PerformanceMetrics } from "@/components/architecture/PerformanceMetrics";
+import { SecurityArchitecture } from "@/components/architecture/SecurityArchitecture";
+import { FutureRoadmap } from "@/components/architecture/FutureRoadmap";
 
 export const metadata: Metadata = {
   title: "System Architecture | Tesseric",
@@ -78,21 +77,20 @@ export default function ArchitecturePage() {
         {/* Technology Stack */}
         <TechStackCards />
 
-        {/* TODO: Implement remaining architecture sections */}
         {/* Meta-Analysis: Tesseric Reviews Tesseric */}
-        {/* <MetaAnalysisSection /> */}
+        <MetaAnalysisSection />
 
         {/* Data Flow & Request Lifecycle */}
-        {/* <DataFlowDiagram /> */}
+        <DataFlowDiagram />
 
         {/* Performance & Reliability */}
-        {/* <PerformanceMetrics /> */}
+        <PerformanceMetrics />
 
         {/* Security Architecture */}
-        {/* <SecurityArchitecture /> */}
+        <SecurityArchitecture />
 
         {/* Future Roadmap */}
-        {/* <FutureRoadmap /> */}
+        <FutureRoadmap />
       </SiteLayout>
     </>
   );

@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Sparkles, Shield, Lock, Zap } from "lucide-react";
+import { Sparkles, Shield, Lock, Zap, Code, CheckCircle, GitBranch, Database } from "lucide-react";
 
 export function Footer() {
   const productLinks = [
     { href: "/#how-it-works", label: "How It Works" },
+    { href: "/architecture", label: "Architecture" },
     { href: "/graph", label: "Knowledge Graph" },
     { href: "/#comparison", label: "vs ChatGPT" },
     { href: "/roadmap", label: "Roadmap" },
@@ -132,6 +133,41 @@ export function Footer() {
             <div className="flex items-center gap-2 group">
               <Sparkles className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
               <span>No Signup Required</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Engineering Highlights */}
+        <div className="border-t border-border py-6">
+          <div className="flex flex-wrap justify-center items-center gap-6 text-xs text-muted-foreground">
+            <div className="flex items-center gap-2 group">
+              <Code className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
+              <span>Type-safe TypeScript + Python</span>
+            </div>
+            <span className="text-muted-foreground/30">•</span>
+            <div className="flex items-center gap-2 group">
+              <GitBranch className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
+              <span>CI/CD with GitHub Actions</span>
+            </div>
+            <span className="text-muted-foreground/30">•</span>
+            <div className="flex items-center gap-2 group">
+              <Database className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
+              <span>Neo4j Knowledge Graph</span>
+            </div>
+            <span className="text-muted-foreground/30">•</span>
+            <div className="flex items-center gap-2 group">
+              <Shield className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
+              <span>Zero Data Persistence</span>
+            </div>
+            <span className="text-muted-foreground/30">•</span>
+            <div className="flex items-center gap-2 group">
+              <Zap className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
+              <span>Sub-10s Response Time</span>
+            </div>
+            <span className="text-muted-foreground/30">•</span>
+            <div className="flex items-center gap-2 group">
+              <CheckCircle className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
+              <span>98.7% Graph Write Success</span>
             </div>
           </div>
         </div>
