@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import {
   ReactFlow,
   Node,
@@ -35,6 +35,9 @@ interface GraphViewerProps {
   architectureServices?: ArchitectureServiceNode[];
   architectureConnections?: ArchitectureConnection[];
   architecturePattern?: ArchitecturePattern | null;
+  // Phase 4: Selection props from ArchitectureViewer
+  selectedServiceId?: string | null;
+  onServiceClick?: (serviceName: string) => void;
 }
 
 // Node dimensions for dagre layout
@@ -534,12 +537,27 @@ export default function GraphViewer({
   architectureServices,
   architectureConnections,
   architecturePattern,
+  selectedServiceId: externalSelectedServiceId,
+  onServiceClick: externalOnServiceClick,
 }: GraphViewerProps) {
   const [reactFlowNodes, setReactFlowNodes, onNodesChange] = useNodesState<Node>([]);
   const [reactFlowEdges, setReactFlowEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
-  // Phase 3: Selection state for bidirectional highlighting
-  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
+  // Phase 3 & 4: Selection state (internal or external)
+  const [internalSelectedServiceId, setInternalSelectedServiceId] = useState<string | null>(null);
+
+  // Use external selection if provided, otherwise use internal
+  const selectedServiceId = externalSelectedServiceId ?? internalSelectedServiceId;
+  const handleServiceClick = useCallback(
+    (serviceName: string) => {
+      if (externalOnServiceClick) {
+        externalOnServiceClick(serviceName);
+      } else {
+        setInternalSelectedServiceId(serviceName === internalSelectedServiceId ? null : serviceName);
+      }
+    },
+    [externalOnServiceClick, internalSelectedServiceId]
+  );
 
   // Choose layout based on available data
   const useArchitectureLayout =
@@ -560,9 +578,7 @@ export default function GraphViewer({
         data: {
           ...node.data,
           isSelected: node.id === selectedServiceId,
-          onClick: () => {
-            setSelectedServiceId(node.id === selectedServiceId ? null : node.id);
-          },
+          onClick: () => handleServiceClick(node.id),
         },
       }));
 
@@ -577,6 +593,7 @@ export default function GraphViewer({
     nodes,
     edges,
     selectedServiceId,
+    handleServiceClick,
   ]);
 
   useEffect(() => {
