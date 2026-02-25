@@ -9,6 +9,7 @@ export function Footer() {
     { href: "/#how-it-works", label: "How It Works" },
     { href: "/architecture", label: "Architecture" },
     { href: "/graph", label: "Knowledge Graph" },
+    { href: "/stats", label: "Live Stats" },
     { href: "/#comparison", label: "vs ChatGPT" },
     { href: "/roadmap", label: "Roadmap" },
   ];

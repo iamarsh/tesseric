@@ -96,3 +96,28 @@ export async function checkHealth(): Promise<{ status: string; version: string; 
 
   return response.json();
 }
+
+export interface MetricsResponse {
+  total_reviews: number;
+  unique_aws_services: number;
+  severity_breakdown: {
+    CRITICAL: number;
+    HIGH: number;
+    MEDIUM: number;
+    LOW: number;
+  };
+  avg_review_time_seconds: number;
+  last_updated: string;
+}
+
+export async function getMetrics(): Promise<MetricsResponse> {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+  const response = await fetch(`${apiUrl}/api/metrics/stats`);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch metrics: ${response.statusText}`);
+  }
+
+  return response.json();
+}
