@@ -144,34 +144,41 @@ Unlike pasting your architecture into ChatGPT, Tesseric provides:
 
 ### Easy Mode: Use dev.sh Script ⭐
 
-We provide a convenient script to manage development servers:
+We provide a convenient script to manage development servers with **3 ways to use it**:
 
+**1️⃣ Interactive Menu** (no arguments):
 ```bash
-# Start everything at once
-./dev.sh start-all
+./dev.sh
+# Shows a beautiful menu with numbered options 1-9
+```
 
-# Check what's running
-./dev.sh status
+**2️⃣ Quick Numerical Shortcuts**:
+```bash
+./dev.sh 3    # Start everything (fastest!)
+./dev.sh 8    # Check server status
+./dev.sh 7    # Restart all servers
+./dev.sh 6    # Stop everything
+```
 
-# Restart everything
-./dev.sh restart-all
-
-# Stop everything
-./dev.sh kill-all
-
-# Get help
-./dev.sh help
+**3️⃣ Traditional Command Names**:
+```bash
+./dev.sh start-all     # Start both servers
+./dev.sh status        # Show server status
+./dev.sh restart-all   # Restart everything
+./dev.sh kill-all      # Stop all servers
+./dev.sh help          # Show help menu
 ```
 
 **Available Commands**:
-- `start-frontend` - Start Next.js on port 3000
-- `start-backend` - Start FastAPI on port 8000
-- `start-all` - Start both servers together
-- `kill-frontend` - Stop frontend server
-- `kill-backend` - Stop backend server
-- `kill-all` - Stop all servers
-- `restart-all` - Restart both servers
-- `status` - Show server status with PIDs
+- `1` or `start-frontend` - Start Next.js on port 3000
+- `2` or `start-backend` - Start FastAPI on port 8000
+- `3` or `start-all` - Start both servers together ⭐
+- `4` or `kill-frontend` - Stop frontend server
+- `5` or `kill-backend` - Stop backend server
+- `6` or `kill-all` - Stop all servers
+- `7` or `restart-all` - Restart both servers
+- `8` or `status` - Show server status with PIDs
+- `9` or `help` - Show detailed help
 
 ---
 

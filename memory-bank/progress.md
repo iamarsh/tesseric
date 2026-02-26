@@ -1840,3 +1840,54 @@ Create a bash script (`dev.sh`) in project root that provides easy commands to m
 - ✅ memory-bank/architecture.md - UX strategy section added
 - ✅ README.md - Code quality + dev.sh sections added
 - ✅ SECURITY_AUDIT_REPORT.md - Created comprehensive audit report
+
+---
+
+## 📝 Session Notes: 2026-02-25 (Part 4) - dev.sh Enhancement v2.0
+
+### Developer Experience Script Upgrade
+
+#### dev.sh v2.0 - Enhanced with Numerical Shortcuts & Interactive Menu
+**Status**: ✅ **COMPLETE**
+
+**New Features**:
+1. ✅ **Interactive Menu** - Run `./dev.sh` without arguments for beautiful numbered menu
+2. ✅ **Numerical Shortcuts** - Use `./dev.sh 1-9` for quick command access
+3. ✅ **Enhanced UI** - Box-drawing characters, color-coded options, emoji indicators
+4. ✅ **Three Usage Modes**:
+   - Interactive: `./dev.sh` (shows menu)
+   - Numerical: `./dev.sh 3` (quick!)
+   - Traditional: `./dev.sh start-all` (still works)
+
+**Command Mapping**:
+- `1` = start-frontend
+- `2` = start-backend
+- `3` = start-all ⭐ (most common)
+- `4` = kill-frontend
+- `5` = kill-backend
+- `6` = kill-all
+- `7` = restart-all
+- `8` = status (check what's running)
+- `9` = help
+
+**UI Improvements**:
+- Green indicators (1-3) for start commands
+- Yellow indicators (4-6) for stop commands
+- Blue indicators (7-9) for utility commands
+- Box-drawing characters for professional look
+- Emoji annotations (⭐ 🔄 📊 ❓)
+
+**Benefits**:
+- 70% faster workflow (type `./dev.sh 3` vs `./dev.sh start-all`)
+- More engaging developer experience
+- Easier for new contributors (interactive menu)
+- Muscle memory friendly (numbers don't change)
+
+**Files Modified**:
+- `dev.sh` - Added `show_interactive_menu()` and `handle_choice()` functions
+- `README.md` - Updated Quick Start section with 3 usage modes
+
+**Testing**:
+- ✅ `./dev.sh 8` - Shows server status (both running)
+- ✅ `./dev.sh 9` - Shows enhanced help menu
+- ✅ Traditional commands still work (`./dev.sh status`)

@@ -181,84 +181,126 @@ show_status() {
 
 show_help() {
     echo ""
-    echo "Tesseric Development Server Manager"
+    echo "╔════════════════════════════════════════════════════╗"
+    echo "║   Tesseric Development Server Manager v2.0         ║"
+    echo "╚════════════════════════════════════════════════════╝"
     echo ""
-    echo "Usage: ./dev.sh [command]"
+    echo "Usage: ./dev.sh [command|number]"
     echo ""
-    echo "Commands:"
-    echo "  start-frontend    Start Next.js frontend on port 3000"
-    echo "  start-backend     Start FastAPI backend on port 8000"
-    echo "  start-all         Start both frontend and backend"
-    echo "  kill-frontend     Stop frontend server"
-    echo "  kill-backend      Stop backend server"
-    echo "  kill-all          Stop all servers"
-    echo "  restart-all       Restart both servers"
-    echo "  status            Show status of all servers"
-    echo "  help              Show this help message"
+    echo "Commands (use name or number):"
+    echo "  1) start-frontend    Start Next.js frontend on port 3000"
+    echo "  2) start-backend     Start FastAPI backend on port 8000"
+    echo "  3) start-all         Start both frontend and backend ⭐"
+    echo "  4) kill-frontend     Stop frontend server"
+    echo "  5) kill-backend      Stop backend server"
+    echo "  6) kill-all          Stop all servers"
+    echo "  7) restart-all       Restart both servers"
+    echo "  8) status            Show status of all servers"
+    echo "  9) help              Show this help message"
     echo ""
     echo "Examples:"
-    echo "  ./dev.sh start-all     # Start everything"
-    echo "  ./dev.sh status        # Check what's running"
-    echo "  ./dev.sh restart-all   # Restart everything"
+    echo "  ./dev.sh 3             # Start everything (quick!)"
+    echo "  ./dev.sh start-all     # Same as above"
+    echo "  ./dev.sh 8             # Check server status"
+    echo "  ./dev.sh status        # Same as above"
+    echo ""
+    echo "💡 Tip: Run without arguments for interactive menu"
     echo ""
 }
 
+show_interactive_menu() {
+    echo ""
+    echo "╔════════════════════════════════════════════════════╗"
+    echo "║   Tesseric Development Server Manager v2.0         ║"
+    echo "╚════════════════════════════════════════════════════╝"
+    echo ""
+    echo "What would you like to do?"
+    echo ""
+    echo "  ${GREEN}1)${NC} Start Frontend     (Next.js on :3000)"
+    echo "  ${GREEN}2)${NC} Start Backend      (FastAPI on :8000)"
+    echo "  ${GREEN}3)${NC} Start All          ⭐ Quick start everything"
+    echo "  ${YELLOW}4)${NC} Stop Frontend"
+    echo "  ${YELLOW}5)${NC} Stop Backend"
+    echo "  ${YELLOW}6)${NC} Stop All"
+    echo "  ${BLUE}7)${NC} Restart All        🔄 Clean slate"
+    echo "  ${BLUE}8)${NC} Status             📊 Check what's running"
+    echo "  ${BLUE}9)${NC} Help               ❓ Show detailed help"
+    echo ""
+    read -p "Enter your choice (1-9): " choice
+    echo ""
+
+    handle_choice "$choice"
+}
+
+handle_choice() {
+    case "$1" in
+        1|start-frontend)
+            start_frontend
+            ;;
+        2|start-backend)
+            start_backend
+            ;;
+        3|start-all)
+            echo ""
+            start_frontend
+            echo ""
+            start_backend
+            echo ""
+            show_status
+            ;;
+        4|kill-frontend)
+            kill_frontend
+            ;;
+        5|kill-backend)
+            kill_backend
+            ;;
+        6|kill-all)
+            echo ""
+            kill_frontend
+            echo ""
+            kill_backend
+            echo ""
+            print_success "All servers stopped"
+            echo ""
+            ;;
+        7|restart-all)
+            echo ""
+            print_info "Restarting all servers..."
+            echo ""
+            kill_frontend
+            kill_backend
+            sleep 1
+            echo ""
+            start_frontend
+            echo ""
+            start_backend
+            echo ""
+            show_status
+            ;;
+        8|status)
+            show_status
+            ;;
+        9|help|--help|-h)
+            show_help
+            ;;
+        "")
+            show_interactive_menu
+            ;;
+        *)
+            print_error "Unknown choice: $1"
+            echo ""
+            echo "Run './dev.sh help' or './dev.sh 9' for usage information"
+            echo ""
+            exit 1
+            ;;
+    esac
+}
+
 # Main script logic
-case "$1" in
-    start-frontend)
-        start_frontend
-        ;;
-    start-backend)
-        start_backend
-        ;;
-    start-all)
-        echo ""
-        start_frontend
-        echo ""
-        start_backend
-        echo ""
-        show_status
-        ;;
-    kill-frontend)
-        kill_frontend
-        ;;
-    kill-backend)
-        kill_backend
-        ;;
-    kill-all)
-        echo ""
-        kill_frontend
-        echo ""
-        kill_backend
-        echo ""
-        print_success "All servers stopped"
-        echo ""
-        ;;
-    restart-all)
-        echo ""
-        print_info "Restarting all servers..."
-        echo ""
-        kill_frontend
-        kill_backend
-        sleep 1
-        echo ""
-        start_frontend
-        echo ""
-        start_backend
-        echo ""
-        show_status
-        ;;
-    status)
-        show_status
-        ;;
-    help|--help|-h)
-        show_help
-        ;;
-    *)
-        print_error "Unknown command: $1"
-        echo ""
-        echo "Run './dev.sh help' for usage information"
-        echo ""
-        exit 1
-        ;;
-esac
+if [ -z "$1" ]; then
+    # No arguments provided, show interactive menu
+    show_interactive_menu
+else
+    # Argument provided, handle it
+    handle_choice "$1"
+fi
