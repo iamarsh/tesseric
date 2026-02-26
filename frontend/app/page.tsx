@@ -16,6 +16,7 @@ import { ComparisonSection } from "@/components/home/ComparisonSection";
 import { FinalCTA } from "@/components/home/FinalCTA";
 import TechnicalChallengesSection from "@/components/home/TechnicalChallengesSection";
 import FeatureShowcaseSection from "@/components/home/FeatureShowcaseSection";
+import { BeforeAfterComparison } from "@/components/marketing/BeforeAfterComparison";
 import { setCurrentReview } from "@/lib/session";
 
 export default function Home() {
@@ -263,6 +264,7 @@ export default function Home() {
           <CaseStudiesSection />
           <PersonasSection />
           <ComparisonSection />
+          <BeforeAfterComparison />
           <FAQSection />
           <RoadmapTeaser />
         </>
