@@ -7,6 +7,7 @@ import { HeroSection } from "@/components/home/HeroSection";
 import { LiveReviewSection } from "@/components/home/LiveReviewSection";
 import { UnderTheHoodSection } from "@/components/home/UnderTheHoodSection";
 import { TestimonialsSection } from "@/components/home/TestimonialsSection";
+import { CaseStudiesSection } from "@/components/home/CaseStudiesSection";
 import { HowItWorksSection } from "@/components/home/HowItWorksSection";
 import { PersonasSection } from "@/components/home/PersonasSection";
 import { FAQSection } from "@/components/home/FAQSection";
@@ -236,6 +237,7 @@ export default function Home() {
           <HowItWorksSection />
           <UnderTheHoodSection />
           <TestimonialsSection />
+          <CaseStudiesSection />
           <PersonasSection />
           <ComparisonSection />
           <FAQSection />
