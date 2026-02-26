@@ -7,6 +7,8 @@ import { SiteLayout } from "@/components/layout/SiteLayout";
 import { fetchAnalysisGraph, fetchGlobalGraph, GraphResponse } from "@/lib/graphApi";
 import { Loader2, AlertCircle, Home } from "lucide-react";
 import Link from "next/link";
+import { getReviewIdFromContext } from "@/lib/session";
+import SessionBanner from "@/components/layout/SessionBanner";
 
 // Dynamically import GraphViewer to avoid SSR issues with React-Flow
 const GraphViewer = dynamic(() => import("@/components/GraphViewer"), {
@@ -20,12 +22,23 @@ const GraphViewer = dynamic(() => import("@/components/GraphViewer"), {
 
 function GraphPageContent() {
   const searchParams = useSearchParams();
-  const analysisId = searchParams.get("id");
+  const urlAnalysisId = searchParams.get("id");
 
+  // Auto-load from session if no URL param provided
+  const [analysisId, setAnalysisId] = useState<string | null>(null);
   const [graphData, setGraphData] = useState<GraphResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [mode, setMode] = useState<"analysis" | "global">(analysisId ? "analysis" : "global");
+  const [mode, setMode] = useState<"analysis" | "global">("global");
+
+  // Determine analysis ID from URL or session on mount
+  useEffect(() => {
+    const contextReviewId = getReviewIdFromContext();
+    const finalAnalysisId = urlAnalysisId || contextReviewId;
+
+    setAnalysisId(finalAnalysisId);
+    setMode(finalAnalysisId ? "analysis" : "global");
+  }, [urlAnalysisId]);
 
   useEffect(() => {
     async function loadGraph() {
@@ -108,6 +121,9 @@ function GraphPageContent() {
 
   return (
     <SiteLayout>
+      {/* Session banner (shows if user has active review) */}
+      <SessionBanner />
+
       <div className="h-screen flex flex-col bg-background">
         {/* Header */}
         <div className="border-b border-border bg-card px-6 py-4">

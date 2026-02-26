@@ -16,6 +16,7 @@ import { ComparisonSection } from "@/components/home/ComparisonSection";
 import { FinalCTA } from "@/components/home/FinalCTA";
 import TechnicalChallengesSection from "@/components/home/TechnicalChallengesSection";
 import FeatureShowcaseSection from "@/components/home/FeatureShowcaseSection";
+import { setCurrentReview } from "@/lib/session";
 
 export default function Home() {
   const [review, setReview] = useState<ReviewResponse | null>(null);
@@ -33,6 +34,21 @@ export default function Home() {
     try {
       const result = await submitReview(request);
       setReview(result);
+
+      // Save session for cross-page context (graph, architecture pages)
+      const isImageUpload = request instanceof FormData;
+      const architecturePreview = isImageUpload
+        ? `Architecture diagram uploaded`
+        : (request as ReviewRequest).design_text.substring(0, 100);
+
+      setCurrentReview({
+        reviewId: result.review_id,
+        timestamp: Date.now(),
+        architecturePreview,
+        provider: "aws",
+        score: result.architecture_score,
+        inputMethod: isImageUpload ? "image" : "text",
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to analyze architecture");
       console.error("Error submitting review:", err);
