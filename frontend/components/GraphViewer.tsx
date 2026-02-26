@@ -619,7 +619,7 @@ export default function GraphViewer({
             a visual map of your cloud architecture insights.
           </p>
           <a
-            href="/"
+            href="/#review"
             className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors mt-4"
           >
             Run Your First Analysis →

@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { SiteLayout } from "@/components/layout/SiteLayout";
-import { fetchAnalysisGraph, fetchGlobalGraph, GraphResponse } from "@/lib/graphApi";
+import { fetchAnalysisGraph, fetchArchitectureGraph, fetchGlobalGraph, GraphResponse, ArchitectureGraphResponse } from "@/lib/graphApi";
 import { Loader2, AlertCircle, Home } from "lucide-react";
 import Link from "next/link";
 import { getReviewIdFromContext } from "@/lib/session";
@@ -27,6 +27,7 @@ function GraphPageContent() {
   // Auto-load from session if no URL param provided
   const [analysisId, setAnalysisId] = useState<string | null>(null);
   const [graphData, setGraphData] = useState<GraphResponse | null>(null);
+  const [architectureData, setArchitectureData] = useState<ArchitectureGraphResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<"analysis" | "global">("global");
@@ -46,13 +47,27 @@ function GraphPageContent() {
       setError(null);
 
       try {
-        let data: GraphResponse;
         if (mode === "analysis" && analysisId) {
-          data = await fetchAnalysisGraph(analysisId);
+          // Try to load architecture topology first (Phase 2-4 feature)
+          try {
+            const archData = await fetchArchitectureGraph(analysisId);
+            setArchitectureData(archData);
+            // Also load traditional graph data for fallback
+            const graphData = await fetchAnalysisGraph(analysisId);
+            setGraphData(graphData);
+          } catch (archError) {
+            console.warn("Architecture topology not available, falling back to traditional graph:", archError);
+            // Fallback to traditional knowledge graph
+            const graphData = await fetchAnalysisGraph(analysisId);
+            setGraphData(graphData);
+            setArchitectureData(null);
+          }
         } else {
-          data = await fetchGlobalGraph(100);
+          // Global graph mode
+          const data = await fetchGlobalGraph(100);
+          setGraphData(data);
+          setArchitectureData(null);
         }
-        setGraphData(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load graph");
         console.error("Graph loading error:", err);
@@ -187,6 +202,9 @@ function GraphPageContent() {
             <GraphViewer
               nodes={graphData.nodes}
               edges={graphData.edges}
+              architectureServices={architectureData?.services}
+              architectureConnections={architectureData?.connections}
+              architecturePattern={architectureData?.architecture_pattern || null}
               className="w-full h-full"
             />
           )}
