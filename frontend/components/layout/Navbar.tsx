@@ -3,11 +3,65 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Terminal, BarChart3, Network, Building2, BookOpen, Wrench, Github } from "lucide-react";
 import { ThemeSwitcher } from "../ThemeSwitcher";
+import { DropdownMenu, type DropdownMenuItem } from "./DropdownMenu";
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Tools dropdown items
+  const toolsItems: DropdownMenuItem[] = [
+    {
+      href: "/playground",
+      label: "API Playground",
+      description: "Interactive testing with live examples",
+      icon: <Terminal className="h-4 w-4" />,
+      badge: "Popular",
+    },
+    {
+      href: "/stats",
+      label: "Live Metrics",
+      description: "Real-time production insights",
+      icon: <BarChart3 className="h-4 w-4" />,
+    },
+    {
+      href: "/graph",
+      label: "Knowledge Graph",
+      description: "Visualize architecture patterns",
+      icon: <Network className="h-4 w-4" />,
+      badge: "New",
+    },
+    {
+      href: "/architecture",
+      label: "System Architecture",
+      description: "How Tesseric is built",
+      icon: <Building2 className="h-4 w-4" />,
+    },
+  ];
+
+  // Resources dropdown items
+  const resourcesItems: DropdownMenuItem[] = [
+    {
+      href: "/#case-studies",
+      label: "Case Studies",
+      description: "Real-world architecture improvements",
+      icon: <BookOpen className="h-4 w-4" />,
+    },
+    {
+      href: "/#technical-challenges",
+      label: "Tech Challenges",
+      description: "Engineering problems solved",
+      icon: <Wrench className="h-4 w-4" />,
+    },
+    {
+      href: "https://github.com/iamarsh/tesseric",
+      label: "GitHub",
+      description: "View source code",
+      icon: <Github className="h-4 w-4" />,
+      external: true,
+    },
+  ];
 
   return (
     <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
@@ -28,22 +82,15 @@ export function Navbar() {
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-6">
             <a
               href="/#how-it-works"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               How It Works
             </a>
-            <Link
-              href="/graph"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors relative pr-10"
-            >
-              Knowledge Graph
-              <span className="absolute -top-2 right-0 px-1.5 py-0.5 text-[10px] font-semibold bg-primary/20 text-primary rounded-full whitespace-nowrap">
-                New
-              </span>
-            </Link>
+            <DropdownMenu label="Tools" items={toolsItems} />
+            <DropdownMenu label="Resources" items={resourcesItems} />
             <Link
               href="/roadmap"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -87,16 +134,52 @@ export function Navbar() {
             >
               How It Works
             </a>
-            <Link
-              href="/graph"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-2 py-2 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Knowledge Graph
-              <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-primary/20 text-primary rounded-full">
-                New
-              </span>
-            </Link>
+
+            {/* Tools section in mobile */}
+            <div className="space-y-2">
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                Tools
+              </div>
+              {toolsItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 py-2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {item.icon}
+                  <span>{item.label}</span>
+                  {item.badge && (
+                    <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-primary/20 text-primary rounded-full">
+                      {item.badge}
+                    </span>
+                  )}
+                </Link>
+              ))}
+            </div>
+
+            {/* Resources section in mobile */}
+            <div className="space-y-2">
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                Resources
+              </div>
+              {resourcesItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  {...(item.external && {
+                    target: "_blank",
+                    rel: "noopener noreferrer",
+                  })}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 py-2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {item.icon}
+                  <span>{item.label}</span>
+                </Link>
+              ))}
+            </div>
+
             <Link
               href="/roadmap"
               onClick={() => setMobileMenuOpen(false)}
