@@ -142,6 +142,39 @@ Unlike pasting your architecture into ChatGPT, Tesseric provides:
 
 ## 🚀 Quick Start
 
+### Easy Mode: Use dev.sh Script ⭐
+
+We provide a convenient script to manage development servers:
+
+```bash
+# Start everything at once
+./dev.sh start-all
+
+# Check what's running
+./dev.sh status
+
+# Restart everything
+./dev.sh restart-all
+
+# Stop everything
+./dev.sh kill-all
+
+# Get help
+./dev.sh help
+```
+
+**Available Commands**:
+- `start-frontend` - Start Next.js on port 3000
+- `start-backend` - Start FastAPI on port 8000
+- `start-all` - Start both servers together
+- `kill-frontend` - Stop frontend server
+- `kill-backend` - Stop backend server
+- `kill-all` - Stop all servers
+- `restart-all` - Restart both servers
+- `status` - Show server status with PIDs
+
+---
+
 ### Local Development
 
 #### Prerequisites

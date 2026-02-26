@@ -1673,3 +1673,130 @@ Features (API Playground, Stats, Graph, Architecture) were buried in footer. Use
 ### Status
 Epic 2 progress: **8/11 tasks complete** (TASK-006, TASK-007, TASK-008, TASK-009, TASK-010 done)
 Next priority: TASK-011 (API Rate Limiting) or TASK-012 (Request Analytics Logging)
+
+---
+
+## 📋 TODO: Developer Experience Improvements
+
+### TASK: Create Server Management Script
+**Priority**: P2 (Developer Experience)
+**Status**: 🔴 TODO
+**Estimated Time**: 30 minutes
+
+**Description**:
+Create a bash script (`dev.sh`) in project root that provides easy commands to manage frontend and backend servers during development.
+
+**Required Commands**:
+1. `./dev.sh start-frontend` - Start Next.js dev server on port 3000
+2. `./dev.sh start-backend` - Start FastAPI backend on port 8000
+3. `./dev.sh start-all` - Start both frontend and backend together
+4. `./dev.sh kill-frontend` - Kill all Next.js processes
+5. `./dev.sh kill-backend` - Kill backend process on port 8000
+6. `./dev.sh kill-all` - Kill all dev servers (frontend + backend)
+7. `./dev.sh restart-all` - Kill all, then start both servers
+8. `./dev.sh status` - Show status of all dev servers (running/stopped)
+
+**Features**:
+- Check if ports are already in use before starting
+- Show URLs after successful start
+- Color-coded output (green=success, red=error, yellow=warning)
+- Handle errors gracefully (e.g., if backend dependencies not installed)
+
+**Acceptance Criteria**:
+- [ ] Create `dev.sh` in project root
+- [ ] Make executable: `chmod +x dev.sh`
+- [ ] All 8 commands work correctly
+- [ ] Help menu: `./dev.sh help`
+- [ ] Update README.md with script usage under "Quick Start"
+- [ ] Test on macOS (primary development environment)
+
+**Files to Create**:
+- `dev.sh` (project root)
+
+**Files to Modify**:
+- `README.md` (add script usage section)
+
+**Example Usage**:
+```bash
+# Start everything
+./dev.sh start-all
+
+# Check what's running
+./dev.sh status
+
+# Restart everything
+./dev.sh restart-all
+
+# Kill everything
+./dev.sh kill-all
+```
+
+**Benefits**:
+- Faster development workflow
+- No need to remember port numbers
+- Easy server management for new contributors
+- Consistent commands across team members
+
+---
+
+## 📝 Session Notes: 2026-02-25 (Part 2) - Developer Experience Script
+
+### Development Server Management Script
+
+#### Created: `dev.sh`
+**Purpose**: Simplify development workflow with easy server management commands
+
+**Features**:
+- ✅ Color-coded output (green/red/yellow/blue)
+- ✅ Port conflict detection
+- ✅ Process management (start, stop, restart)
+- ✅ Status checking with PID display
+- ✅ Error handling and helpful messages
+
+**Commands**:
+```bash
+./dev.sh start-frontend   # Start Next.js on port 3000
+./dev.sh start-backend    # Start FastAPI on port 8000
+./dev.sh start-all        # Start both servers
+./dev.sh kill-frontend    # Stop frontend
+./dev.sh kill-backend     # Stop backend
+./dev.sh kill-all         # Stop all servers
+./dev.sh restart-all      # Restart everything
+./dev.sh status           # Show server status
+./dev.sh help             # Show help
+```
+
+**Benefits**:
+- No need to remember port numbers or commands
+- Prevents "port already in use" errors
+- Consistent workflow across team members
+- Easy onboarding for new contributors
+
+#### Security Audit Completed ✅
+**Report**: `SECURITY_AUDIT_REPORT.md`
+
+**Audit Scope**:
+1. ✅ .gitignore protection verified
+2. ✅ Environment files scanned (only safe examples tracked)
+3. ✅ Source code scanned (no hardcoded credentials)
+4. ✅ Git staging area checked (clean)
+5. ✅ Recent commits audited (10 commits, all safe)
+6. ✅ Configuration patterns reviewed (best practices followed)
+7. ✅ Production secrets verified (Railway/Vercel env vars only)
+8. ✅ New dev.sh script validated (no sensitive data)
+
+**Result**: ✅ **APPROVED FOR PUBLIC GITHUB**
+- Zero credentials found
+- All sensitive files gitignored
+- Safe to push to public repository
+
+**Protected Files**:
+- `.env`, `.env.local` - gitignored
+- `memory-bank/` - gitignored (contains local API keys)
+- `*.pem`, `*.key`, `*.crt` - gitignored
+- `secrets/` directory - gitignored
+
+**Tracked .env Files** (Intentionally Public):
+- `.env.example` - Placeholders only ✅
+- `frontend/.env.example` - Localhost URLs only ✅
+- `frontend/.env.production` - Public Railway URL only ✅
