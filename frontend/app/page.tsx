@@ -15,6 +15,7 @@ import { RoadmapTeaser } from "@/components/home/RoadmapTeaser";
 import { ComparisonSection } from "@/components/home/ComparisonSection";
 import { FinalCTA } from "@/components/home/FinalCTA";
 import TechnicalChallengesSection from "@/components/home/TechnicalChallengesSection";
+import FeatureShowcaseSection from "@/components/home/FeatureShowcaseSection";
 
 export default function Home() {
   const [review, setReview] = useState<ReviewResponse | null>(null);
@@ -236,6 +237,7 @@ export default function Home() {
       {!review && (
         <>
           <HowItWorksSection />
+          <FeatureShowcaseSection />
           <UnderTheHoodSection />
           <TechnicalChallengesSection />
           <TestimonialsSection />
