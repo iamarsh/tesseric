@@ -506,6 +506,66 @@ IMPORTANT: Remember to use {tone} tone throughout ALL findings and remediations.
     return system_prompt, user_message
 
 
+# ====================================================================
+# OPTIMIZED: Combined Validation + Extraction (Phase 1 Optimization)
+# ====================================================================
+# This combines validation and extraction into a single API call
+# Eliminates ~2-3 seconds by removing one Bedrock roundtrip
+
+VISION_COMBINED_PROMPT = """You are an AWS architecture expert analyzing images for Tesseric.
+
+**Task**: Validate if this image contains a cloud architecture diagram AND extract the architecture if valid.
+
+**Step 1: Validation**
+Check if the image is a valid cloud architecture diagram:
+
+✅ Valid diagrams contain:
+- Cloud service icons (AWS, Azure, GCP)
+- Infrastructure components (servers, databases, load balancers)
+- Network topology (connections, arrows, data flow)
+- Technical labels (service names, IPs, protocols)
+
+❌ Invalid images:
+- Photos (people, animals, nature, objects, food)
+- Screenshots (websites, apps, code editors)
+- Documents/slides without diagrams
+- Memes, artwork, comics
+- Blank/empty images
+
+**Step 2: Extraction** (ONLY if valid diagram)
+If valid, extract:
+- All AWS services and configurations
+- Network topology (VPC, subnets, routing)
+- Data flow and connections
+- Security controls (encryption, IAM, etc.)
+- Missing best practices
+
+**Output Format** (JSON only, no markdown):
+{
+  "is_valid_diagram": true/false,
+  "confidence": "high" | "medium" | "low",
+  "content_type": "architecture_diagram" | "photo" | "screenshot" | "document" | "other",
+  "architecture_description": "Detailed architecture extraction (ONLY if is_valid_diagram=true, otherwise empty string)",
+  "services": ["EC2", "RDS", "S3", ...],
+  "visual_description": "What you see in the image (for error messages if invalid)",
+  "clever_observation": "Witty comment (ONLY if invalid diagram)"
+}
+
+**Architecture Description Format** (if valid):
+List AWS services with:
+- Service names and types (EC2 t3.large, RDS MySQL 8.0)
+- Availability zones (Multi-AZ or single AZ)
+- Network layout (VPC CIDR, public/private subnets)
+- Data flow (CloudFront → ALB → EC2 → RDS)
+- Security (encryption status, IAM roles, security groups)
+- Observations (missing backups, single AZ risks, etc.)
+
+Be concise but thorough. Focus on facts visible in the diagram."""
+
+# ====================================================================
+# LEGACY PROMPTS (kept for fallback, deprecated after optimization)
+# ====================================================================
+
 # Vision API System Prompt (for extracting architecture from diagrams)
 VISION_VALIDATION_PROMPT = """You are an observant, witty AI assistant analyzing images for Tesseric, an AWS architecture review service.
 

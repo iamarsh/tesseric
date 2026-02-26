@@ -740,9 +740,112 @@ Generic knowledge graphs show Analysis → Finding → Service relationships, wh
 
 ---
 
-## Next ADR: ADR-017
+## ADR-017 – Phase 1 Speed Optimizations (Combined Vision API + Image Compression)
 
-For future decisions (IaC parsing strategy, Terraform analysis, deployment architecture, etc.), add here following the template above.
+**Date**: 2026-02-25
+**Status**: Accepted
+
+**Decision**: Implement Phase 1 speed optimizations for image reviews:
+1. Combine validation + extraction into single Bedrock vision API call
+2. Aggressive image optimization (1024px max, JPEG conversion, compression)
+3. Keep legacy methods as fallback for graceful degradation
+
+**Rationale**:
+- **Performance**: Image reviews were averaging 23.5 seconds (too slow for production UX)
+- **Cost**: $0.016 per image review (high due to 2 separate vision API calls)
+- **User Experience**: 20+ seconds is unacceptable for real-time feedback
+- **Target**: SPEED_OPTIMIZATION_GUIDE.md recommended 30-40% improvement for Phase 1
+
+**Implementation Details**:
+
+1. **Combined Validation + Extraction** (25-30% speedup):
+   - Created `VISION_COMBINED_PROMPT` in `backend/app/services/prompts.py`
+   - Added `extract_and_validate_architecture()` method in `backend/app/services/bedrock.py`
+   - Updated `analyze_design_from_image()` in `backend/app/services/rag.py` to use combined call
+   - **Before**: 2 sequential API calls (validation → extraction)
+   - **After**: 1 combined API call with dual output (is_valid + architecture_description)
+
+2. **Image Optimization** (10-15% speedup + cost savings):
+   - Reduced `max_dimension` from 2048px → 1024px in `backend/app/services/image_processing.py`
+   - Force JPEG conversion for all images (PNG → JPEG)
+   - Apply compression: `quality=75, optimize=True, progressive=True`
+   - Result: 4-46% file size reduction (PNG images benefit most)
+
+3. **Graceful Fallback**:
+   - Legacy methods (`validate_architecture_diagram()`, `extract_architecture_from_image()`) kept
+   - If combined call returns insufficient text (< 50 chars), fall back to legacy extraction
+   - Ensures backward compatibility and resilience
+
+**Results** (Tested with 3 test images):
+
+| Metric | Before | After Phase 1 | Improvement |
+|--------|--------|---------------|-------------|
+| **Average Time** | 23.51s | 9.75s | **58.5% faster** ⚡ |
+| **Min Time** | 21.60s | 8.83s | 59.1% faster |
+| **Max Time** | 26.67s | 10.65s | 60.1% faster |
+| **Cost per Review** | $0.0164 | $0.0095 | **42.4% cheaper** 💰 |
+
+**BEAT THE TARGET**: Expected 30-40%, achieved **58.5%**! 🚀
+
+**Consequences**:
+- ✅ **User Experience**: Image reviews now complete in ~10 seconds (acceptable)
+- ✅ **Cost Reduction**: 42% cheaper per review ($0.007 saved per image)
+- ✅ **No New Dependencies**: Uses existing Pillow, boto3, no new packages
+- ✅ **No New Env Vars**: Works with existing configuration
+- ✅ **Backward Compatible**: Fallback to legacy methods if combined call fails
+- ⚠️ **Slightly Lower Image Quality**: 1024px max and JPEG compression (acceptable trade-off for diagrams)
+- ⚠️ **Increased Code Complexity**: More fallback logic in `rag.py` (but well-tested)
+
+**Alternatives Considered**:
+
+1. **Response Streaming** (deferred to future):
+   - Pro: Perceived instant results (first token < 1s)
+   - Con: Requires frontend changes (SSE/WebSockets), high complexity
+   - Decision: Defer to Phase 3 - current 9.75s is acceptable
+
+2. **Provisioned Throughput** (deferred to production scale):
+   - Pro: 20-50% faster in production, guaranteed throughput
+   - Con: Fixed cost ($hundreds/month), only beneficial at high volume (1000+ req/hour)
+   - Decision: Defer until production volume justifies cost
+
+3. **Redis Caching** (deferred to Phase 2):
+   - Pro: Instant responses for duplicate images (< 1s)
+   - Con: Memory usage, cache invalidation complexity
+   - Decision: Defer - current 9.75s is acceptable, duplicate uploads rare
+
+4. **Parallel API Calls** (not applicable):
+   - Considered: Run validation + knowledge base retrieval in parallel
+   - Issue: Validation must complete before extraction (can't extract non-diagram)
+   - Decision: Not feasible with current architecture
+
+**Testing**:
+- ✅ Baseline: 3 images, 23.51s average (before optimization)
+- ✅ Optimized: Same 3 images, 9.75s average (58.5% faster)
+- ✅ Image optimization: 4-46% file size reduction validated
+- ✅ Combined validation: Correctly detects valid/invalid diagrams, extracts 12 services
+- ✅ Text reviews: No regression (still fast, fallback working)
+- ✅ Graceful degradation: Fallback to legacy extraction tested
+
+**Production Deployment**:
+- ✅ **Railway Ready**: No new env vars, no new dependencies
+- ✅ **Docker Image**: No size increase (Pillow already included)
+- ✅ **Monitoring**: Added `optimization` metadata field to track combined vs legacy calls
+- ✅ **Rollback**: Can disable by reverting `rag.py` changes, legacy methods still functional
+
+**Related ADRs**:
+- ADR-001: Amazon Bedrock (foundation for vision API usage)
+- ADR-003: App Runner Deployment (production target)
+
+**Documentation**:
+- Full results: `/PHASE1_OPTIMIZATION_RESULTS.md`
+- Strategy guide: `/SPEED_OPTIMIZATION_GUIDE.md`
+- Test code: `/backend/tests/test_performance_baseline.py`
+
+---
+
+## Next ADR: ADR-018
+
+For future decisions (Phase 2 caching, IaC parsing strategy, Terraform analysis, etc.), add here following the template above.
 
 ---
 

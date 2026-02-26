@@ -85,24 +85,39 @@ async def validate_and_process_image(file: UploadFile) -> dict:
             "dimensions": None,
         }
 
-    # For images: Open with PIL and resize if needed
+    # For images: Open with PIL and apply aggressive optimization
     try:
         image = Image.open(io.BytesIO(file_bytes))
         original_dimensions = image.size  # (width, height)
 
-        # Resize if larger than 2048px on any side (Claude vision limit)
-        max_dimension = 2048
+        # OPTIMIZED: More aggressive resizing (1024px max instead of 2048px)
+        # Phase 1 optimization: Smaller images = faster upload + processing
+        # Trade-off: Slightly lower quality, but acceptable for diagram analysis
+        max_dimension = 1024  # Down from 2048px
         if image.width > max_dimension or image.height > max_dimension:
-            # Preserve aspect ratio
+            # Preserve aspect ratio with high-quality resampling
             image.thumbnail((max_dimension, max_dimension), Image.Resampling.LANCZOS)
 
         # Convert to RGB if necessary (handles RGBA, grayscale, etc.)
         if image.mode not in ("RGB", "L"):
             image = image.convert("RGB")
 
-        # Encode to bytes
+        # OPTIMIZED: Always convert to JPEG for smaller payloads
+        # PNG images can be 3-5x larger than JPEG for diagrams
+        # Force JPEG format for all images (except PDFs)
+        optimized_format = "jpeg"
+
+        # Encode to bytes with compression
         output_buffer = io.BytesIO()
-        image.save(output_buffer, format=image_format.upper())
+        # OPTIMIZED: Use JPEG quality=75 and optimize=True for smaller files
+        # Quality 75 is good balance: ~30% smaller, minimal visual degradation
+        image.save(
+            output_buffer,
+            format="JPEG",
+            quality=75,
+            optimize=True,
+            progressive=True  # Progressive JPEG for better loading
+        )
         processed_bytes = output_buffer.getvalue()
 
         # Base64 encode
@@ -110,9 +125,12 @@ async def validate_and_process_image(file: UploadFile) -> dict:
 
         return {
             "image_data": base64_data,
-            "format": image_format,
-            "size_kb": int(len(file_bytes) / 1024),
+            "format": optimized_format,  # Always "jpeg" after optimization
+            "size_kb": int(len(file_bytes) / 1024),  # Original size
+            "processed_size_kb": int(len(processed_bytes) / 1024),  # Optimized size
             "dimensions": original_dimensions,
+            "optimized_dimensions": image.size,  # After resizing
+            "optimization_applied": True,
         }
 
     except Exception as e:
