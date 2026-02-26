@@ -26,6 +26,7 @@ import {
   calculateServicePositions,
   detectArchitecturePattern,
 } from "@/lib/architectureLayout";
+import { EmptyGraphIllustration } from "./EmptyGraphIllustration";
 
 interface GraphViewerProps {
   nodes: GraphNode[];
@@ -608,7 +609,7 @@ export default function GraphViewer({
     return (
       <div className={`flex items-center justify-center h-full ${className}`}>
         <div className="text-center max-w-md space-y-4 px-6">
-          <div className="text-6xl mb-4">🧩</div>
+          <EmptyGraphIllustration />
           <h3 className="text-xl font-semibold text-foreground">
             Your Knowledge Graph Awaits
           </h3>

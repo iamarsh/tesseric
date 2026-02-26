@@ -32,8 +32,8 @@ class Settings(BaseSettings):
     bedrock_model_id: str = "anthropic.claude-3-5-haiku-20241022-v1:0"
     disable_bedrock: bool = False
 
-    # Bedrock Vision Model (Claude 3 Sonnet - has vision capabilities)
-    bedrock_vision_model_id: str = "anthropic.claude-3-sonnet-20240229-v1:0"
+    # Bedrock Vision Model (Claude 3.5 Sonnet v2 - has vision capabilities)
+    bedrock_vision_model_id: str = "anthropic.claude-3-5-sonnet-20241022-v2:0"
 
     # Image Upload Settings
     max_image_size_mb: int = 5

@@ -1,5 +1,6 @@
 import { Cloud, Layers, FileCode, Terminal, Users } from "lucide-react";
 import Link from "next/link";
+import { ArchitectureDiagram } from "./ArchitectureDiagram";
 
 const roadmapItems = [
   {
@@ -142,45 +143,11 @@ export function FutureRoadmap() {
         </div>
 
         {/* Future State Diagram */}
-        <div className="bg-card border border-border rounded-2xl p-8 shadow-xl">
+        <div className="mb-8">
           <h3 className="text-2xl font-semibold text-foreground mb-6 text-center">
             Future State Architecture (v2.0 Vision)
           </h3>
-          <pre className="text-xs md:text-sm text-muted-foreground overflow-x-auto font-mono leading-relaxed">
-{`┌─────────────────────────────────────────────────────────────────┐
-│                    Multi-Cloud Frontend                         │
-│         Next.js 14 + WebSockets + Multi-tenant Auth            │
-│  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌──────────┐   │
-│  │ /aws      │  │ /azure    │  │ /gcp      │  │ /teams   │   │
-│  │ (review)  │  │ (review)  │  │ (review)  │  │ (collab) │   │
-│  └───────────┘  └───────────┘  └───────────┘  └──────────┘   │
-└──────────┬──────────────┬──────────────┬──────────────────────┘
-           │              │              │
-           ▼              ▼              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│              Intelligent Routing Layer (API Gateway)            │
-│           • Provider detection (AWS/Azure/GCP)                  │
-│           • Auth middleware (JWT validation)                    │
-│           • Rate limiting per organization                      │
-└──────────┬──────────────┬──────────────┬───────────────────────┘
-           │              │              │
-           ▼              ▼              ▼
-┌────────────────┐  ┌─────────────┐  ┌─────────────┐
-│ AWS Bedrock    │  │ Azure OpenAI│  │ GCP Vertex  │
-│ Claude 3.5     │  │ GPT-4       │  │ PaLM 2      │
-└────────────────┘  └─────────────┘  └─────────────┘
-           │              │              │
-           └──────────────┴──────────────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────────────────────────┐
-│              Central Knowledge Graph (Neo4j)                    │
-│  • Multi-provider service nodes (AWS/Azure/GCP)                 │
-│  • Cross-cloud pattern detection                               │
-│  • Organization-scoped data isolation                          │
-│  • Real-time collaboration state                               │
-└─────────────────────────────────────────────────────────────────┘`}
-          </pre>
+          <ArchitectureDiagram type="future" />
         </div>
 
         {/* CTA */}

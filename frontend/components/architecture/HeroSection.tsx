@@ -1,4 +1,5 @@
 import { Zap, Database, Shield, Code } from "lucide-react";
+import { ArchitectureDiagram } from "./ArchitectureDiagram";
 
 export function HeroSection() {
   const metrics = [
@@ -46,56 +47,7 @@ export function HeroSection() {
         </div>
 
         {/* High-Level Architecture Diagram */}
-        <div className="mb-12 bg-card border border-border rounded-2xl p-8 shadow-xl">
-          <pre className="text-xs md:text-sm text-muted-foreground overflow-x-auto font-mono leading-relaxed">
-{`┌────────────────────────────────────────────────────────────────────┐
-│                   User / Frontend (Vercel)                          │
-│                      Next.js 14 + TypeScript                        │
-│   ┌─────────────┐  ┌─────────────┐  ┌──────────────────┐          │
-│   │  /review    │  │  /graph     │  │  /architecture   │          │
-│   │ (Analysis)  │  │ (Viz)       │  │  (Docs)          │          │
-│   └─────────────┘  └─────────────┘  └──────────────────┘          │
-└─────────┬────────────────┬──────────────────┬────────────────────────┘
-          │ POST /review   │ GET /api/graph/* │
-          │                │                   │
-          ▼                ▼                   ▼
-┌────────────────────────────────────────────────────────────────────┐
-│                   Production API (Railway)                          │
-│                    FastAPI + Python 3.11                            │
-│  ┌──────────┐  ┌──────────┐  ┌───────────────┐  ┌──────────────┐ │
-│  │ /health  │  │ /review  │  │ /api/metrics  │  │ /api/graph/* │ │
-│  └──────────┘  └─────┬────┘  └──────┬────────┘  └──────┬───────┘ │
-│                      │                │                   │         │
-│  ┌───────────────────▼────────────────┼───────────────────┼───────┐│
-│  │       Analysis Orchestration       │   Graph Layer     │       ││
-│  │  • Image parsing (vision)          │  • Neo4j queries  │       ││
-│  │  • Bedrock AI analysis             │  • Aggregations   │       ││
-│  │  • Cost tracking                   │  • Relationships  │       ││
-│  │  • Background graph write  ────────┼───────────▶       │       ││
-│  └────────────┬───────────────────────┴───────────────────────────┘│
-└───────────────┼───────────────────────┬────────────────────────────┘
-                │                       │
-      ┌─────────┴──────────┐           │
-      │                    │           │
-      ▼                    ▼           ▼
-┌──────────────┐   ┌──────────────┐   ┌─────────────────────────┐
-│   Bedrock    │   │   Bedrock    │   │   Neo4j AuraDB          │
-│  (us-east-2) │   │   Vision     │   │   Knowledge Graph       │
-│              │   │              │   │                         │
-│ Claude 3.5   │   │ Claude 3     │   │ • 31 reviews            │
-│   Haiku      │   │   Sonnet     │   │ • 20 AWS services       │
-│              │   │              │   │ • 72 findings           │
-│ ~$0.001/call │   │ ~$0.012/img  │   │ • Relationships         │
-│ Text → JSON  │   │ Image → Text │   │ • Pattern analysis      │
-└──────────────┘   └──────────────┘   └─────────────────────────┘`}
-          </pre>
-          <p className="text-xs text-muted-foreground text-center mt-4">
-            Color Legend: <span className="text-blue-500">Frontend</span> •{" "}
-            <span className="text-success">Backend</span> •{" "}
-            <span className="text-primary">AWS</span> •{" "}
-            <span className="text-cyan-500">Neo4j</span>
-          </p>
-        </div>
+        <ArchitectureDiagram type="current" />
 
         {/* Metrics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
