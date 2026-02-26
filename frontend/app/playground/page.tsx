@@ -194,8 +194,7 @@ export default function PlaygroundPage() {
 
   return (
     <SiteLayout>
-      <div className="min-h-screen bg-background">
-        <ToastContainer
+      <ToastContainer
         position="top-right"
         autoClose={3000}
         hideProgressBar={false}
@@ -209,18 +208,19 @@ export default function PlaygroundPage() {
         className="dark:invert"
       />
 
-      {/* Header */}
-      <div className="border-b border-border bg-gradient-to-r from-primary/5 to-primary/10">
-        <div className="container mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold">API Playground</h1>
-          <p className="text-muted-foreground mt-2">
-            Explore Tesseric's architecture analysis with interactive examples, live previews, and cURL commands.
-          </p>
+      <div className="bg-background">
+        {/* Header */}
+        <div className="border-b border-border bg-gradient-to-r from-primary/5 to-primary/10">
+          <div className="container mx-auto px-4 py-6">
+            <h1 className="text-3xl font-bold">API Playground</h1>
+            <p className="text-muted-foreground mt-2">
+              Explore Tesseric's architecture analysis with interactive examples, live previews, and cURL commands.
+            </p>
+          </div>
         </div>
-      </div>
 
-      {/* Main content - Split screen */}
-      <div className="h-[calc(100vh-140px)]">
+        {/* Main content - Split screen */}
+        <div className="h-[calc(100vh-220px)]">
         <div className="container mx-auto px-4 py-6 h-full">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 h-full">
             {/* Left panel - Config (60% on desktop) */}
@@ -256,7 +256,7 @@ export default function PlaygroundPage() {
             </div>
           </div>
         </div>
-      </div>
+        </div>
       </div>
     </SiteLayout>
   );
