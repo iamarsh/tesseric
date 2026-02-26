@@ -843,7 +843,209 @@ Generic knowledge graphs show Analysis → Finding → Service relationships, wh
 
 ---
 
-## Next ADR: ADR-018
+## ADR-018 – Production Rate Limiting Strategy
+
+**Date**: 2026-02-25
+**Status**: Accepted ✅ Implemented
+**Context**: Epic 3 (Quality & Infrastructure) - TASK-011
+**Priority**: P0 (blocks production deployment)
+
+**Problem**:
+Without rate limiting, Tesseric is vulnerable to:
+1. **Cost Abuse**: Malicious actors can spam `/review` endpoint, burning through AWS Bedrock budget ($0.011/review × 10,000 requests = $110)
+2. **Resource Exhaustion**: Uncontrolled traffic can overwhelm Railway backend or Neo4j database
+3. **Unfair Access**: Single user can monopolize resources, degrading experience for others
+4. **DoS Attacks**: Coordinated spam attacks can take down service
+
+**Decision**:
+Implement production-grade rate limiting with:
+- **Library**: `slowapi` (FastAPI-compatible, decorator-based)
+- **Storage**: Redis for production, in-memory for development
+- **Granularity**: Per-endpoint limits based on resource cost
+- **Identification**: IP-based with `X-Forwarded-For` header support
+
+**Rate Limits**:
+| Endpoint | Limit | Rationale |
+|----------|-------|-----------|
+| `/review` | 10/min | Most expensive (Bedrock AI cost), prevents abuse |
+| `/api/metrics/*` | 60/min | Dashboard queries, moderate cost |
+| `/api/graph/*` | 30/min | Neo4j queries, moderate cost |
+
+**Implementation Details**:
+1. **Localhost Bypass**: Development convenience (no limits for localhost)
+2. **HTTP 429 Responses**: Standard rate limit exceeded status
+3. **Retry-After Header**: Tells clients when they can retry
+4. **Graceful Degradation**: Falls back to memory storage if Redis unavailable
+5. **Configuration**: All limits configurable via environment variables
+
+**Alternatives Considered**:
+1. **nginx rate limiting** (before FastAPI):
+   - Pro: More performant, works at network layer
+   - Con: Harder to debug, requires separate infrastructure, less flexible per-endpoint rules
+   - Rejected: FastAPI-level limiting sufficient for current scale, easier to maintain
+
+2. **Redis-only storage** (no memory fallback):
+   - Pro: Simpler codebase, forces proper production setup
+   - Con: Local development requires Redis installation, harder to test
+   - Rejected: Developer experience trumps simplicity for early-stage project
+
+3. **Per-user rate limiting** (requires authentication):
+   - Pro: More accurate tracking, prevents IP-sharing exploits
+   - Con: Requires auth system (Phase 5 feature), adds complexity
+   - Deferred: IP-based sufficient for MVP, revisit in Phase 5 (SaaS features)
+
+4. **API key system** (token-based access):
+   - Pro: Fine-grained control, monetization ready
+   - Con: Friction for users (signup required), against "no signup" positioning
+   - Rejected: Conflicts with core value prop ("No signup required")
+
+**Consequences**:
+- ✅ **Production Ready**: Safe to deploy without cost/abuse concerns
+- ✅ **Fair Resource Allocation**: Prevents single user monopolizing service
+- ✅ **Observable**: Rate limit metrics trackable in Redis
+- ✅ **Flexible**: Per-endpoint limits tunable based on real usage patterns
+- ❌ **Redis Dependency**: Production requires Redis add-on ($5/month or Upstash free)
+- ❌ **IP-Based Limitations**: Corporate NAT can trigger false positives (multiple users, same IP)
+
+**Monitoring**:
+- Track 429 responses in logs
+- Monitor Redis memory usage
+- Alert if rate limits consistently hit (may need adjustment)
+
+**Related Tasks**:
+- TASK-011: Implement Rate Limiting System (completed)
+- TASK-012: Add Request Analytics Logging (next priority)
+
+**Files**:
+- `backend/app/middleware/rate_limiter.py` - Core implementation
+- `backend/app/core/config.py` - Configuration
+- `backend/test_rate_limit.py` - Automated tests
+
+---
+
+## ADR-019 – Client-Side Session Management for Cross-Page Context
+
+**Date**: 2026-02-25
+**Status**: Accepted ✅ Implemented
+**Context**: Epic 3 (Quality & Infrastructure) - TASK-011B
+**Priority**: P0 (critical UX improvement)
+
+**Problem**:
+Users experience friction when navigating between pages after submitting a review:
+1. **Lost Context**: User uploads AWS diagram on home page → navigates to `/graph` → prompted to upload again
+2. **Repeated Work**: Users must re-enter architecture description to see different visualizations
+3. **Poor UX**: Feels broken/incomplete ("Why doesn't it remember what I just did?")
+4. **Shareable Links Break Context**: URL params work, but session data doesn't persist across navigation
+
+**Decision**:
+Implement client-side session management using localStorage API with:
+- **Storage**: Browser localStorage (5-10MB limit, client-only)
+- **TTL**: 24 hours (balance convenience vs privacy)
+- **Priority**: URL params override session (shareable links work)
+- **Data Minimization**: Only store: reviewId, timestamp, preview (100 chars), score, inputMethod
+- **SSR-Safe**: Guard all localStorage calls with `typeof window !== "undefined"`
+
+**Implementation Details**:
+
+**Session Data Structure**:
+```typescript
+interface ReviewSession {
+  reviewId: string;           // For graph/metrics queries
+  timestamp: number;          // For TTL expiration check
+  architecturePreview: string; // First 100 chars (for banner display)
+  provider: string;           // "aws" (future: azure, gcp)
+  score?: number;             // Architecture score (optional)
+  inputMethod: "text" | "image"; // How user submitted
+}
+```
+
+**Key Functions**:
+- `setCurrentReview()` - Save session after successful review
+- `getCurrentReview()` - Retrieve session (checks TTL)
+- `getReviewIdFromContext()` - Get reviewId from URL or session (URL priority)
+- `clearCurrentReview()` - Delete session data (user-triggered)
+- `hasActiveSession()` - Boolean check for session existence
+
+**User Experience Flow**:
+1. User submits review on home page
+2. `setCurrentReview()` saves session to localStorage
+3. User clicks "View Graph" or navigates to `/graph`
+4. Graph page calls `getReviewIdFromContext()` → returns saved reviewId
+5. Graph auto-loads without prompting for re-upload
+6. Session banner shows: "👁️ Viewing your architecture review (85/100)"
+7. User can clear session with "Clear Session" button
+
+**Alternatives Considered**:
+
+1. **Cookies vs localStorage**:
+   | Approach | Pros | Cons | Decision |
+   |----------|------|------|----------|
+   | localStorage | 5-10MB limit, no server overhead, client-only | Can't access from server-side | **Chosen** - No server need, larger storage |
+   | Cookies | Server-accessible, automatic expiration | 4KB limit, sent with every request (overhead) | Rejected - Too small, unnecessary overhead |
+   | sessionStorage | Auto-clears on tab close | Loses data on tab close | Rejected - Too aggressive cleanup |
+
+2. **URL-only approach** (no session storage):
+   - Pro: Stateless, shareable links by default
+   - Con: Complex URL params, can't navigate without losing context
+   - Rejected: Poor UX, fragile (browser back button breaks)
+
+3. **Server-side session storage**:
+   - Pro: Cross-device sync, centralized control
+   - Con: Requires authentication, database storage, privacy concerns
+   - Deferred: Phase 5 (SaaS features), overkill for MVP
+
+4. **IndexedDB** (structured browser database):
+   - Pro: Larger storage (50MB+), structured queries
+   - Con: More complex API, async operations, overkill for key-value storage
+   - Rejected: localStorage sufficient for simple session object
+
+**TTL Decision (24 hours)**:
+| Duration | Pros | Cons | Decision |
+|----------|------|------|----------|
+| 1 hour | More privacy, encourages fresh reviews | Too aggressive, user may close laptop and return | Rejected |
+| 24 hours | Reasonable for same-day work, balances convenience + privacy | May persist stale reviews | **Chosen** |
+| 7 days | Maximum convenience | Privacy concern, likely stale data | Rejected |
+| No expiration | Simplest implementation | Privacy nightmare, stale data forever | Rejected |
+
+**Privacy Considerations**:
+- ✅ **No PII**: Only reviewId, score, preview text (user-submitted, not personal)
+- ✅ **User Control**: Clear session button always available
+- ✅ **Automatic Expiration**: 24h TTL prevents indefinite storage
+- ✅ **Client-Only**: Never sent to server
+- ✅ **No Tracking**: No analytics or cross-site storage
+- ❌ **Shared Devices**: Session persists if user doesn't clear (document in FAQ)
+
+**Consequences**:
+- ✅ **Seamless Navigation**: Users can explore graph/metrics without re-uploading
+- ✅ **Shareable Links Still Work**: URL params have priority
+- ✅ **Better UX**: Feels complete, no repeated work
+- ✅ **Privacy-First**: Minimal data, short TTL, user-controlled
+- ✅ **SSR-Safe**: No Next.js hydration errors
+- ❌ **Client-Side Only**: Doesn't sync across devices/browsers
+- ❌ **Shared Device Risk**: Session visible to next user (mitigated by 24h TTL + clear button)
+
+**Testing Checklist**:
+- ✅ Submit text review → navigate to `/graph` → auto-loads
+- ✅ Submit image review → navigate to `/graph` → auto-loads
+- ✅ Refresh page → session persists
+- ✅ Clear session → banner disappears, graph shows global view
+- ✅ URL param overrides session (shareable links work)
+- ✅ Expired session (24h+) → banner doesn't show
+- ✅ SSR safe (no localStorage errors during build/server render)
+
+**Related Tasks**:
+- TASK-011B: Implement Session Management (completed)
+- Future: TASK-XXX: Server-side session storage (Phase 5, requires auth)
+
+**Files**:
+- `frontend/lib/session.ts` - Core utilities (143 lines)
+- `frontend/components/layout/SessionBanner.tsx` - Visual indicator (82 lines)
+- `frontend/app/page.tsx` - Save session after review
+- `frontend/app/graph/page.tsx` - Auto-load from session
+
+---
+
+## Next ADR: ADR-020
 
 For future decisions (Phase 2 caching, IaC parsing strategy, Terraform analysis, etc.), add here following the template above.
 
