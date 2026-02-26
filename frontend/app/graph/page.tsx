@@ -120,7 +120,7 @@ function GraphPageContent() {
   }
 
   return (
-    <SiteLayout>
+    <SiteLayout showFooter={false}>
       {/* Session banner (shows if user has active review) */}
       <SessionBanner />
 

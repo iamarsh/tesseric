@@ -193,7 +193,7 @@ export default function PlaygroundPage() {
   }, [handleAnalyze, handleReset]);
 
   return (
-    <SiteLayout>
+    <SiteLayout showFooter={false}>
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -220,7 +220,7 @@ export default function PlaygroundPage() {
         </div>
 
         {/* Main content - Split screen */}
-        <div className="h-[calc(100vh-220px)]">
+        <div className="h-[calc(100vh-200px)]">
         <div className="container mx-auto px-4 py-6 h-full">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 h-full">
             {/* Left panel - Config (60% on desktop) */}
