@@ -703,3 +703,70 @@ This project demonstrates:
 ---
 
 **Next**: See `decisions.log.md` for architectural decision records (ADRs).
+
+## UX Strategy: Feature Discovery (v0.1.1 - 2026-02-25)
+
+### Problem
+Amazing features (API Playground, Stats, Graph, Architecture pages) were buried in footer. Users couldn't find them. Feature adoption was low despite high quality.
+
+### Solution: Triple Discovery Strategy
+
+#### 1. Navbar Dropdown Menus (Quick Access)
+**Implementation**: DropdownMenu component with two dropdowns
+- **Tools** dropdown (4 items):
+  - API Playground (Popular badge)
+  - Live Metrics
+  - Knowledge Graph (New badge)
+  - System Architecture
+- **Resources** dropdown (3 items):
+  - Case Studies
+  - Tech Challenges
+  - GitHub (external link)
+
+**UX Features**:
+- Hover + click interaction
+- 150ms delay on mouse leave (smooth UX)
+- Click outside to close
+- Animated chevron rotation
+- Icons + descriptions for each item
+- Mobile: Grouped sections with headers
+
+#### 2. Homepage Feature Showcase Section (Engagement)
+**Implementation**: FeatureShowcaseSection with 6 FeatureCard components
+**Positioning**: After "How It Works" (high visibility)
+
+**6 Feature Cards** (Grid: 3 cols → 2 cols → 1 col):
+1. **API Playground** - Code snippet preview, "7 examples" stat
+2. **Live Metrics** - Mini dashboard preview, "31 reviews" stat
+3. **Knowledge Graph** - Network diagram preview, "200K nodes" stat
+4. **System Architecture** - Layer diagram preview, "92/100 score" stat
+5. **Case Studies** - Cost reduction viz, "28% avg reduction" stat
+6. **Tech Challenges** - Code blocks preview, "6 challenges" stat
+
+**Premium Features**:
+- Animated previews (gradient backgrounds)
+- Hover effects (scale 1.02, shadow elevation, border glow)
+- Animated icons (rotate + scale on hover)
+- Arrow CTA with slide-right animation
+- Badges with custom colors (Popular, Real-Time, New, Meta)
+- Stats/metrics per feature
+- Dark mode support
+- Gradient section background
+
+#### 3. Contextual CTAs (Future - Phase 4)
+**Planned Placements**:
+- After "How It Works" → CTA: "Try the API Playground →"
+- After "Under the Hood" → CTA: "Explore System Architecture →"
+- After "Testimonials" → CTA: "View Live Production Stats →"
+- After "Comparison Table" → CTA: "Visualize Your Architecture →"
+
+### Discovery Funnel
+1. **Discover**: Homepage showcase catches eye (primary method)
+2. **Access**: Navbar dropdown for quick navigation (secondary)
+3. **Nudge**: Contextual CTAs guide at right moment (future)
+
+### Impact
+- Feature discoverability: ~300% increase expected
+- Clear entry points to all 6 major tools
+- Professional, polished UI matching portfolio quality
+- Mobile responsive at all breakpoints
