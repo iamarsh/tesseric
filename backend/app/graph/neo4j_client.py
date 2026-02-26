@@ -175,6 +175,17 @@ class Neo4jClient:
         architecture_pattern = topology.get("architecture_pattern") if topology else None
         architecture_description = review_response.get("architecture_description")
 
+        # Extract analytics fields from metadata (privacy-first: no PII or arch details)
+        input_method = metadata.get("input_method", "text") if metadata else "text"
+        analysis_method = metadata.get("analysis_method", "unknown") if metadata else "unknown"
+
+        # Extract token usage (total tokens for analytics)
+        token_usage = metadata.get("token_usage", {}) if metadata else {}
+        total_tokens = token_usage.get("input_tokens", 0) + token_usage.get("output_tokens", 0)
+
+        # Count findings by severity (for analytics)
+        findings_count = len(risks)
+
         analysis_query = """
         CREATE (a:Analysis {
             id: $review_id,
@@ -184,7 +195,11 @@ class Neo4jClient:
             tone: $tone,
             processing_time_ms: $processing_time_ms,
             architecture_description: $architecture_description,
-            architecture_pattern: $architecture_pattern
+            architecture_pattern: $architecture_pattern,
+            input_method: $input_method,
+            analysis_method: $analysis_method,
+            total_tokens: $total_tokens,
+            findings_count: $findings_count
         })
         RETURN a
         """
@@ -198,6 +213,10 @@ class Neo4jClient:
             processing_time_ms=processing_time_ms,
             architecture_description=architecture_description,
             architecture_pattern=architecture_pattern,
+            input_method=input_method,
+            analysis_method=analysis_method,
+            total_tokens=total_tokens,
+            findings_count=findings_count,
         )
 
         # 2. Create/merge Finding nodes + relationships

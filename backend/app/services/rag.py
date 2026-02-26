@@ -173,6 +173,7 @@ async def analyze_with_bedrock(request: ReviewRequest) -> ReviewResponse:
 
     # 7. Add metadata
     review_response.metadata = {
+        "input_method": "text",
         "analysis_method": "bedrock_claude_3_5_haiku",
         "provider": "aws",
         "token_usage": response["usage"],
@@ -403,6 +404,7 @@ async def analyze_design_stub(request: ReviewRequest) -> ReviewResponse:
 
     # Add metadata indicating fallback was used
     response.metadata = {
+        "input_method": "text",
         "analysis_method": "pattern_matching_fallback",
         "provider": "aws",
         "note": "AI analysis unavailable, using rule-based detection",

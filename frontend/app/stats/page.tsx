@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { getMetrics, MetricsResponse } from "@/lib/api";
 import { MetricsCard } from "@/components/stats/MetricsCard";
 import { SeverityChart } from "@/components/stats/SeverityChart";
+import { SiteLayout } from "@/components/layout/SiteLayout";
 import {
   BarChart3,
   Clock,
@@ -42,8 +43,9 @@ export default function StatsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      <div className="container mx-auto px-4 py-12 sm:px-6 lg:px-8">
+    <SiteLayout>
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+        <div className="container mx-auto px-4 py-12 sm:px-6 lg:px-8">
         {/* Hero Section */}
         <div className="mb-12 space-y-4">
           <div className="flex items-center justify-between">
@@ -84,6 +86,39 @@ export default function StatsPage() {
               second: "2-digit",
             })}
           </p>
+
+          {/* Privacy Notice */}
+          <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+            <div className="flex items-start gap-3">
+              <div className="rounded-full bg-primary/10 p-1.5">
+                <svg
+                  className="h-4 w-4 text-primary"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                  />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-foreground">
+                  Privacy-First Analytics
+                </h3>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  All metrics are fully anonymized. We <strong>never</strong>{" "}
+                  store architecture descriptions, IP addresses, or any
+                  personally identifiable information. Only aggregated
+                  statistics (counts, averages, processing times) are collected
+                  for analytics.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Error state */}
@@ -190,7 +225,8 @@ export default function StatsPage() {
           </p>
         </div>
       </div>
-    </div>
+      </div>
+    </SiteLayout>
   );
 }
 

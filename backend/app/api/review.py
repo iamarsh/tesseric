@@ -18,6 +18,7 @@ from app.services.rag import analyze_design, analyze_design_from_image
 from app.utils.exceptions import ImageProcessingException
 from app.graph.neo4j_client import neo4j_client
 from app.middleware.rate_limiter import get_limiter, review_rate_limit
+from app.core.config import settings
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
