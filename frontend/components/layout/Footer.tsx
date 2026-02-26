@@ -7,6 +7,7 @@ import { Sparkles, Shield, Lock, Zap, Code, CheckCircle, GitBranch, Database } f
 export function Footer() {
   const productLinks = [
     { href: "/#how-it-works", label: "How It Works" },
+    { href: "/playground", label: "API Playground" },
     { href: "/architecture", label: "Architecture" },
     { href: "/graph", label: "Knowledge Graph" },
     { href: "/stats", label: "Live Stats" },
