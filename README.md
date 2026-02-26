@@ -4,14 +4,25 @@
 
 Instant AWS architecture review service that returns a Well-Architected-aligned score, risks, and remediation steps in seconds.
 
-![Version](https://img.shields.io/badge/version-0.1.0--alpha-blue)
-![Python](https://img.shields.io/badge/python-3.11+-green)
-![Next.js](https://img.shields.io/badge/next.js-14-black)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-teal)
-![AWS Bedrock](https://img.shields.io/badge/AWS-Bedrock-orange)
-![Status](https://img.shields.io/badge/status-production-success)
-![Neo4j](https://img.shields.io/badge/Neo4j-AuraDB-008CC1)
+<!-- Row 1: Project Status -->
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Status](https://img.shields.io/badge/status-production-green)
+![Maintained](https://img.shields.io/badge/maintained-yes-brightgreen)
+![License](https://img.shields.io/badge/license-proprietary-red)
+![Last Commit](https://img.shields.io/github/last-commit/iamarsh/tesseric)
+![Open Issues](https://img.shields.io/github/issues/iamarsh/tesseric)
+![Code Size](https://img.shields.io/github/languages/code-size/iamarsh/tesseric)
 
+<!-- Row 2: Tech Stack -->
+![Python](https://img.shields.io/badge/python-3.11+-blue)
+![Next.js](https://img.shields.io/badge/next.js-14-black)
+![FastAPI](https://img.shields.io/badge/fastapi-0.104-teal)
+
+<!-- Row 3: AWS & Data -->
+![AWS Bedrock](https://img.shields.io/badge/AWS-Bedrock-orange)
+![Neo4j](https://img.shields.io/badge/neo4j-aura-blue)
+
+<!-- Row 4: CI/CD -->
 [![Backend Tests](https://github.com/iamarsh/tesseric/actions/workflows/backend-tests.yml/badge.svg)](https://github.com/iamarsh/tesseric/actions/workflows/backend-tests.yml)
 [![Frontend Tests](https://github.com/iamarsh/tesseric/actions/workflows/frontend-tests.yml/badge.svg)](https://github.com/iamarsh/tesseric/actions/workflows/frontend-tests.yml)
 [![Integration Tests](https://github.com/iamarsh/tesseric/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/iamarsh/tesseric/actions/workflows/integration-tests.yml)
