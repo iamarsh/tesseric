@@ -1,0 +1,107 @@
+{
+  "timestamp": 1772078751.928552,
+  "results": [
+    {
+      "image": "AWS_Architecture_Diagram-thumb-web.png",
+      "size_kb": 48.75390625,
+      "total_time_ms": 10649,
+      "score": 97,
+      "num_risks": 1,
+      "metadata": {
+        "analysis_method": "pattern_matching_fallback",
+        "provider": "aws",
+        "note": "AI analysis unavailable, using rule-based detection",
+        "input_method": "image",
+        "image_filename": "AWS_Architecture_Diagram-thumb-web.png",
+        "image_format": "jpeg",
+        "image_size_kb": 48,
+        "image_dimensions": [
+          1440,
+          960
+        ],
+        "image_processed_size_kb": 46,
+        "image_optimized_dimensions": [
+          1024,
+          683
+        ],
+        "image_compression_ratio": 0.96,
+        "extraction_model": "us.anthropic.claude-3-5-sonnet-20241022-v2:0",
+        "vision_tokens": {
+          "input_tokens": 1497,
+          "output_tokens": 317
+        },
+        "vision_cost_usd": 0.009246,
+        "optimization": "combined_validation_extraction_v1",
+        "total_cost_usd": 0.009246
+      }
+    },
+    {
+      "image": "aws-architecture.png",
+      "size_kb": 116.77734375,
+      "total_time_ms": 9779,
+      "score": 97,
+      "num_risks": 1,
+      "metadata": {
+        "analysis_method": "pattern_matching_fallback",
+        "provider": "aws",
+        "note": "AI analysis unavailable, using rule-based detection",
+        "input_method": "image",
+        "image_filename": "aws-architecture.png",
+        "image_format": "jpeg",
+        "image_size_kb": 116,
+        "image_dimensions": [
+          1352,
+          823
+        ],
+        "image_processed_size_kb": 71,
+        "image_optimized_dimensions": [
+          1024,
+          623
+        ],
+        "image_compression_ratio": 0.61,
+        "extraction_model": "us.anthropic.claude-3-5-sonnet-20241022-v2:0",
+        "vision_tokens": {
+          "input_tokens": 1423,
+          "output_tokens": 352
+        },
+        "vision_cost_usd": 0.009549,
+        "optimization": "combined_validation_extraction_v1",
+        "total_cost_usd": 0.009549
+      }
+    },
+    {
+      "image": "typical-microservices-application.png",
+      "size_kb": 100.341796875,
+      "total_time_ms": 8829,
+      "score": 97,
+      "num_risks": 1,
+      "metadata": {
+        "analysis_method": "pattern_matching_fallback",
+        "provider": "aws",
+        "note": "AI analysis unavailable, using rule-based detection",
+        "input_method": "image",
+        "image_filename": "typical-microservices-application.png",
+        "image_format": "jpeg",
+        "image_size_kb": 100,
+        "image_dimensions": [
+          1318,
+          1020
+        ],
+        "image_processed_size_kb": 54,
+        "image_optimized_dimensions": [
+          1024,
+          792
+        ],
+        "image_compression_ratio": 0.54,
+        "extraction_model": "us.anthropic.claude-3-5-sonnet-20241022-v2:0",
+        "vision_tokens": {
+          "input_tokens": 1645,
+          "output_tokens": 309
+        },
+        "vision_cost_usd": 0.00957,
+        "optimization": "combined_validation_extraction_v1",
+        "total_cost_usd": 0.00957
+      }
+    }
+  ]
+}
