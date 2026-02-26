@@ -20,6 +20,14 @@ run_all_tests.sh
 *_GUIDE_INTERNAL.md
 ENGINEERING_SHOWCASE_ROADMAP.md
 
+# Internal documentation (keep local only)
+*_REPORT.md
+*_GUIDE.md
+*_ANALYSIS.md
+EMPTY_*_OPTIONS.md
+SECURITY_AUDIT_REPORT.md
+SPEED_OPTIMIZATION_GUIDE.md
+
 # Memory Bank & AI Working Contract (local only)
 # memory-bank/  # TEMPORARILY DISABLED for Perplexity access - 2026-01-25
 Claude.md
