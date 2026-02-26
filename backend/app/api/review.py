@@ -17,9 +17,11 @@ from app.models.response import ReviewResponse
 from app.services.rag import analyze_design, analyze_design_from_image
 from app.utils.exceptions import ImageProcessingException
 from app.graph.neo4j_client import neo4j_client
+from app.middleware.rate_limiter import get_limiter, review_rate_limit
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
+limiter = get_limiter()
 
 
 async def write_to_graph_background(review_response: ReviewResponse):
@@ -44,6 +46,7 @@ async def write_to_graph_background(review_response: ReviewResponse):
 
 
 @router.post("/review", response_model=ReviewResponse)
+@limiter.limit(review_rate_limit())
 async def review_architecture(
     request: Request,
     # Text input (original - now optional)

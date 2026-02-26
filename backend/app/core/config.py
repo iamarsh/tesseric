@@ -65,6 +65,17 @@ class Settings(BaseSettings):
     backend_port: int = 8000
     log_level: str = "INFO"
 
+    # Rate Limiting Configuration
+    rate_limit_enabled: bool = True
+    redis_url: str | None = None  # e.g., redis://localhost:6379/0 or Redis Cloud URL
+    rate_limit_storage: str = "memory"  # "memory" or "redis"
+
+    # Rate limits per endpoint (requests per minute)
+    rate_limit_review: str = "10/minute"  # /review endpoint
+    rate_limit_metrics: str = "60/minute"  # /api/metrics/* endpoints
+    rate_limit_graph: str = "30/minute"  # /api/graph/* endpoints
+    # /health has no rate limit
+
     # CORS Origins (comma-separated for production)
     # Includes: localhost (dev), tesseric.ca domains (production frontend), api subdomain
     cors_origins: str = "http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000,http://127.0.0.1:3001,https://tesseric.ca,https://www.tesseric.ca,https://api.tesseric.ca"

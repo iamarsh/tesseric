@@ -512,6 +512,54 @@ tesseric/
 - **AWS**: IAM roles with `bedrock:InvokeModel` permission only
 - **Secrets**: Rotate credentials regularly
 
+### Rate Limiting
+Production API is protected with per-endpoint rate limiting to prevent abuse:
+
+| Endpoint | Rate Limit | Purpose |
+|----------|------------|---------|
+| `/review` | 10 requests/minute per IP | Prevent AI cost abuse |
+| `/api/metrics/*` | 60 requests/minute per IP | Dashboard data access |
+| `/api/graph/*` | 30 requests/minute per IP | Graph visualization data |
+| `/health` | Unlimited | Monitoring and uptime checks |
+
+**Rate limit exceeded (HTTP 429) response:**
+```json
+{
+  "error": "Rate limit exceeded",
+  "message": "You have exceeded 10 requests per minute. Please wait 60 seconds.",
+  "retry_after": 60,
+  "limit": 10,
+  "endpoint": "/review"
+}
+```
+
+**Rate limit headers:**
+- `X-RateLimit-Limit`: Maximum requests allowed in window
+- `X-RateLimit-Remaining`: Requests remaining in current window
+- `X-RateLimit-Reset`: Unix timestamp when limit resets
+- `Retry-After`: Seconds to wait before retrying
+
+**Configuration:**
+Rate limiting uses Redis for production (Railway Redis add-on) and in-memory storage for local development. Configure via environment variables:
+
+```bash
+# Enable/disable rate limiting
+RATE_LIMIT_ENABLED=true
+
+# Storage backend: "memory" (dev) or "redis" (prod)
+RATE_LIMIT_STORAGE=redis
+
+# Redis connection URL (required for production)
+REDIS_URL=redis://default:password@redis.railway.internal:6379
+
+# Customize limits (optional, defaults shown)
+RATE_LIMIT_REVIEW=10/minute
+RATE_LIMIT_METRICS=60/minute
+RATE_LIMIT_GRAPH=30/minute
+```
+
+**Local development:** Rate limits are automatically bypassed for `localhost` and `127.0.0.1` to streamline development workflow.
+
 ### If You Accidentally Commit a Secret
 1. **Rotate immediately** in AWS Console
 2. Use `git filter-branch` or BFG Repo-Cleaner to remove from history

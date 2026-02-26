@@ -5,16 +5,18 @@ Provides aggregated data from Neo4j knowledge graph with caching
 for performance optimization.
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from datetime import datetime, timedelta, timezone
 import logging
 import time
 
 from app.models.metrics import MetricsResponse
 from app.graph.neo4j_client import neo4j_client
+from app.middleware.rate_limiter import get_limiter, metrics_rate_limit
 
 router = APIRouter(prefix="/api/metrics", tags=["metrics"])
 logger = logging.getLogger(__name__)
+limiter = get_limiter()
 
 # In-memory cache with TTL (5 minutes)
 # Format: {"data": MetricsResponse, "expires_at": datetime}
@@ -22,7 +24,8 @@ _metrics_cache = {"data": None, "expires_at": None}
 
 
 @router.get("/stats", response_model=MetricsResponse)
-async def get_metrics():
+@limiter.limit(metrics_rate_limit())
+async def get_metrics(request: Request):
     """
     Retrieve real-time production metrics from Neo4j.
 
@@ -106,7 +109,8 @@ async def get_metrics():
 
 
 @router.delete("/cache")
-async def clear_metrics_cache():
+@limiter.limit(metrics_rate_limit())
+async def clear_metrics_cache(request: Request):
     """
     Clear the metrics cache (admin/debugging endpoint).
 

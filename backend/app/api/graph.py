@@ -4,7 +4,7 @@ Graph API endpoints for knowledge graph visualization.
 Provides access to Neo4j graph data for frontend visualization.
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 import logging
 
 from app.models.graph import (
@@ -16,13 +16,16 @@ from app.models.graph import (
     ArchitectureConnection,
 )
 from app.graph.neo4j_client import neo4j_client
+from app.middleware.rate_limiter import get_limiter, graph_rate_limit
 
 router = APIRouter(prefix="/api/graph")
 logger = logging.getLogger(__name__)
+limiter = get_limiter()
 
 
 @router.get("/health")
-async def graph_health():
+@limiter.limit(graph_rate_limit())
+async def graph_health(request: Request):
     """
     Check Neo4j connection health.
 
@@ -47,7 +50,8 @@ async def graph_health():
 
 
 @router.get("/{analysis_id}", response_model=GraphResponse)
-async def get_analysis_graph(analysis_id: str):
+@limiter.limit(graph_rate_limit())
+async def get_analysis_graph(request: Request, analysis_id: str):
     """
     Retrieve knowledge graph for a specific analysis.
 
@@ -94,7 +98,8 @@ async def get_analysis_graph(analysis_id: str):
 
 
 @router.get("/{analysis_id}/architecture", response_model=ArchitectureGraphResponse)
-async def get_architecture_graph(analysis_id: str):
+@limiter.limit(graph_rate_limit())
+async def get_architecture_graph(request: Request, analysis_id: str):
     """
     Retrieve architecture-first graph for visualization.
 
@@ -151,7 +156,8 @@ async def get_architecture_graph(analysis_id: str):
 
 
 @router.get("/global/all", response_model=GraphResponse)
-async def get_global_graph(limit: int = 100):
+@limiter.limit(graph_rate_limit())
+async def get_global_graph(request: Request, limit: int = 100):
     """
     Retrieve aggregated knowledge graph across all analyses.
 

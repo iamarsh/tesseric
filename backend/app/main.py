@@ -10,6 +10,11 @@ from contextlib import asynccontextmanager
 import logging
 from app.core.config import settings
 from app.api import health, review, graph, metrics
+from app.middleware.rate_limiter import (
+    get_limiter,
+    rate_limit_exceeded_handler,
+)
+from slowapi.errors import RateLimitExceeded
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +47,12 @@ app = FastAPI(
     redoc_url="/redoc",
     lifespan=lifespan,
 )
+
+# Register rate limiter
+# Slowapi uses decorator-based rate limiting, so we only need to register the state and handler
+limiter = get_limiter()
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
 
 # CORS middleware (allow frontend to call backend)
 app.add_middleware(
