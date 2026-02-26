@@ -84,4 +84,4 @@ yarn-error.log*
 .pytest_cache/
 .coverage
 htmlcov/
-test-images/
+test-images*
