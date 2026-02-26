@@ -5,6 +5,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ConfigPanel from "@/components/playground/ConfigPanel";
 import ResponseViewer from "@/components/playground/ResponseViewer";
+import { SiteLayout } from "@/components/layout/SiteLayout";
 import { submitReview, type ReviewRequest, type ReviewResponse } from "@/lib/api";
 import { exampleArchitectures, type ExampleArchitecture } from "@/lib/example-architectures";
 
@@ -192,8 +193,9 @@ export default function PlaygroundPage() {
   }, [handleAnalyze, handleReset]);
 
   return (
-    <div className="min-h-screen bg-background">
-      <ToastContainer
+    <SiteLayout>
+      <div className="min-h-screen bg-background">
+        <ToastContainer
         position="top-right"
         autoClose={3000}
         hideProgressBar={false}
@@ -255,6 +257,7 @@ export default function PlaygroundPage() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </SiteLayout>
   );
 }
