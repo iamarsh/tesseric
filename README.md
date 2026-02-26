@@ -12,6 +12,11 @@ Instant AWS architecture review service that returns a Well-Architected-aligned 
 ![Status](https://img.shields.io/badge/status-production-success)
 ![Neo4j](https://img.shields.io/badge/Neo4j-AuraDB-008CC1)
 
+[![Backend Tests](https://github.com/iamarsh/tesseric/actions/workflows/backend-tests.yml/badge.svg)](https://github.com/iamarsh/tesseric/actions/workflows/backend-tests.yml)
+[![Frontend Tests](https://github.com/iamarsh/tesseric/actions/workflows/frontend-tests.yml/badge.svg)](https://github.com/iamarsh/tesseric/actions/workflows/frontend-tests.yml)
+[![Integration Tests](https://github.com/iamarsh/tesseric/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/iamarsh/tesseric/actions/workflows/integration-tests.yml)
+[![Security Scan](https://github.com/iamarsh/tesseric/actions/workflows/security-scan.yml/badge.svg)](https://github.com/iamarsh/tesseric/actions/workflows/security-scan.yml)
+
 🔗 **Live Site**: [https://www.tesseric.ca](https://www.tesseric.ca)
 🔗 **Production API**: [https://tesseric-production.up.railway.app](https://tesseric-production.up.railway.app)
 🔗 **Knowledge Graph**: [https://www.tesseric.ca/graph](https://www.tesseric.ca/graph)
