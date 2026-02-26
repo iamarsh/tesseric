@@ -152,7 +152,7 @@ const caseStudies: CaseStudy[] = [
 
 export function CaseStudiesSection() {
   return (
-    <section className="border-t border-border bg-gradient-to-b from-background to-muted/20 py-24">
+    <section id="case-studies" className="border-t border-border bg-gradient-to-b from-background to-muted/20 py-24">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-12 space-y-4 text-center">

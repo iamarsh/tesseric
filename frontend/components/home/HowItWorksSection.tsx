@@ -1,4 +1,4 @@
-import { FileText, Sparkles, CheckCircle2 } from "lucide-react";
+import { FileText, Sparkles, Network, CheckCircle2 } from "lucide-react";
 
 const steps = [
   {
@@ -14,6 +14,14 @@ const steps = [
     description:
       "Our AI (powered by AWS Bedrock) reviews your design against AWS best practices. We've built in deep Well-Architected expertise so you don't have to memorize it.",
     benefit: "Same quality as a $200/hour consultant, in 10 seconds",
+  },
+  {
+    icon: Network,
+    title: "See Your Architecture",
+    description:
+      "We recreate your system topology with visual problem indicators. See exactly WHERE issues exist—services with findings are color-coded by severity. Stored in Neo4j knowledge graph.",
+    benefit: "Visual proof AI understood your architecture",
+    badge: "NEW",
   },
   {
     icon: CheckCircle2,
@@ -32,11 +40,11 @@ export function HowItWorksSection() {
           How It Works
         </h2>
         <p className="text-lg text-muted-foreground">
-          Three simple steps to Well-Architected feedback
+          Four simple steps to Well-Architected feedback
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
         {steps.map((step, idx) => {
           const StepIcon = step.icon;
           return (
@@ -59,6 +67,11 @@ export function HowItWorksSection() {
                   <h3 className="text-xl font-semibold text-foreground">
                     {step.title}
                   </h3>
+                  {step.badge && (
+                    <span className="px-2 py-0.5 text-xs font-semibold bg-primary/10 text-primary border border-primary/20 rounded-full">
+                      {step.badge}
+                    </span>
+                  )}
                 </div>
 
                 {/* Content */}

@@ -2,6 +2,12 @@ import Image from "next/image";
 import { CheckCircle2, XCircle } from "lucide-react";
 
 const comparisonData = [
+  // ⭐ Visual differentiation (top priority)
+  { feature: "Architecture Visualization", tesseric: "Interactive topology with problem indicators", chatgpt: "Text only" },
+  { feature: "Problem Location", tesseric: "Shows WHERE in your system", chatgpt: "Generic list" },
+  { feature: "Knowledge Graph", tesseric: "Neo4j stores patterns & relationships", chatgpt: false },
+
+  // Well-Architected expertise
   { feature: "AWS Well-Architected Framework", tesseric: true, chatgpt: false },
   { feature: "Structured JSON Output", tesseric: true, chatgpt: false },
   { feature: "Service-Specific Recommendations", tesseric: true, chatgpt: "Generic" },

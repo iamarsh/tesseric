@@ -11,6 +11,29 @@ interface FAQItem {
 
 const faqItems: FAQItem[] = [
   {
+    category: "technical",
+    question: "How does architecture visualization work?",
+    answer: (
+      <>
+        <p className="mb-3">
+          Tesseric <strong>recreates your AWS architecture topology</strong> as an interactive graph showing services and their relationships. When you submit an architecture description, our AI:
+        </p>
+        <ul className="space-y-2 mb-3 list-disc list-inside">
+          <li><strong>Extracts services</strong>: Identifies AWS services (ALB, EC2, RDS, etc.)</li>
+          <li><strong>Maps relationships</strong>: Determines how services connect (ROUTES_TO, WRITES_TO, MONITORS)</li>
+          <li><strong>Detects patterns</strong>: Recognizes common architectures (3-tier, serverless, microservices)</li>
+          <li><strong>Visualizes problems</strong>: Color-codes services by finding severity (red=critical, orange=high, yellow=medium)</li>
+        </ul>
+        <p className="mb-3">
+          The topology is stored in a <strong>Neo4j knowledge graph</strong> that accumulates patterns across all reviews. Click a service in the graph to see which findings affect it, or click a finding card to highlight affected services.
+        </p>
+        <p>
+          <strong>Example</strong>: Submit "ALB routes to EC2 which writes to RDS" → See ALB → EC2 → RDS topology with orange borders if EC2 isn't multi-AZ.
+        </p>
+      </>
+    ),
+  },
+  {
     category: "privacy",
     question: "Where is my architecture data stored?",
     answer: (

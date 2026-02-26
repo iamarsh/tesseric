@@ -1,4 +1,4 @@
-import { Sparkles, Shield, Zap, Lock, Layers, AlertCircle } from "lucide-react";
+import { Sparkles, Shield, Zap, Layers, AlertCircle, Network, Database } from "lucide-react";
 
 export function HeroSection() {
   return (
@@ -12,13 +12,13 @@ export function HeroSection() {
           </div>
 
           <h1 className="text-5xl md:text-6xl font-bold text-foreground text-balance">
-            Instant AWS
+            See Your Architecture.
             <br />
-            <span className="text-primary">Architecture Reviews</span>
+            <span className="text-primary">Fix Your Problems.</span>
           </h1>
 
           <p className="text-xl text-muted-foreground text-balance">
-            Paste your AWS architecture description and receive a Well-Architected aligned score, structured findings, and remediation steps in seconds. Built with Claude via AWS Bedrock, Next.js, and Neo4j.
+            AI-powered analysis that <strong className="text-foreground">recreates your AWS infrastructure topology</strong> and shows exactly where security risks, reliability gaps, and cost issues exist. Built with Claude (AWS Bedrock), Next.js, FastAPI, and Neo4j knowledge graph.
           </p>
 
           <div className="flex flex-col gap-2">
@@ -45,16 +45,20 @@ export function HeroSection() {
           {/* Trust Indicators */}
           <div className="flex items-center gap-6 pt-4 flex-wrap">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Network className="h-4 w-4 text-primary" />
+              Visual topology mapping
+            </div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Database className="h-4 w-4 text-primary" />
+              Neo4j knowledge graph
+            </div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Shield className="h-4 w-4 text-primary" />
               Well-Architected aligned
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Zap className="h-4 w-4 text-primary" />
               ~10 second reviews
-            </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Lock className="h-4 w-4 text-primary" />
-              No signup required
             </div>
           </div>
         </div>

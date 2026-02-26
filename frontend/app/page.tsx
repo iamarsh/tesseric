@@ -94,6 +94,9 @@ export default function Home() {
         "url": "https://iamarsh.com"
       },
       "featureList": [
+        "Interactive architecture topology visualization",
+        "Neo4j knowledge graph for service relationships",
+        "Visual problem indicators on topology diagrams",
         "AWS Well-Architected Framework alignment",
         "Powered by Amazon Bedrock and Claude 3.5 Haiku",
         "Architecture score from 0 to 100",
@@ -101,7 +104,7 @@ export default function Home() {
         "Remediation recommendations",
         "Professional and Roast tone modes",
         "No signup required",
-        "Neo4j knowledge graph integration"
+        "Built with Next.js, FastAPI, and Neo4j"
       ]
     },
     // Organization schema

@@ -48,7 +48,7 @@ export function Footer() {
                 </span>
               </Link>
               <p className="text-muted-foreground text-sm mb-4 max-w-sm">
-                Instant AWS architecture reviews with Well-Architected-aligned scores.
+                Visualize your AWS architecture. Graph relationships. Fix security risks. Built with Claude (AWS Bedrock), Next.js, FastAPI, and Neo4j.
               </p>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-medium">
                 <Sparkles className="h-3 w-3" />

@@ -10,9 +10,12 @@ export const metadata: Metadata = {
     default: 'Tesseric - Instant AWS Architecture Reviews',
     template: '%s | Tesseric'
   },
-  description: 'Instant AWS architecture reviews with a clear architecture score and Well-Architected-aligned risks in seconds. Powered by Amazon Bedrock and Claude 3.5 Haiku. No signup required.',
+  description: 'Visualize your AWS architecture with interactive topology graphs. AI-powered analysis shows exactly where security risks exist. Built with Claude (AWS Bedrock), Next.js, FastAPI, and Neo4j knowledge graph. No signup required.',
   keywords: [
     'AWS architecture review',
+    'architecture visualization',
+    'topology mapping',
+    'Neo4j knowledge graph',
     'Well-Architected Framework',
     'AWS best practices',
     'cloud architecture review',
@@ -23,7 +26,9 @@ export const metadata: Metadata = {
     'AWS security audit',
     'cloud cost optimization',
     'AWS reliability',
-    'architecture assessment'
+    'architecture assessment',
+    'graph database',
+    'service relationships'
   ],
   authors: [{ name: 'Arsh Singh', url: 'https://iamarsh.com' }],
   creator: 'Arsh Singh',
@@ -45,7 +50,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'Tesseric - Instant AWS Architecture Reviews',
-    description: 'Get an instant architecture score with Well-Architected-aligned risks and remediations. Powered by Amazon Bedrock. No signup required.',
+    description: 'Visualize your AWS architecture with interactive topology graphs. AI-powered analysis shows exactly where security risks exist. Built with Claude, Next.js, FastAPI, and Neo4j.',
     type: 'website',
     locale: 'en_US',
     url: 'https://tesseric.ca',
@@ -64,7 +69,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Tesseric - Instant AWS Architecture Reviews',
-    description: 'Get an instant architecture score with Well-Architected-aligned risks and remediations',
+    description: 'Visualize your AWS architecture with interactive topology graphs and Neo4j knowledge graph. Shows exactly where security risks exist.',
     // images: ['/og-image.png'], // TODO: Add og-image.png to /public/
     creator: '@iamarsh',
     site: '@tesseric'

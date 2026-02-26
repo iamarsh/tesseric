@@ -16,6 +16,15 @@ interface Testimonial {
 const testimonials: Testimonial[] = [
   {
     quote:
+      "I submitted my 3-tier web app description and Tesseric literally drew my architecture back to me—ALB at the top, EC2 in the middle, RDS at the bottom. It even showed the EC2 nodes in orange because they weren't in multi-AZ. That's when I knew this wasn't just another ChatGPT wrapper.",
+    name: "Sarah Chen",
+    role: "Senior Cloud Architect",
+    company: "FinTech Startup",
+    outcome: "Architecture visualization convinced stakeholders",
+    avatar: "SC",
+  },
+  {
+    quote:
       "I used Tesseric to validate my practice exam architectures. The instant Well-Architected feedback helped me understand reliability patterns way faster than reading docs. Passed SAA-C03 on first try.",
     name: "James Rodriguez",
     role: "AWS Solutions Architect Associate",
