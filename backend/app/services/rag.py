@@ -151,6 +151,18 @@ async def analyze_with_bedrock(request: ReviewRequest) -> ReviewResponse:
     # 6a. Add original architecture description
     review_response.architecture_description = request.design_text
 
+    # DEBUG: Log topology extraction results
+    if review_response.topology:
+        logger.info(
+            f"Topology extracted: {len(review_response.topology.services)} services, "
+            f"{len(review_response.topology.connections)} connections, "
+            f"pattern={review_response.topology.architecture_pattern}"
+        )
+        logger.debug(f"Services: {review_response.topology.services}")
+        logger.debug(f"Connections: {review_response.topology.connections}")
+    else:
+        logger.warning("No topology data in Bedrock response!")
+
     # 6b. Validate topology connections (ensure services exist in AWS_SERVICES)
     if review_response.topology and review_response.topology.connections:
         from app.graph.service_parser import AWS_SERVICES

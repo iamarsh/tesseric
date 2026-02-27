@@ -324,6 +324,9 @@ class Neo4jClient:
         # 6. Create topology relationships (ROUTES_TO, WRITES_TO, etc.)
         topology = review_response.get("topology")
         if topology and topology.get("connections"):
+            connections_count = len(topology["connections"])
+            logger.info(f"Storing {connections_count} topology connections in Neo4j")
+
             for conn in topology["connections"]:
                 source = conn.get("source_service")
                 target = conn.get("target_service")
@@ -331,7 +334,10 @@ class Neo4jClient:
                 description = conn.get("description", "")
 
                 if not source or not target:
+                    logger.warning(f"Skipping invalid topology connection: {conn}")
                     continue
+
+                logger.debug(f"Creating topology relationship: {source} -{rel_type}-> {target}")
 
                 # Ensure services exist before creating relationship
                 tx.run(
@@ -345,6 +351,8 @@ class Neo4jClient:
                     target=target,
                     description=description,
                 )
+        else:
+            logger.warning(f"No topology connections to store for analysis {review_response.get('review_id')}")
 
     async def get_graph_for_analysis(self, analysis_id: str) -> Dict[str, List]:
         """
@@ -649,12 +657,20 @@ class Neo4jClient:
                 }
             )
 
-        return {
+        result = {
             "services": services,
             "connections": connections,
             "architecture_pattern": architecture_pattern,
             "architecture_description": architecture_description,
         }
+
+        logger.info(
+            f"Architecture graph query result for {analysis_id}: "
+            f"{len(services)} services, {len(connections)} connections, "
+            f"pattern={architecture_pattern}"
+        )
+
+        return result
 
     async def get_metrics(self) -> Dict[str, Any]:
         """

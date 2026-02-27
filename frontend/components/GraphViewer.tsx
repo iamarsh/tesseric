@@ -564,9 +564,21 @@ export default function GraphViewer({
   const useArchitectureLayout =
     architectureServices && architectureServices.length > 0;
 
+  // DEBUG: Log layout selection
+  console.log("[GRAPHVIEWER DEBUG] Layout selection:", {
+    useArchitectureLayout,
+    servicesCount: architectureServices?.length || 0,
+    connectionsCount: architectureConnections?.length || 0,
+    pattern: architecturePattern,
+    traditionalNodesCount: nodes.length,
+  });
+
   // Phase 3: Create nodes with click handlers and selection state
   const { nodes: layoutedNodes, edges: layoutedEdges } = useMemo(() => {
     if (useArchitectureLayout && architectureServices && architectureConnections) {
+      console.log("[GRAPHVIEWER DEBUG] Using architecture layout with services:",
+        architectureServices.map(s => s.service_name)
+      );
       const archLayout = getArchitectureLayout(
         architectureServices,
         architectureConnections,

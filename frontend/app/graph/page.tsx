@@ -51,6 +51,12 @@ function GraphPageContent() {
           // Try to load architecture topology first (Phase 2-4 feature)
           try {
             const archData = await fetchArchitectureGraph(analysisId);
+            console.log("[GRAPH DEBUG] Architecture data fetched:", {
+              services: archData.services?.length || 0,
+              connections: archData.connections?.length || 0,
+              pattern: archData.architecture_pattern,
+              servicesPreview: archData.services?.slice(0, 3).map(s => s.service_name),
+            });
             setArchitectureData(archData);
             // Also load traditional graph data for fallback
             const graphData = await fetchAnalysisGraph(analysisId);
